@@ -9,7 +9,7 @@
   font-weight: 900;
   font-size: clamp(0.55rem, 1.8vh, 0.85rem);
   color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   user-select: none;
   position: absolute;
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -17,27 +17,82 @@
   contain: layout style paint;
 }
 
-/* Absolute height placement mathematically calibrated so 10 coins stack from TOP to BOTTOM */
+.coin.has-label {
+  font-size: clamp(0.75rem, 2.4vh, 1.2rem);
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Absolute height placement mathematically calibrated so 10 coins fit cleanly inside the slot without spilling out */
 .coin {
   --base: 3.5%;
   --step: 8.45%;
 }
-.coin:nth-child(1) { top: calc(var(--base) + (var(--step) * 0)); z-index: 1; }
-.coin:nth-child(2) { top: calc(var(--base) + (var(--step) * 1)); z-index: 2; }
-.coin:nth-child(3) { top: calc(var(--base) + (var(--step) * 2)); z-index: 3; }
-.coin:nth-child(4) { top: calc(var(--base) + (var(--step) * 3)); z-index: 4; }
-.coin:nth-child(5) { top: calc(var(--base) + (var(--step) * 4)); z-index: 5; }
-.coin:nth-child(6) { top: calc(var(--base) + (var(--step) * 5)); z-index: 6; }
-.coin:nth-child(7) { top: calc(var(--base) + (var(--step) * 6)); z-index: 7; }
-.coin:nth-child(8) { top: calc(var(--base) + (var(--step) * 7)); z-index: 8; }
-.coin:nth-child(9) { top: calc(var(--base) + (var(--step) * 8)); z-index: 9; }
-.coin:nth-child(10) { top: calc(var(--base) + (var(--step) * 9)); z-index: 10; }
-.coin:nth-child(11) { top: calc(var(--base) + (var(--step) * 10)); z-index: 11; }
-.coin:nth-child(12) { top: calc(var(--base) + (var(--step) * 11)); z-index: 12; }
+
+.coin:nth-child(1) {
+  bottom: calc(var(--base) + (var(--step) * 0));
+  z-index: 1;
+}
+
+.coin:nth-child(2) {
+  bottom: calc(var(--base) + (var(--step) * 1));
+  z-index: 2;
+}
+
+.coin:nth-child(3) {
+  bottom: calc(var(--base) + (var(--step) * 2));
+  z-index: 3;
+}
+
+.coin:nth-child(4) {
+  bottom: calc(var(--base) + (var(--step) * 3));
+  z-index: 4;
+}
+
+.coin:nth-child(5) {
+  bottom: calc(var(--base) + (var(--step) * 4));
+  z-index: 5;
+}
+
+.coin:nth-child(6) {
+  bottom: calc(var(--base) + (var(--step) * 5));
+  z-index: 6;
+}
+
+.coin:nth-child(7) {
+  bottom: calc(var(--base) + (var(--step) * 6));
+  z-index: 7;
+}
+
+.coin:nth-child(8) {
+  bottom: calc(var(--base) + (var(--step) * 7));
+  z-index: 8;
+}
+
+.coin:nth-child(9) {
+  bottom: calc(var(--base) + (var(--step) * 8));
+  z-index: 9;
+}
+
+.coin:nth-child(10) {
+  bottom: calc(var(--base) + (var(--step) * 9));
+  z-index: 10;
+}
+
+.coin:nth-child(11) {
+  bottom: calc(var(--base) + (var(--step) * 10));
+  z-index: 11;
+}
+
+.coin:nth-child(12) {
+  bottom: calc(var(--base) + (var(--step) * 11));
+  z-index: 12;
+}
 
 /* The deep physical 3D coin edge using layered extruded shadows & bevels */
 .coin {
-  box-shadow: 
+  box-shadow:
     inset 0 2px 3px rgba(255, 255, 255, 0.45),
     inset 0 -2px 3px rgba(0, 0, 0, 0.4),
     0 1px 0 var(--edge-color, #333),
@@ -52,17 +107,30 @@
 .coin::before {
   content: '';
   position: absolute;
-  top: 2px; left: 4px; right: 4px; bottom: 2px;
+  top: 2px;
+  left: 4px;
+  right: 4px;
+  bottom: 2px;
   border-radius: 50%;
   border: 1px dashed rgba(255, 255, 255, 0.35);
-  box-shadow: inset 0 1px 2px rgba(255,255,255,0.25);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25);
   pointer-events: none;
 }
 
 @keyframes dropIn {
-  0% { transform: translateY(-50px) scale(0.9); opacity: 0; }
-  60% { transform: translateY(5px) scale(1); opacity: 1; }
-  100% { transform: translateY(0) scale(1); }
+  0% {
+    transform: translateY(-50px) scale(0.9);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translateY(5px) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Smooth 3D Parabolic Arc Flight for Transferring Coins */
@@ -70,9 +138,11 @@
   0% {
     transform: translate3d(0, 0px, 0) scale(1) rotateY(0deg);
   }
+
   45% {
     transform: translate3d(0, -22px, 0) scale(1.18) rotateY(180deg);
   }
+
   100% {
     transform: translate3d(0, 0px, 0) scale(1) rotateY(360deg);
   }
@@ -80,10 +150,13 @@
 
 /* Yellow Celebration Glow for 10-coin stack completion */
 @keyframes goldStackGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     filter: brightness(1.3) drop-shadow(0 0 10px #fde047);
     transform: scale(1);
   }
+
   50% {
     filter: brightness(1.8) drop-shadow(0 0 25px #fde047);
     transform: scale(1.03);
@@ -101,6 +174,7 @@
     transform: scale(1);
     opacity: 1;
   }
+
   100% {
     transform: scale(0.2) translateY(30px);
     opacity: 0;
@@ -118,11 +192,13 @@
     opacity: 0;
     filter: brightness(2.5) drop-shadow(0 0 30px #38bdf8);
   }
+
   65% {
     transform: translateY(-8px) scale(1.2);
     opacity: 1;
     filter: brightness(1.4);
   }
+
   100% {
     transform: translateY(0) scale(1);
     filter: brightness(1);
@@ -137,7 +213,7 @@
   transform: translateY(-10px) scale(1.04);
   z-index: 15;
   filter: brightness(1.25);
-  box-shadow: 
+  box-shadow:
     inset 0 2px 3px rgba(255, 255, 255, 0.6),
     0 1px 0 var(--edge-color, #333),
     0 2px 0 var(--edge-color, #333),
@@ -149,28 +225,113 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateY(0) translateX(0); }
-  25% { transform: translateY(0) translateX(-3px); }
-  50% { transform: translateY(0) translateX(3px); }
-  75% { transform: translateY(0) translateX(-3px); }
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+
+  25% {
+    transform: translateY(0) translateX(-3px);
+  }
+
+  50% {
+    transform: translateY(0) translateX(3px);
+  }
+
+  75% {
+    transform: translateY(0) translateX(-3px);
+  }
 }
+
 .coin.shake {
   animation: shake 0.3s ease-in-out !important;
 }
 
 /* Rich Isometric Coin Faces and Edges */
-.coin.type-1 { background: radial-gradient(ellipse at 50% 30%, #ef4444, #991b1b); --edge-color: #7f1d1d; }
-.coin.type-2 { background: radial-gradient(ellipse at 50% 30%, #3b82f6, #1e40af); --edge-color: #1e3a8a; }
-.coin.type-3 { background: radial-gradient(ellipse at 50% 30%, #eab308, #a16207); --edge-color: #713f12; }
-.coin.type-4 { background: radial-gradient(ellipse at 50% 30%, #22c55e, #166534); --edge-color: #14532d; }
-.coin.type-5 { background: radial-gradient(ellipse at 50% 30%, #a855f7, #6b21a8); --edge-color: #4c1d95; }
-.coin.type-6 { background: radial-gradient(ellipse at 50% 30%, #ec4899, #9d174d); --edge-color: #831843; }
-.coin.type-7 { background: radial-gradient(ellipse at 50% 30%, #14b8a6, #0f766e); --edge-color: #115e59; }
-.coin.type-8 { background: radial-gradient(ellipse at 50% 30%, #f97316, #c2410c); --edge-color: #7c2d12; }
-.coin.type-9 { background: radial-gradient(ellipse at 50% 30%, #94a3b8, #475569); --edge-color: #1e293b; }
-.coin.type-10 { background: radial-gradient(ellipse at 50% 30%, #fde047, #ca8a04); --edge-color: #854d0e; color: #000; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
-.coin.type-11 { background: radial-gradient(ellipse at 50% 30%, #4ade80, #166534); --edge-color: #14532d; color: #000; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
-.coin.type-12 { background: radial-gradient(ellipse at 50% 30%, #f87171, #991b1b); --edge-color: #7f1d1d; color: #000; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
-.coin.type-13 { background: radial-gradient(ellipse at 50% 30%, #60a5fa, #1e40af); --edge-color: #1e3a8a; color: #000; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
-.coin.type-14 { background: radial-gradient(ellipse at 50% 30%, #c084fc, #6b21a8); --edge-color: #4c1d95; color: #000; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
-.coin.type-15 { background: radial-gradient(ellipse at 50% 30%, #fbbf24, #b45309); --edge-color: #78350f; color: #000; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
+.coin.type-1 {
+  background: radial-gradient(ellipse at 50% 30%, #ef4444, #991b1b);
+  --edge-color: #7f1d1d;
+}
+
+.coin.type-2 {
+  background: radial-gradient(ellipse at 50% 30%, #3b82f6, #1e40af);
+  --edge-color: #1e3a8a;
+}
+
+.coin.type-3 {
+  background: radial-gradient(ellipse at 50% 30%, #eab308, #a16207);
+  --edge-color: #713f12;
+}
+
+.coin.type-4 {
+  background: radial-gradient(ellipse at 50% 30%, #22c55e, #166534);
+  --edge-color: #14532d;
+}
+
+.coin.type-5 {
+  background: radial-gradient(ellipse at 50% 30%, #a855f7, #6b21a8);
+  --edge-color: #4c1d95;
+}
+
+.coin.type-6 {
+  background: radial-gradient(ellipse at 50% 30%, #ec4899, #9d174d);
+  --edge-color: #831843;
+}
+
+.coin.type-7 {
+  background: radial-gradient(ellipse at 50% 30%, #14b8a6, #0f766e);
+  --edge-color: #115e59;
+}
+
+.coin.type-8 {
+  background: radial-gradient(ellipse at 50% 30%, #f97316, #c2410c);
+  --edge-color: #7c2d12;
+}
+
+.coin.type-9 {
+  background: radial-gradient(ellipse at 50% 30%, #94a3b8, #475569);
+  --edge-color: #1e293b;
+}
+
+.coin.type-10 {
+  background: radial-gradient(ellipse at 50% 30%, #fde047, #ca8a04);
+  --edge-color: #854d0e;
+  color: #000;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.coin.type-11 {
+  background: radial-gradient(ellipse at 50% 30%, #4ade80, #166534);
+  --edge-color: #14532d;
+  color: #000;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.coin.type-12 {
+  background: radial-gradient(ellipse at 50% 30%, #f87171, #991b1b);
+  --edge-color: #7f1d1d;
+  color: #000;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.coin.type-13 {
+  background: radial-gradient(ellipse at 50% 30%, #60a5fa, #1e40af);
+  --edge-color: #1e3a8a;
+  color: #000;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.coin.type-14 {
+  background: radial-gradient(ellipse at 50% 30%, #c084fc, #6b21a8);
+  --edge-color: #4c1d95;
+  color: #000;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.coin.type-15 {
+  background: radial-gradient(ellipse at 50% 30%, #fbbf24, #b45309);
+  --edge-color: #78350f;
+  color: #000;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}

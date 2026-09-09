@@ -103,9 +103,16 @@ export class Renderer {
           coinClass += ' selected-coin';
         }
 
-        coinEl.className = coinClass;
-        coinEl.textContent = coin.type;
-        // Remove stale viewTransitionName - no longer using View Transitions API
+        // Only display number label on the bottom coin of the stack (matching target design)
+        const isBottomCoin = (coinIndex === 0);
+        coinEl.textContent = isBottomCoin ? coin.type : '';
+        if (isBottomCoin) {
+          coinEl.classList.add('has-label');
+        } else {
+          coinEl.classList.remove('has-label');
+        }
+        
+        // Remove stale viewTransitionName
         coinEl.style.viewTransitionName = '';
 
         // BUG FIX: Use insertBefore to maintain correct coin stacking order
