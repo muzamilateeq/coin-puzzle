@@ -5,17 +5,17 @@ export class Renderer {
     this.board = board;
     this.gameLogic = gameLogic;
     this.dropManager = dropManager;
-    
+
     // DOM Elements
     this.boardEl = document.getElementById('game-board');
     this.scoreEl = document.getElementById('ui-score');
     this.targetEl = document.getElementById('ui-target');
     this.dropsEl = document.getElementById('ui-drops');
     this.dropBtn = document.getElementById('btn-drop');
-    
+
     // Cache for Coin DOM Elements by ID for smooth View Transitions
     this.coinDomMap = new Map();
-    
+
     // Callbacks
     this.onSlotClick = null;
   }
@@ -30,16 +30,16 @@ export class Renderer {
     // Update Stats UI
     this.scoreEl.textContent = this.gameLogic.score;
     if (this.dropsEl) this.dropsEl.textContent = '∞';
-    
+
     // Drop button state
     const hasEmptySpace = this.board.hasEmptySpace();
     this.dropBtn.disabled = (
-      this.gameLogic.gameState !== 'playing' || 
+      this.gameLogic.gameState !== 'playing' ||
       !hasEmptySpace
     );
-    
+
     const slots = this.board.getAllSlots();
-    
+
     // Initialize slots if they don't exist yet
     if (this.boardEl.children.length !== slots.length) {
       this.boardEl.innerHTML = '';
@@ -58,7 +58,7 @@ export class Renderer {
     // Sync state for all slots and coins
     slots.forEach((slot, index) => {
       const slotEl = this.boardEl.children[index];
-      
+
       // Update slot classes — preserve animation classes already set
       let slotClass = 'slot';
       if (slot.isLocked) slotClass += ' locked';
@@ -74,7 +74,7 @@ export class Renderer {
 
       slot.coins.forEach((coin, coinIndex) => {
         activeCoinIds.add(coin.id);
-        
+
         let coinEl = this.coinDomMap.get(coin.id);
         if (!coinEl) {
           coinEl = document.createElement('div');
@@ -82,7 +82,7 @@ export class Renderer {
         }
 
         let coinClass = `coin type-${coin.type}`;
-        
+
         // Always reset drop marker so old coins are never re-animated
         delete coinEl.dataset.newDrop;
 
@@ -103,15 +103,15 @@ export class Renderer {
           coinClass += ' selected-coin';
         }
 
-        // Only display number label on the bottom coin of the stack (matching target design)
-        const isBottomCoin = (coinIndex === 0);
-        coinEl.textContent = isBottomCoin ? coin.type : '';
-        if (isBottomCoin) {
+        // Display text number ONLY on the lowest coin of the stack (matching reference screenshot)
+        const isBottomCoinOfStack = (coinIndex === slot.coins.length - 1);
+        coinEl.textContent = isBottomCoinOfStack ? coin.type : '';
+        if (isBottomCoinOfStack) {
           coinEl.classList.add('has-label');
         } else {
           coinEl.classList.remove('has-label');
         }
-        
+
         // Remove stale viewTransitionName
         coinEl.style.viewTransitionName = '';
 
@@ -160,22 +160,22 @@ export class Renderer {
     flare.className = 'star-flare';
     slotEl.appendChild(flare);
     setTimeout(() => flare.remove(), 900);
-    
+
     // Spawn subtle golden ✦ starburst rays
     const starCount = 10;
     for (let i = 0; i < starCount; i++) {
       const star = document.createElement('div');
       star.className = 'star-particle';
       star.textContent = '✦';
-      
+
       const angle = (i / starCount) * Math.PI * 2 + (Math.random() * 0.4);
       const dist = 50 + Math.random() * 40;
       const tx = Math.cos(angle) * dist;
       const ty = Math.sin(angle) * dist;
-      
+
       star.style.setProperty('--tx', `${tx}px`);
       star.style.setProperty('--ty', `${ty}px`);
-      
+
       slotEl.appendChild(star);
       setTimeout(() => star.remove(), 950);
     }
@@ -186,17 +186,17 @@ export class Renderer {
     const modalTitle = document.getElementById('modal-title');
     const modalMsg = document.getElementById('modal-msg');
     const modalRestartBtn = document.getElementById('btn-modal-restart');
-    
+
     modalTitle.textContent = title;
     modalMsg.textContent = msg;
     modal.classList.add('active');
-    
+
     modalRestartBtn.onclick = () => {
       modal.classList.remove('active');
       if (onRestart) onRestart();
     };
   }
-  
+
   hideModal() {
     document.getElementById('modal').classList.remove('active');
   }
