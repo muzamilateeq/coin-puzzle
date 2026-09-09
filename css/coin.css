@@ -17,23 +17,23 @@
   contain: layout style paint;
 }
 
-/* Absolute height placement mathematically calibrated so 10 coins fit cleanly inside the slot without spilling out */
+/* Absolute height placement mathematically calibrated so 10 coins stack from TOP to BOTTOM */
 .coin {
   --base: 3.5%;
   --step: 8.45%;
 }
-.coin:nth-child(1) { bottom: calc(var(--base) + (var(--step) * 0)); z-index: 1; }
-.coin:nth-child(2) { bottom: calc(var(--base) + (var(--step) * 1)); z-index: 2; }
-.coin:nth-child(3) { bottom: calc(var(--base) + (var(--step) * 2)); z-index: 3; }
-.coin:nth-child(4) { bottom: calc(var(--base) + (var(--step) * 3)); z-index: 4; }
-.coin:nth-child(5) { bottom: calc(var(--base) + (var(--step) * 4)); z-index: 5; }
-.coin:nth-child(6) { bottom: calc(var(--base) + (var(--step) * 5)); z-index: 6; }
-.coin:nth-child(7) { bottom: calc(var(--base) + (var(--step) * 6)); z-index: 7; }
-.coin:nth-child(8) { bottom: calc(var(--base) + (var(--step) * 7)); z-index: 8; }
-.coin:nth-child(9) { bottom: calc(var(--base) + (var(--step) * 8)); z-index: 9; }
-.coin:nth-child(10) { bottom: calc(var(--base) + (var(--step) * 9)); z-index: 10; }
-.coin:nth-child(11) { bottom: calc(var(--base) + (var(--step) * 10)); z-index: 11; }
-.coin:nth-child(12) { bottom: calc(var(--base) + (var(--step) * 11)); z-index: 12; }
+.coin:nth-child(1) { top: calc(var(--base) + (var(--step) * 0)); z-index: 1; }
+.coin:nth-child(2) { top: calc(var(--base) + (var(--step) * 1)); z-index: 2; }
+.coin:nth-child(3) { top: calc(var(--base) + (var(--step) * 2)); z-index: 3; }
+.coin:nth-child(4) { top: calc(var(--base) + (var(--step) * 3)); z-index: 4; }
+.coin:nth-child(5) { top: calc(var(--base) + (var(--step) * 4)); z-index: 5; }
+.coin:nth-child(6) { top: calc(var(--base) + (var(--step) * 5)); z-index: 6; }
+.coin:nth-child(7) { top: calc(var(--base) + (var(--step) * 6)); z-index: 7; }
+.coin:nth-child(8) { top: calc(var(--base) + (var(--step) * 7)); z-index: 8; }
+.coin:nth-child(9) { top: calc(var(--base) + (var(--step) * 8)); z-index: 9; }
+.coin:nth-child(10) { top: calc(var(--base) + (var(--step) * 9)); z-index: 10; }
+.coin:nth-child(11) { top: calc(var(--base) + (var(--step) * 10)); z-index: 11; }
+.coin:nth-child(12) { top: calc(var(--base) + (var(--step) * 11)); z-index: 12; }
 
 /* The deep physical 3D coin edge using layered extruded shadows & bevels */
 .coin {
