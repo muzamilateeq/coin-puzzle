@@ -12,7 +12,7 @@ class GameController {
     this.logic = new GameLogic(this.board);
     this.dropManager = new DropManager(this.board);
     this.renderer = new Renderer(this.board, this.logic, this.dropManager);
-    
+
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
 
@@ -22,7 +22,7 @@ class GameController {
 
   bindEvents() {
     this.renderer.init((index) => this.handleSlotClick(index));
-    
+
     document.getElementById('btn-drop').addEventListener('click', () => this.handleDrop());
     document.getElementById('btn-restart').addEventListener('click', () => this.init());
   }
@@ -34,12 +34,12 @@ class GameController {
     this.dropManager.reset();
     this.selectedSlotIndex = null;
     this.busySlots.clear();
-    
+
     this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + this.logic.score);
-    
+
     this.renderer.hideModal();
     this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, Math.max(CONFIG.COIN_TYPES, (CONFIG.COIN_TYPES - 1) + this.logic.score), true);
-    
+
     this.renderer.render(this.selectedSlotIndex);
 
     await this.processAllFullSlots();
@@ -49,7 +49,7 @@ class GameController {
   async handleSlotClick(index) {
     if (this.logic.gameState !== 'playing') return;
     if (this.busySlots.size > 0) return; // Prevent clicks while animations or conversions are active
-    
+
     if (this.selectedSlotIndex === null) {
       if (!this.board.getSlot(index).isEmpty()) {
         this.selectedSlotIndex = index;
@@ -68,7 +68,7 @@ class GameController {
         .filter(Boolean);
 
       const success = this.logic.executeTransfer(srcIndex, destIndex);
-      
+
       if (success) {
         this.selectedSlotIndex = null;
         this.busySlots.add(srcIndex);
@@ -91,7 +91,7 @@ class GameController {
         const errSlot = this.selectedSlotIndex;
         this.busySlots.add(errSlot);
         this.renderer.shakeSelectedCoins(errSlot);
-        
+
         setTimeout(() => {
           this.selectedSlotIndex = null;
           this.busySlots.delete(errSlot);
@@ -139,7 +139,7 @@ class GameController {
       this.renderer.spawnStarBurst(slotIndex);
       this.renderer.render(this.selectedSlotIndex);
 
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 400));
 
       // Step 2: Beautiful fusion implosion
       if (slotEl) slotEl.classList.remove('slot-celebrate');

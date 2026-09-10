@@ -64,7 +64,11 @@ export class DropManager {
       const newCoin = new Coin(typeToDrop);
       // Only mark as animated drop when explicitly requested (button click), not on init
       if (animate) newCoin.isNewDrop = true;
-      slots[randomSlotIndex].push(newCoin);
+      try {
+        slots[randomSlotIndex].push(newCoin);
+      } catch (e) {
+        // Slot filled between re-validation and push — skip this coin safely
+      }
     }
   }
 

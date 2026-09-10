@@ -98,7 +98,8 @@ export class GameLogic {
     slot.clear();
 
     // Convert to the next level and leave exactly 2 coins
-    const newType = firstType + 1;
+    // Cap at max coin type to avoid generating unrecognized/unstyled coins
+    const newType = Math.min(firstType + 1, CONFIG.COIN_TYPES + this.score + 1);
     const c1 = new Coin(newType);
     const c2 = new Coin(newType);
     c1.isNewMerge = true;

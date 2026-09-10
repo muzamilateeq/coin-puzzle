@@ -3,11 +3,13 @@ export class Animations {
   /** Promote an element to its own GPU compositing layer before animating. */
   static _promote(el) {
     el.style.willChange = 'transform, opacity';
+    el.style.transition = 'none';
   }
 
   /** Release the GPU layer after animation — frees memory for idle coins. */
   static _demote(el) {
     el.style.willChange = '';
+    el.style.transition = '';
   }
 
   /** Cancel any running Web Animations on the element to avoid conflicts. */
@@ -53,7 +55,7 @@ export class Animations {
           return anim.finished;
         });
 
-        resolve(Promise.all(promises).catch(() => {}));
+        resolve(Promise.all(promises).catch(() => { }));
       });
     });
 
@@ -62,14 +64,20 @@ export class Animations {
   }
 
   /**
-   * Smooth coin flight using FLIP + Web Animations API.
-   * Creates a lag-free 3D parabolic arc.
+   * Ultra-Premium Fluid Cascade Wave Flight.
+   * Coins stream together ("saath saath") in a buttery 60fps cascading 3D arc.
    */
   static async animateSlowFlight(updateFn, elementsToAnimate = []) {
     const validEls = elementsToAnimate.filter(el => el && el.isConnected);
-    if (validEls.length === 0) { updateFn(); return; }
+    if (validEls.length === 0) {
+      if (typeof updateFn === 'function') updateFn();
+      return;
+    }
 
-    // 1. Measure start positions (before DOM change)
+    // 0. Clean up selection class so start measurements are 100% exact & un-offset
+    validEls.forEach(el => el.classList.remove('selected-coin'));
+
+    // 1. Measure true start positions before DOM mutation
     const startPositions = new Map();
     validEls.forEach(el => {
       Animations._cancelExisting(el);
@@ -77,61 +85,85 @@ export class Animations {
       startPositions.set(el, el.getBoundingClientRect());
     });
 
-    // 2. Mutate DOM
+    // Collect all parent slot containers of flying coins BEFORE DOM mutation
+    const parentSlots = new Set();
+    validEls.forEach(el => {
+      if (el.parentElement) parentSlots.add(el.parentElement);
+    });
+
+    // 2. Mutate DOM (render coins inside destination slot)
     updateFn();
 
-    // 3. Measure end positions
+    // Collect destination parent slot containers AFTER DOM mutation
+    validEls.forEach(el => {
+      if (el.parentElement) parentSlots.add(el.parentElement);
+    });
+
+    // Promote parent slots to highest z-index so flying coins render above ALL other board slots & coins
+    parentSlots.forEach(slotEl => {
+      slotEl.style.setProperty('z-index', '9999', 'important');
+    });
+
+    // 3. Measure true end positions and elevate z-index during flight
     const moves = [];
-    validEls.forEach((el, index) => {
+
+    validEls.forEach((el, flightIndex) => {
       const start = startPositions.get(el);
       const end = el.getBoundingClientRect();
       const dx = start.left - end.left;
       const dy = start.top - end.top;
 
       if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        moves.push({ el, dx, dy, index });
+        // Elevate z-index so flying coin renders on top of all slot contents
+        el.style.setProperty('z-index', String(10000 + flightIndex), 'important');
+        moves.push({ el, dx, dy, flightIndex });
       } else {
-        // No actual movement — release layer immediately
         Animations._demote(el);
       }
     });
 
-    if (moves.length === 0) return;
+    if (moves.length === 0) {
+      parentSlots.forEach(slotEl => slotEl.style.removeProperty('z-index'));
+      return;
+    }
 
-    // 4. Batch all .animate() in one rAF for same-frame start (zero stutter)
-    const animFinished = new Promise(resolve => {
-      requestAnimationFrame(() => {
-        const promises = moves.map(({ el, dx, dy, index }) => {
-          const delay = index * 65;
-          const originalZ = el.style.zIndex;
-          el.style.zIndex = 100 + index;
+    // 4. Trigger Web Animations API: Fluid Stream Cascade Wave
+    const promises = moves.map(({ el, dx, dy, flightIndex }) => {
+      const coinDuration = 380; // Crisp 380ms flight per coin
+      const delay = flightIndex * 55; // 55ms fluid cascade wave stagger (coins stream together!)
+      
+      const distance = Math.hypot(dx, dy);
+      const arcHeight = Math.max(55, Math.min(110, distance * 0.28));
 
-          const anim = el.animate([
-            { transform: `translate3d(${dx}px, ${dy}px, 0) scale(1) rotate(0deg)` },
-            { transform: `translate3d(${dx * 0.5}px, ${dy * 0.5 - 40}px, 0) scale(1.15) rotate(5deg)` },
-            { transform: `translate3d(0, 0, 0) scale(1) rotate(0deg)` }
-          ], {
-            duration: 480,
-            delay,
-            easing: 'cubic-bezier(0.34, 1.25, 0.64, 1)',
-            fill: 'both'
-          });
-
-          anim.onfinish = () => {
-            el.style.zIndex = originalZ;
-            Animations._demote(el);
-            anim.cancel(); // Release so CSS class transforms work
-          };
-
-          return anim.finished;
-        });
-
-        resolve(Promise.all(promises).catch(() => {}));
+      const anim = el.animate([
+        { transform: `translate3d(${dx}px, ${dy}px, 0) scale(1)`, offset: 0 },
+        { transform: `translate3d(${dx * 0.5}px, ${dy * 0.5 - arcHeight}px, 0) scale(1.10)`, offset: 0.5 },
+        { transform: `translate3d(0px, 0px, 0) scale(1)`, offset: 1 }
+      ], {
+        duration: coinDuration,
+        delay,
+        easing: 'cubic-bezier(0.25, 1, 0.4, 1)',
+        fill: 'both'
       });
+
+      anim.onfinish = () => {
+        el.style.removeProperty('z-index');
+        Animations._demote(el);
+        anim.cancel();
+      };
+
+      return anim.finished;
     });
 
-    const timeoutPromise = new Promise(r => setTimeout(r, 750));
-    return Promise.race([animFinished, timeoutPromise]);
+    const totalDuration = (moves.length - 1) * 55 + 380 + 50;
+    const timeoutPromise = new Promise(r => setTimeout(r, totalDuration + 300));
+    
+    try {
+      await Promise.race([Promise.all(promises).catch(() => {}), timeoutPromise]);
+    } finally {
+      // Always cleanup parent slot z-indexes after animation finishes
+      parentSlots.forEach(slotEl => slotEl.style.removeProperty('z-index'));
+    }
   }
 
   /**
@@ -174,7 +206,7 @@ export class Animations {
           return anim.finished;
         });
 
-        resolve(Promise.all(promises).catch(() => {}));
+        resolve(Promise.all(promises).catch(() => { }));
       });
     });
 

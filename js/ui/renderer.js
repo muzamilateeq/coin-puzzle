@@ -22,7 +22,6 @@ export class Renderer {
 
   init(onSlotClick) {
     this.onSlotClick = onSlotClick;
-    this.targetEl.textContent = CONFIG.TARGET_SCORE;
     this.coinDomMap.clear();
   }
 
@@ -30,6 +29,17 @@ export class Renderer {
     // Update Stats UI
     this.scoreEl.textContent = this.gameLogic.score;
     if (this.dropsEl) this.dropsEl.textContent = '∞';
+
+    // Dynamic Target Coin Level required for next slot unlock
+    const currentTargetCoin = CONFIG.COIN_TYPES + this.gameLogic.score;
+    const totalUnlocked = CONFIG.INITIAL_UNLOCKED_SLOTS + this.gameLogic.score;
+    if (this.targetEl) {
+      if (totalUnlocked < CONFIG.TOTAL_SLOTS) {
+        this.targetEl.textContent = currentTargetCoin;
+      } else {
+        this.targetEl.textContent = 'MAX';
+      }
+    }
 
     // Drop button state
     const hasEmptySpace = this.board.hasEmptySpace();
@@ -103,15 +113,36 @@ export class Renderer {
           coinClass += ' selected-coin';
         }
 
-        // Match target game design: Only the bottom-most coin of the stack displays the big 3D number badge
         const isStackFrontCoin = (coinIndex === slot.coins.length - 1);
-        coinEl.textContent = isStackFrontCoin ? coin.type : '';
         if (isStackFrontCoin) {
           coinClass += ' has-label';
         }
 
         coinEl.className = coinClass;
         coinEl.style.viewTransitionName = '';
+
+        // IMAGE COINS (types 1-7): inject <img> tag — handles JPG images correctly
+        const IMG_COIN_MAX = 7;
+        if (coin.type <= IMG_COIN_MAX) {
+          // Ensure img child exists
+          let img = coinEl.querySelector('img.coin-img');
+          if (!img) {
+            img = document.createElement('img');
+            img.className = 'coin-img';
+            img.draggable = false;
+            coinEl.innerHTML = '';
+            coinEl.appendChild(img);
+          }
+          const expectedSrc = `./images/coins/coin-${coin.type}.png`;
+          if (img.getAttribute('src') !== expectedSrc) {
+            img.src = expectedSrc;
+          }
+        } else {
+          // CSS-gradient coins: show number text, remove any img
+          const existingImg = coinEl.querySelector('img.coin-img');
+          if (existingImg) existingImg.remove();
+          coinEl.textContent = isStackFrontCoin ? coin.type : '';
+        }
 
         // BUG FIX: Use insertBefore to maintain correct coin stacking order
         const currentChild = slotEl.children[coinIndex];
@@ -121,14 +152,15 @@ export class Renderer {
       });
     });
 
-    // Cleanup dead coin elements
-    for (const [id, el] of this.coinDomMap.entries()) {
-      if (!activeCoinIds.has(id)) {
-        if (el.parentNode) {
-          el.parentNode.removeChild(el);
-        }
-        this.coinDomMap.delete(id);
-      }
+    // Cleanup dead coin elements — collect IDs first to avoid mutation-during-iteration
+    const deadIds = [];
+    for (const [id] of this.coinDomMap.entries()) {
+      if (!activeCoinIds.has(id)) deadIds.push(id);
+    }
+    for (const id of deadIds) {
+      const el = this.coinDomMap.get(id);
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      this.coinDomMap.delete(id);
     }
   }
 
