@@ -63,6 +63,30 @@
   pointer-events: none;
 }
 
+/* Front coin 3D inner circular number badge matching target reference screenshot */
+.coin.has-label {
+  font-size: clamp(0.8rem, 2.5vh, 1.25rem);
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95);
+  z-index: 20 !important;
+}
+
+.coin.has-label::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64%;
+  height: 64%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
 @keyframes dropIn {
   0% {
     transform: translateY(-50px) scale(0.9);

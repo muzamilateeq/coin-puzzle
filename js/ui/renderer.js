@@ -103,9 +103,14 @@ export class Renderer {
           coinClass += ' selected-coin';
         }
 
+        // Match target game design: Only the bottom-most coin of the stack displays the big 3D number badge
+        const isStackFrontCoin = (coinIndex === slot.coins.length - 1);
+        coinEl.textContent = isStackFrontCoin ? coin.type : '';
+        if (isStackFrontCoin) {
+          coinClass += ' has-label';
+        }
+
         coinEl.className = coinClass;
-        coinEl.textContent = coin.type;
-        // Remove stale viewTransitionName - no longer using View Transitions API
         coinEl.style.viewTransitionName = '';
 
         // BUG FIX: Use insertBefore to maintain correct coin stacking order
