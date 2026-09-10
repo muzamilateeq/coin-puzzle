@@ -19,8 +19,8 @@
 
 /* Absolute top placement so coins stack from TOP to BOTTOM inside the slot */
 .coin {
-  --base: 3%;
-  --step: 8.2%;
+  --base: 3.5%;
+  --step: 8.45%;
 }
 
 .coin:nth-child(1) { top: calc(var(--base) + (var(--step) * 0)); z-index: 1; }

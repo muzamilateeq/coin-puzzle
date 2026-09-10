@@ -103,16 +103,9 @@ export class Renderer {
           coinClass += ' selected-coin';
         }
 
-        // Display text number ONLY on the lowest coin of the stack (matching reference screenshot)
-        const isBottomCoinOfStack = (coinIndex === slot.coins.length - 1);
-        coinEl.textContent = isBottomCoinOfStack ? coin.type : '';
-        if (isBottomCoinOfStack) {
-          coinEl.classList.add('has-label');
-        } else {
-          coinEl.classList.remove('has-label');
-        }
-
-        // Remove stale viewTransitionName
+        coinEl.className = coinClass;
+        coinEl.textContent = coin.type;
+        // Remove stale viewTransitionName - no longer using View Transitions API
         coinEl.style.viewTransitionName = '';
 
         // BUG FIX: Use insertBefore to maintain correct coin stacking order
