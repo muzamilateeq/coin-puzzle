@@ -1,4 +1,5 @@
 import { CONFIG } from '../config.js';
+import { createCoinSvg } from './coinSvg.js';
 
 export class Renderer {
   constructor(board, gameLogic, dropManager) {
@@ -121,27 +122,11 @@ export class Renderer {
         coinEl.className = coinClass;
         coinEl.style.viewTransitionName = '';
 
-        // IMAGE COINS (types 1-7): inject <img> tag — handles JPG images correctly
-        const IMG_COIN_MAX = 7;
-        if (coin.type <= IMG_COIN_MAX) {
-          // Ensure img child exists
-          let img = coinEl.querySelector('img.coin-img');
-          if (!img) {
-            img = document.createElement('img');
-            img.className = 'coin-img';
-            img.draggable = false;
-            coinEl.innerHTML = '';
-            coinEl.appendChild(img);
-          }
-          const expectedSrc = `./images/coins/coin-${coin.type}.png`;
-          if (img.getAttribute('src') !== expectedSrc) {
-            img.src = expectedSrc;
-          }
-        } else {
-          // CSS-gradient coins: show number text, remove any img
-          const existingImg = coinEl.querySelector('img.coin-img');
-          if (existingImg) existingImg.remove();
-          coinEl.textContent = isStackFrontCoin ? coin.type : '';
+        // SVG Coin Rendering: inject SVG, only re-render when type/label changes
+        const svgKey = `${coin.type}_${isStackFrontCoin}`;
+        if (coinEl.dataset.svgKey !== svgKey) {
+          coinEl.innerHTML = createCoinSvg(coin.type, isStackFrontCoin);
+          coinEl.dataset.svgKey = svgKey;
         }
 
         // BUG FIX: Use insertBefore to maintain correct coin stacking order

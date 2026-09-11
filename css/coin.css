@@ -1,30 +1,63 @@
 /* =====================================================
-   COIN BASE STYLE — IMAGE-BASED COINS (types 1-7)
-   Each coin div contains an <img class="coin-img"> element.
-   Images are already 3D-rendered top-down coins — no rotateX.
+   SVG CIRCULAR COIN — CONTAINER LAYOUT
+   Coins are square (1:1). Size = slot width-based.
+   Up to 10 coins stack per slot — all must fit in height.
    ===================================================== */
-.coin {
+
+/* ── SVG fill helper ── */
+.coin-svg {
+  display: block;
   width: 100%;
-  left: 0;
-  height: 18%;
-  border: none;
-  box-shadow: none;
-  background: none;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  user-select: none;
-  position: absolute;
-  transform-origin: center top;
-  transition: filter 0.15s ease-out;
+  height: 100%;
   overflow: visible;
 }
 
-/* Coin stacking — each coin step = 9.5% of slot height */
-/* Higher z-index = renders in front = top of physical pile */
+/* ── Base Coin Container ── */
+.coin {
+  position: absolute;
+  left: 6%;
+  width: 88%;
+  /* coin diameter = 88% of slot width  */
+  padding-bottom: 88%;
+  /* height = 84% of SLOT WIDTH → square */
+  height: 0;
+
+  transform-origin: center top;
+  transition: filter 0.18s ease-out, transform 0.18s ease-out;
+  overflow: visible;
+
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+
+  user-select: none;
+  z-index: 1;
+}
+
+/* SVG absolutely fills the square padding-box */
+.coin>svg.coin-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ─────────────────────────────────────────────────────
+   Stacking offsets
+   Slot height H ≈ 2.65 × slot_width  (board 300:490, 5col×3row)
+   Coin diameter D = 84% × slot_width
+   D as % of H = 84 / 2.65 ≈ 31.7% of slot height
+
+   Visible overlap step so 10 coins fit:
+   base + step × 9 + coinHeight ≤ 100%
+   step ≤ (100 - 2 - 32) / 9 ≈ 7.3%  →  use 7%
+   ───────────────────────────────────────────────────── */
 .coin {
   --base: 2%;
-  --step: 8.6%;
+  --step: 7%;
 }
 
 .coin:nth-child(1) {
@@ -87,53 +120,57 @@
   z-index: 12;
 }
 
-/* No pseudo-elements on coin divs */
+/* ── Remove old pseudo-element layers ── */
 .coin::before,
 .coin::after {
   display: none;
+  content: none;
 }
 
-/* =====================================================
-   COIN IMAGE — the actual <img> injected by renderer.js
-   Images are transparent PNGs (coin-1.png .. coin-7.png)
-   ===================================================== */
-.coin-img {
-  width: 90%;
-  height: 130%;
-  display: block;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
-  transition: filter 0.15s ease-out;
-}
-
-/* =====================================================
-   HAS-LABEL — top coin in stack
-   Image already shows the coin number, no text badge needed
-   ===================================================== */
+/* ── Top coin with label gets highest z-index ── */
 .coin.has-label {
   z-index: 20;
 }
 
 /* =====================================================
-   ANIMATIONS
+   STATE ANIMATIONS & TRANSITIONS
    ===================================================== */
+
+@keyframes selectedFloat {
+
+  0%,
+  100% {
+    transform: translateY(-8px);
+    filter: drop-shadow(0 8px 16px rgba(255, 210, 60, 0.80));
+  }
+
+  50% {
+    transform: translateY(-13px);
+    filter: drop-shadow(0 12px 24px rgba(255, 210, 60, 1.00));
+  }
+}
+
+.coin.selected-coin {
+  animation: selectedFloat 1.0s ease-in-out infinite alternate !important;
+  z-index: 30;
+}
+
 @keyframes goldStackGlow {
 
   0%,
   100% {
-    filter: brightness(1.2) drop-shadow(0 0 10px #fde047);
+    filter: brightness(1.15) drop-shadow(0 0 6px #fde047);
     transform: scale(1);
   }
 
   50% {
-    filter: brightness(1.7) drop-shadow(0 0 22px #fde047);
-    transform: scale(1.04);
+    filter: brightness(1.5) drop-shadow(0 0 18px #fde047);
+    transform: scale(1.05);
   }
 }
 
 .coin.coins-celebrate {
-  animation: goldStackGlow 0.6s ease-in-out infinite alternate !important;
+  animation: goldStackGlow 0.55s ease-in-out infinite alternate !important;
   z-index: 12;
 }
 
@@ -144,26 +181,26 @@
   }
 
   100% {
-    transform: scale(0.15) translateY(20px);
+    transform: scale(0.1) translateY(15px);
     opacity: 0;
   }
 }
 
 .coin.coins-shrink {
-  animation: coinFadeShrink 0.35s ease-in forwards !important;
+  animation: coinFadeShrink 0.32s ease-in forwards !important;
 }
 
 @keyframes upgradeBounce {
   0% {
-    transform: translateY(18px) scale(0.3);
+    transform: translateY(18px) scale(0.2);
     opacity: 0;
-    filter: brightness(3) drop-shadow(0 0 25px #fde047);
+    filter: brightness(2) drop-shadow(0 0 18px #fde047);
   }
 
   65% {
     transform: translateY(-5px) scale(1.18);
     opacity: 1;
-    filter: brightness(1.4);
+    filter: brightness(1.2);
   }
 
   100% {
@@ -173,19 +210,7 @@
 }
 
 .coin.merging {
-  animation: upgradeBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-}
-
-/* =====================================================
-   SELECTED COIN — cyan glow via filter
-   ===================================================== */
-.coin.selected-coin {
-  transform: translateY(-8px);
-  z-index: 30;
-}
-
-.coin.selected-coin .coin-img {
-  filter: brightness(1.2) drop-shadow(0 0 8px rgba(56, 189, 248, 1)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.7));
+  animation: upgradeBounce 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 @keyframes shake {
@@ -196,118 +221,18 @@
   }
 
   25% {
-    transform: translateX(-4px);
+    transform: translateX(-5px);
   }
 
   50% {
-    transform: translateX(4px);
+    transform: translateX(5px);
   }
 
   75% {
-    transform: translateX(-4px);
+    transform: translateX(-5px);
   }
 }
 
 .coin.shake {
-  animation: shake 0.28s ease-in-out !important;
-}
-
-/* =====================================================
-   FALLBACK CSS GRADIENT COINS — types 8-15
-   These use border-radius + gradient (no image file)
-   ===================================================== */
-.coin.type-8,
-.coin.type-9,
-.coin.type-10,
-.coin.type-11,
-.coin.type-12,
-.coin.type-13,
-.coin.type-14,
-.coin.type-15 {
-  width: 90%;
-  left: 5%;
-  border-radius: 50%;
-  border-top: 2.5px solid rgba(255, 255, 255, 0.8);
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
-  border-right: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: 1.5px solid rgba(0, 0, 0, 0.35);
-  box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-  transform: rotateX(40deg);
-  font-size: clamp(0.6rem, 1.8vh, 0.95rem);
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.coin.type-8::before,
-.coin.type-9::before,
-.coin.type-10::before,
-.coin.type-11::before,
-.coin.type-12::before,
-.coin.type-13::before,
-.coin.type-14::before,
-.coin.type-15::before {
-  display: block;
-  content: '';
-  position: absolute;
-  inset: 3px 5px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  pointer-events: none;
-}
-
-.coin.type-8 {
-  background: radial-gradient(ellipse at 50% 30%, #f97316, #c2410c);
-}
-
-.coin.type-9 {
-  background: radial-gradient(ellipse at 50% 30%, #94a3b8, #475569);
-}
-
-.coin.type-10 {
-  background: radial-gradient(ellipse at 50% 30%, #fde047, #ca8a04);
-  color: #000;
-}
-
-.coin.type-11 {
-  background: radial-gradient(ellipse at 50% 30%, #4ade80, #166534);
-  color: #000;
-}
-
-.coin.type-12 {
-  background: radial-gradient(ellipse at 50% 30%, #f87171, #991b1b);
-  color: #000;
-}
-
-.coin.type-13 {
-  background: radial-gradient(ellipse at 50% 30%, #60a5fa, #1e40af);
-  color: #000;
-}
-
-.coin.type-14 {
-  background: radial-gradient(ellipse at 50% 30%, #c084fc, #6b21a8);
-  color: #000;
-}
-
-.coin.type-15 {
-  background: radial-gradient(ellipse at 50% 30%, #fbbf24, #b45309);
-  color: #000;
-}
-
-/* Selected state for CSS gradient coins */
-.coin.type-8.selected-coin,
-.coin.type-9.selected-coin,
-.coin.type-10.selected-coin,
-.coin.type-11.selected-coin,
-.coin.type-12.selected-coin,
-.coin.type-13.selected-coin,
-.coin.type-14.selected-coin,
-.coin.type-15.selected-coin {
-  transform: rotateX(40deg) translateY(-6px) scale(1.07);
-  filter: brightness(1.4);
-  border-top: 2.5px solid #38bdf8;
-  box-shadow: inset 0 5px 8px rgba(255, 255, 255, 0.8), 0 -8px 20px rgba(56, 189, 248, 0.85);
+  animation: shake 0.26s ease-in-out !important;
 }

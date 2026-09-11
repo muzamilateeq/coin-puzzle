@@ -38,7 +38,7 @@ export class Animations {
 
           const anim = el.animate([
             { transform: 'translateY(-120px) scale(0.7)', opacity: 0 },
-            { transform: 'translateY(6px) scale(1.08)', opacity: 1, offset: 0.75 },
+            { transform: 'translateY(6px) scale(1.04)', opacity: 1, offset: 0.75 },
             { transform: 'translateY(0) scale(1)', opacity: 1 }
           ], {
             duration: 400,
@@ -136,9 +136,9 @@ export class Animations {
       const arcHeight = Math.max(55, Math.min(110, distance * 0.28));
 
       const anim = el.animate([
-        { transform: `translate3d(${dx}px, ${dy}px, 0) scale(1)`, offset: 0 },
-        { transform: `translate3d(${dx * 0.5}px, ${dy * 0.5 - arcHeight}px, 0) scale(1.10)`, offset: 0.5 },
-        { transform: `translate3d(0px, 0px, 0) scale(1)`, offset: 1 }
+        { transform: `translate3d(${dx}px, ${dy}px, 0)`, offset: 0 },
+        { transform: `translate3d(${dx * 0.5}px, ${dy * 0.5 - arcHeight}px, 0)`, offset: 0.5 },
+        { transform: `translate3d(0px, 0px, 0)`, offset: 1 }
       ], {
         duration: coinDuration,
         delay,
