@@ -15,10 +15,10 @@
 /* ── Base Coin Container ── */
 .coin {
   position: absolute;
-  left: 6%;
-  width: 88%;
-  /* coin diameter = 88% of slot width  */
-  padding-bottom: 88%;
+  left: 7%;
+  width: 86%;
+  /* coin diameter = 86% of slot width  */
+  padding-bottom: 86%;
   /* height = 84% of SLOT WIDTH → square */
   height: 0;
 
@@ -56,8 +56,9 @@
    step ≤ (100 - 2 - 32) / 9 ≈ 7.3%  →  use 7%
    ───────────────────────────────────────────────────── */
 .coin {
-  --base: 2%;
-  --step: 7%;
+  /* Adjusted for the wider board so 8 coins perfectly fit */
+  --base: -11%;
+  --step: 10%;
 }
 
 .coin:nth-child(1) {

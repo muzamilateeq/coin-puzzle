@@ -1,6 +1,6 @@
 export const CONFIG = {
   COIN_TYPES: 6,
-  MAX_PER_SLOT: 10,
+  MAX_PER_SLOT: 8,
   TOTAL_SLOTS: 15,
   TARGET_SCORE: 8,
   INITIAL_DROPS: 10,

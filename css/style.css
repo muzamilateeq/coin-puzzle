@@ -40,7 +40,7 @@ body {
 }
 
 #game-container {
-  background: rgba(255, 255, 254git checkout dev, 0.03);
+  background: rgba(255, 255, 255, 0.03);
   padding: 10px 12px;
   border-radius: 20px;
   box-shadow:
@@ -201,6 +201,119 @@ button:disabled {
   }
 }
 
+@media (max-width: 600px) {
+  body {
+    padding: 2px;
+  }
+  #game-container {
+    padding: 4px 6px;
+    border-radius: 12px;
+  }
+}
+
 ::view-transition-group(*) {
   animation-duration: 0.3s;
+}
+
+/* ==============================================================
+   Mobile Responsiveness & Landscape Warning
+   ============================================================== */
+
+@media (max-width: 380px) {
+  /* On very narrow phones (e.g., iPhone SE), reduce header padding to save vertical space */
+  header {
+    padding: 4px 8px;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 0.6rem;
+  }
+  .stat-value {
+    font-size: 1rem;
+  }
+  #game-container {
+    padding: 6px 8px;
+  }
+}
+
+@media (max-height: 600px) {
+  /* On very short screens, reduce margins and padding to ensure the board fits */
+  header {
+    margin-bottom: 2px;
+  }
+  .controls {
+    margin-top: 2px;
+  }
+  button {
+    padding: 6px 10px;
+  }
+}
+
+/* Landscape Warning Overlay */
+.landscape-warning {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  color: white;
+  
+  /* Hidden by default in Portrait mode */
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.4s ease;
+}
+
+.landscape-warning-content {
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  transform: translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.landscape-warning h2 {
+  font-size: 1.5rem;
+  margin: 15px 0 10px;
+}
+
+.landscape-warning p {
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+@keyframes rotatePhone {
+  0% { transform: rotate(-90deg); }
+  30% { transform: rotate(0deg); }
+  70% { transform: rotate(0deg); }
+  100% { transform: rotate(-90deg); }
+}
+
+.rotate-icon {
+  font-size: 4rem;
+  display: inline-block;
+  animation: rotatePhone 2.5s infinite ease-in-out;
+}
+
+/* Show Warning when in Landscape on Mobile/Tablet ONLY (not laptops) */
+@media screen and (orientation: landscape) and (max-height: 600px) and (pointer: coarse) {
+  .landscape-warning {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+  .landscape-warning-content {
+    transform: translateY(0);
+  }
 }
