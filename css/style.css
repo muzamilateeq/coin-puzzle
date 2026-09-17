@@ -1,5 +1,5 @@
 :root {
-  --bg-color: #0f172a;
+  --bg-color: #000000;
   --text-color: #f8fafc;
 }
 
@@ -25,8 +25,7 @@ body {
 }
 
 body {
-  background: var(--bg-color);
-  background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+  background: #000000;
   color: var(--text-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
@@ -35,14 +34,115 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 8px;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+/* =========================================================================
+   LOADING SCREEN
+   ========================================================================= */
+#loading-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 9cm;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4vh 16px 6vh 16px;
+  background-image: url("../Assets/Loading/BG_.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-logo {
+  width: 96%;
+  max-width: 440px;
+  height: auto;
+  max-height: 30vh;
+  object-fit: contain;
+  margin-top: 1vh;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.5));
+}
+
+.loading-center-art {
+  width: 98%;
+  max-width: 450px;
+  height: auto;
+  max-height: 48vh;
+  flex: 0 1 auto;
+  object-fit: contain;
+  margin-top: -2.5vh;
+  margin-bottom: 0;
+  filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.6));
+}
+
+.loading-bar-wrapper {
+  position: relative;
+  width: 75%;
+  max-width: 280px;
+  margin-bottom: 3.5vh;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.6));
+}
+
+.loading-bar-graphics {
+  position: relative;
+  width: 100%;
+}
+
+.loading-bar-frame-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.loading-bar-fill-img {
+  position: absolute;
+  top: 29.5%;
+  left: 4.5%;
+  width: 91%;
+  height: 41%;
+  border-radius: 999px;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.1s linear;
+  display: block;
+}
+
+.loading-text {
+  color: #ffffff;
+  font-size: 1.45rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 10px;
+  margin-top: 0;
+  text-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.9),
+    0 0 5px rgba(0, 0, 0, 0.8);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 #game-container {
-  background: rgba(255, 255, 255, 0.03);
-  padding: 10px 12px;
-  border-radius: 20px;
+  position: relative;
+  /* Required to contain the absolutely positioned loading screen */
+  background-image: url("../Assets/Loading/BG_.png");
+  background-size: 100% 100%;
+  background-position: center;
+  padding: 30px 10px;
+  /* Padding inside the container */
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.7),
     inset 0 1px 2px rgba(255, 255, 255, 0.1);
@@ -51,73 +151,282 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  max-width: 420px;
+  justify-content: flex-start;
+  /* Pack from top down */
   width: 100%;
-  height: 100%;
-  max-height: calc(100dvh - 16px);
+  max-width: 9cm;
+  min-height: 100vh;
+  /* Stretch at least full height of screen */
   overflow: hidden;
   perspective: 1200px;
   /* Enable 3D space */
 }
 
-header {
+/* =========================================================================
+   TOP HUD
+   ========================================================================= */
+#top-hud {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 6px 14px;
-  border-radius: 14px;
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  align-items: flex-start;
+  padding: 1px 2px;
+  /* Reduced left/right padding */
   flex: 0 0 auto;
 }
 
-.stat {
+/* Left Side: Level & Coin Bases */
+.hud-left {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 0px;
+  /* Reduced gap */
+}
+
+.hud-level-text {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  /* Normal line height to stop heavy overlapping */
+  margin-bottom: 2px;
+  /* Small gap so it touches perfectly without burying the text */
+  position: relative;
+  z-index: 2;
+  /* Keep text above bases if they overlap */
+}
+
+.hud-coin-bases {
+  display: flex;
+  gap: 3px;
+}
+
+.hud-coin-base+.hud-coin-base {
+  margin-left: -12px;
+  /* Pulls the second image over the transparent space of the first */
+}
+
+.hud-coin-base {
+  width: 60px;
+  height: 60px;
+  background-image: url("../Assets/Gameplay/Coin Base.png");
+  background-size: contain;
+  /* Prevents stretching */
+  /* Prevents cropping */
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   align-items: center;
+  padding-bottom: 2px;
 }
 
-.stat-label {
-  font-size: clamp(0.65rem, 1.4vh, 0.75rem);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #94a3b8;
+.hud-coin-count {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin-bottom: 1px;
 }
 
-.stat-value {
-  font-size: clamp(1.1rem, 2.2vh, 1.4rem);
+/* Right Side: Hearts & Gems */
+.hud-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.hud-top-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  /* Even smaller gap between the two bars */
+  margin-top: 14px;
+}
+
+.hud-bar-group {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.hud-bar-bg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  /* Reduced container width instead of squishing image */
+  height: 18px;
+}
+
+.hud-bar-bg.long-bar {
+  width: 60px;
+  /* Reduced width */
+}
+
+.hud-bar-img {
+  position: absolute;
+  width: 100%;
+  /* Restored to 100% so it fits properly */
+  height: 100%;
+  object-fit: fill;
+  z-index: 1;
+}
+
+.bar-text {
+  position: relative;
+  z-index: 2;
+  color: #481803;
+  /* Dark brown text as seen in screenshot */
   font-weight: 800;
-  color: #f8fafc;
+  font-size: 0.55rem;
+}
+
+.hud-heart-wrapper {
+  position: absolute;
+  left: -12px;
+  /* Adjusted for smaller heart */
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-heart-icon {
+  width: 24px;
+  /* Reduced size */
+  height: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.heart-text {
+  position: absolute;
+  color: white;
+  font-weight: 900;
+  font-size: 0.70rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.hud-plus-icon {
+  position: absolute;
+  left: -6px;
+  /* Adjusted slightly for larger size */
+  margin-top: 2px;
+  /* Nudged down by 1px */
+  z-index: 3;
+  width: 28px;
+  /* Increased size */
+  height: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.hud-plus-icon:active {
+  transform: scale(0.9);
+}
+
+.hud-gem-icon {
+  position: absolute;
+  right: 8px;
+  /* Adjusted slightly for smaller size */
+  z-index: 3;
+  width: 10px;
+  /* Reduced size */
+  height: auto;
+}
+
+.hud-settings-icon {
+  width: 40px;
+  height: auto;
+  margin-top: 3px;
+  margin-right: 3px;
+  /* Push it left to align under the wooden bar */
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  transition: transform 0.1s;
+}
+
+.hud-settings-icon:active {
+  transform: scale(0.9);
 }
 
 .controls {
+  position: absolute;
+  bottom: -50px;
+  /* Overlap the bottom border perfectly */
+  left: 50%;
+  transform: translateX(-50%) rotateX(-25deg);
+  /* Counter-rotate to stay flat facing camera */
+  transform-origin: bottom center;
+  /* Stand up from its bottom */
+  z-index: 20;
   width: 100%;
   display: flex;
-  gap: 10px;
-  margin-top: 6px;
-  flex: 0 0 auto;
+  justify-content: center;
+  align-items: center;
 }
 
-button {
-  flex: 1;
-  padding: clamp(8px, 1.6vh, 12px);
+.drop-btn-custom {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("../Assets/Gameplay/Drop Button_.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
   border: none;
-  border-radius: 12px;
-  font-size: clamp(0.85rem, 1.8vh, 1.05rem);
-  font-weight: bold;
+  width: 150px;
+  /* Decreased width */
+  height: 65px;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-  color: white;
-  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  padding: 0 10px;
+  padding-bottom: 6px;
+  /* Push content up to sit nicely on the top face of the 3D button */
+  gap: 2px;
+  transition: transform 0.1s;
   outline: none;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
   -webkit-tap-highlight-color: transparent;
+}
+
+.drop-btn-custom:active {
+  transform: scale(0.95);
+}
+
+.drop-btn-icon {
+  width: 36px;
+  /* Slightly reduced */
+  height: auto;
+  transform: translateY(-8px);
+  /* Shift icon up clearly onto the bright face */
+}
+
+.drop-btn-text {
+  color: white;
+  font-size: 1.5rem;
+  /* Adjusted for smaller button */
+  font-weight: 700;
+  text-shadow:
+    -1.5px -1.5px 0 #1b5b08,
+    1.5px -1.5px 0 #1b5b08,
+    -1.5px 1.5px 0 #1b5b08,
+    1.5px 1.5px 0 #1b5b08,
+    0px 3px 3px rgba(0, 0, 0, 0.6);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.5px;
+  transform: translateY(-8px);
+  /* Shift text up clearly onto the bright face */
+  margin-top: 0;
 }
 
 button:focus,

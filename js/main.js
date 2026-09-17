@@ -25,8 +25,7 @@ class GameController {
     this.renderer.init((index) => this.handleSlotClick(index));
 
     document.getElementById('btn-drop').addEventListener('click', () => this.handleDrop());
-    document.getElementById('btn-restart').addEventListener('click', () => this.init());
-    
+
     const btnHammer = document.getElementById('btn-hammer');
     if (btnHammer) {
       btnHammer.addEventListener('click', () => this.toggleHammerMode());
@@ -83,7 +82,7 @@ class GameController {
         // Prevent clicks during animation
         this.busySlots.add(index);
         this.setHammerMode(false);
-        
+
         const slotEl = this.renderer.boardEl.children[index];
         await Animations.animateHammerSmash(slotEl);
 

@@ -219,7 +219,7 @@ export class Animations {
 
     // 1. Create and inject hammer
     const hammer = document.createElement('img');
-    hammer.src = './Assets/hammer-removebg-preview.png';
+    hammer.src = './Assets/board-ui/hammer-removebg-preview.png';
     hammer.className = 'hammer-anim-img';
     slotEl.appendChild(hammer);
 

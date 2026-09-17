@@ -28,7 +28,7 @@ export class Renderer {
 
   render(selectedSlotIndex) {
     // Update Stats UI
-    this.scoreEl.textContent = this.gameLogic.score;
+    if (this.scoreEl) this.scoreEl.textContent = this.gameLogic.score;
     if (this.dropsEl) this.dropsEl.textContent = '∞';
 
     // Dynamic Target Coin Level required for next slot unlock

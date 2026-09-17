@@ -1,7 +1,29 @@
 :root {
   --slot-bg: rgba(255, 255, 255, 0.03);
   --slot-border: rgba(255, 255, 255, 0.15);
-  --slot-highlight: rgba(56, 189, 248, 0.8);
+}
+
+.board-3d-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: calc((100vh - 160px) * 0.7289);
+  height: auto;
+  aspect-ratio: 390 / 535;
+  margin: -35px auto 0 auto;
+  /* Pushed the board down away from the top HUD */
+  flex: 0 0 auto;
+  align-self: center;
+
+  background-image: url("../Assets/board-ui/image (2).png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+
+  padding: 8.5% 8.5% 13.5% 8.5%;
+
+  transform: rotateX(25deg);
+  transform-style: preserve-3d;
 }
 
 #game-board {
@@ -10,30 +32,9 @@
   grid-template-rows: repeat(3, minmax(0, 1fr));
   column-gap: 1.5%;
   row-gap: 5%;
-
-  aspect-ratio: 390 / 535;
-  
-  /* Rock-solid responsiveness: Take full width, but never exceed the maximum height available */
   width: 100%;
-  max-width: calc((100vh - 160px) * 0.7289);
-  height: auto;
-  margin: auto;
-  flex: 0 0 auto;
-  align-self: center;
-
-  /* Apply Image Background */
-  background-image: url("../Assets/image (2).png");
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: transparent;
-  
-  /* Balanced padding to keep slots inside the stitching but reduce empty space */
-  padding: 8.5% 8.5% 13.5% 8.5%;
-  
-  /* 3D Isometric Tabletop Tilt */
-  transform: rotateX(25deg);
-  transform-style: preserve-3d;
+  height: 100%;
+  position: relative;
 }
 
 .slot {
@@ -49,7 +50,7 @@
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* Apply Image Background */
-  background-image: url("../Assets/Coin Pocket.png");
+  background-image: url("../Assets/board-ui/Coin Pocket.png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -91,7 +92,7 @@
 }
 
 .slot.locked {
-  background-image: url("../Assets/Closed Pocket_.png");
+  background-image: url("../Assets/board-ui/Closed Pocket_.png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
