@@ -57,6 +57,8 @@ body {
   height: 100%;
   max-height: calc(100dvh - 16px);
   overflow: hidden;
+  perspective: 1200px;
+  /* Enable 3D space */
 }
 
 header {
@@ -129,6 +131,37 @@ div:active {
 button:active:not(:disabled) {
   transform: translateY(2px);
   box-shadow: 0 2px 5px rgba(14, 165, 233, 0.4);
+}
+
+.controls button:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.controls button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.controls button#btn-hammer {
+  padding: 4px;
+  /* Less padding so image fits nicely */
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.controls button#btn-hammer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.controls button#btn-hammer.active {
+  background: #f59e0b;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
 }
 
 button:disabled {
@@ -205,6 +238,7 @@ button:disabled {
   body {
     padding: 2px;
   }
+
   #game-container {
     padding: 4px 6px;
     border-radius: 12px;
@@ -220,30 +254,37 @@ button:disabled {
    ============================================================== */
 
 @media (max-width: 380px) {
+
   /* On very narrow phones (e.g., iPhone SE), reduce header padding to save vertical space */
   header {
     padding: 4px 8px;
     margin-bottom: 4px;
   }
+
   .stat-label {
     font-size: 0.6rem;
   }
+
   .stat-value {
     font-size: 1rem;
   }
+
   #game-container {
     padding: 6px 8px;
   }
 }
 
 @media (max-height: 600px) {
+
   /* On very short screens, reduce margins and padding to ensure the board fits */
   header {
     margin-bottom: 2px;
   }
+
   .controls {
     margin-top: 2px;
   }
+
   button {
     padding: 6px 10px;
   }
@@ -265,7 +306,7 @@ button:disabled {
   flex-direction: column;
   text-align: center;
   color: white;
-  
+
   /* Hidden by default in Portrait mode */
   opacity: 0;
   pointer-events: none;
@@ -294,10 +335,21 @@ button:disabled {
 }
 
 @keyframes rotatePhone {
-  0% { transform: rotate(-90deg); }
-  30% { transform: rotate(0deg); }
-  70% { transform: rotate(0deg); }
-  100% { transform: rotate(-90deg); }
+  0% {
+    transform: rotate(-90deg);
+  }
+
+  30% {
+    transform: rotate(0deg);
+  }
+
+  70% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(-90deg);
+  }
 }
 
 .rotate-icon {
@@ -313,7 +365,64 @@ button:disabled {
     pointer-events: auto;
     visibility: visible;
   }
+
   .landscape-warning-content {
     transform: translateY(0);
+  }
+}
+
+/* =========================================================================
+   HAMMER SMASH ANIMATION
+   ========================================================================= */
+
+.hammer-anim-img {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  top: 20%;
+  left: 10%;
+  margin-left: -25px;
+  transform-origin: 70% 80%;
+  /* Pivot near the handle */
+  z-index: 99999;
+  pointer-events: none;
+  filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.5));
+}
+
+.slot-smash {
+  animation: slot-shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes slot-shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-4px) translateY(2px) rotate(-1deg);
+  }
+
+  40%,
+  80% {
+    transform: translateX(4px) translateY(-2px) rotate(1deg);
+  }
+}
+
+.coin-shatter {
+  animation: coin-explode 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+}
+
+@keyframes coin-explode {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.3) translate3d(var(--tx), var(--ty), 50px) rotate(var(--rot));
+    opacity: 0;
   }
 }

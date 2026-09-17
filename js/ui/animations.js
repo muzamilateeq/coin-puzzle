@@ -213,4 +213,68 @@ export class Animations {
     const timeoutPromise = new Promise(r => setTimeout(r, 750));
     return Promise.race([animFinished, timeoutPromise]);
   }
+
+  static async animateHammerSmash(slotEl) {
+    if (!slotEl) return;
+
+    // 1. Create and inject hammer
+    const hammer = document.createElement('img');
+    hammer.src = './Assets/hammer-removebg-preview.png';
+    hammer.className = 'hammer-anim-img';
+    slotEl.appendChild(hammer);
+
+    // Ensure slot has position relative so hammer is positioned correctly
+    slotEl.style.position = 'relative';
+
+    // 2. Animate the hammer swinging down
+    Animations._promote(hammer);
+    const swingAnim = hammer.animate([
+      { transform: 'rotate(-45deg) translateY(-20px) scale(1.2)', opacity: 0 },
+      { transform: 'rotate(-45deg) translateY(-20px) scale(1.2)', opacity: 1, offset: 0.2 },
+      { transform: 'rotate(15deg) translateY(20px) scale(1)', opacity: 1, offset: 0.8 },
+      { transform: 'rotate(0deg) translateY(10px) scale(1)', opacity: 1 } // Contact!
+    ], {
+      duration: 350,
+      easing: 'cubic-bezier(0.5, 0, 0.75, 0)', // Accelerate down
+      fill: 'forwards'
+    });
+
+    await swingAnim.finished.catch(() => {});
+
+    // 3. Contact! Shake the slot and shatter the coins
+    slotEl.classList.add('slot-smash');
+    
+    // Scatter the coins inside the slot
+    const coins = Array.from(slotEl.querySelectorAll('.coin'));
+    coins.forEach(coin => {
+      // Generate random explosion vector
+      const angle = (Math.random() - 0.5) * Math.PI; // -90 to 90 degrees (upwards)
+      const force = 150 + Math.random() * 150;
+      const tx = Math.sin(angle) * force + 'px';
+      const ty = (-Math.cos(angle) * force - 100) + 'px'; // Fly up and out
+      const rot = (Math.random() - 0.5) * 720 + 'deg';
+      
+      coin.style.setProperty('--tx', tx);
+      coin.style.setProperty('--ty', ty);
+      coin.style.setProperty('--rot', rot);
+      coin.classList.add('coin-shatter');
+    });
+
+    // 4. Hammer recoil and fade out
+    const recoilAnim = hammer.animate([
+      { transform: 'rotate(0deg) translateY(10px) scale(1)', opacity: 1 },
+      { transform: 'rotate(-20deg) translateY(-30px) scale(1.1)', opacity: 0 }
+    ], {
+      duration: 250,
+      easing: 'ease-out',
+      fill: 'forwards'
+    });
+
+    // Wait for the shatter/recoil to finish (approx 500ms)
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 5. Cleanup
+    hammer.remove();
+    slotEl.classList.remove('slot-smash');
+  }
 }

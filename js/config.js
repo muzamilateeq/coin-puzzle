@@ -1,11 +1,11 @@
 export const CONFIG = {
-  COIN_TYPES: 6,
-  MAX_PER_SLOT: 8,
-  TOTAL_SLOTS: 15,
-  TARGET_SCORE: 8,
-  INITIAL_DROPS: 10,
-  INITIAL_DEAL: 35,
-  DROP_AMOUNT: 20,
-  INITIAL_UNLOCKED_SLOTS: 7
+  COIN_TYPES: 4,            // Start with only 4 coin types to make sorting easy
+  MAX_PER_SLOT: 8,          // Maximum coins per slot
+  TOTAL_SLOTS: 15,          // Total slots on the board
+  TARGET_SCORE: 8,          // Total score needed to win/finish level
+  INITIAL_DROPS: 10,        // How many "Drop Coins" uses you get
+  INITIAL_DEAL: 15,         // Deal only 15 coins initially so the board isn't cluttered
+  DROP_AMOUNT: 12,          // Drop 12 coins at a time when requested
+  INITIAL_UNLOCKED_SLOTS: 5 // Only 5 slots open at the start
 };
 

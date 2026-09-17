@@ -22,14 +22,18 @@
   align-self: center;
 
   /* Apply Image Background */
-  background-image: url("../Assets/Wallet Base.png");
+  background-image: url("../Assets/image (2).png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
   
-  /* Increased left/right padding (11%) to squeeze the slots away from the leather stitching */
-  padding: 11.5% 11% 15.5% 11%;
+  /* Balanced padding to keep slots inside the stitching but reduce empty space */
+  padding: 8.5% 8.5% 13.5% 8.5%;
+  
+  /* 3D Isometric Tabletop Tilt */
+  transform: rotateX(25deg);
+  transform-style: preserve-3d;
 }
 
 .slot {
@@ -60,11 +64,6 @@
 /* Base plate removed as requested */
 .slot::before {
   display: none;
-}
-
-.slot.selected {
-  /* Removed border and box-shadow to keep the slot background picture clean */
-  /* The selected coin itself still animates (floats & glows) */
 }
 
 /* Vibrant Yellow Glass Tube Glow for Stack Completion */

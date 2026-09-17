@@ -15,6 +15,7 @@ class GameController {
 
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
+    this.isHammerActive = false;
 
     this.bindEvents();
     this.init();
@@ -25,6 +26,30 @@ class GameController {
 
     document.getElementById('btn-drop').addEventListener('click', () => this.handleDrop());
     document.getElementById('btn-restart').addEventListener('click', () => this.init());
+    
+    const btnHammer = document.getElementById('btn-hammer');
+    if (btnHammer) {
+      btnHammer.addEventListener('click', () => this.toggleHammerMode());
+    }
+  }
+
+  toggleHammerMode() {
+    if (this.logic.gameState !== 'playing' || this.busySlots.size > 0) return;
+    this.setHammerMode(!this.isHammerActive);
+  }
+
+  setHammerMode(active) {
+    this.isHammerActive = active;
+    const btnHammer = document.getElementById('btn-hammer');
+    if (btnHammer) {
+      if (active) {
+        btnHammer.classList.add('active');
+        this.selectedSlotIndex = null; // Clear normal selection
+        this.renderer.render(this.selectedSlotIndex);
+      } else {
+        btnHammer.classList.remove('active');
+      }
+    }
   }
 
   async init() {
@@ -34,6 +59,7 @@ class GameController {
     this.dropManager.reset();
     this.selectedSlotIndex = null;
     this.busySlots.clear();
+    this.setHammerMode(false);
 
     this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + this.logic.score);
 
@@ -49,6 +75,25 @@ class GameController {
   async handleSlotClick(index) {
     if (this.logic.gameState !== 'playing') return;
     if (this.busySlots.size > 0) return; // Prevent clicks while animations or conversions are active
+
+    // Handle Hammer Mode Click
+    if (this.isHammerActive) {
+      const slot = this.board.getSlot(index);
+      if (!slot.isEmpty() && !slot.isLocked) {
+        // Prevent clicks during animation
+        this.busySlots.add(index);
+        this.setHammerMode(false);
+        
+        const slotEl = this.renderer.boardEl.children[index];
+        await Animations.animateHammerSmash(slotEl);
+
+        // Destroy the coins in the slot completely
+        slot.clear();
+        this.busySlots.delete(index);
+        this.renderer.render(this.selectedSlotIndex);
+      }
+      return;
+    }
 
     if (this.selectedSlotIndex === null) {
       if (!this.board.getSlot(index).isEmpty()) {
