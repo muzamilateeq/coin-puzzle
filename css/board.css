@@ -26,6 +26,15 @@
   transform-style: preserve-3d;
 }
 
+/* Prevent board from spilling off-screen on mobile */
+@media (max-width: 600px) {
+  .board-3d-wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 #game-board {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -107,6 +116,80 @@
 .slot.locked::before,
 .slot.locked::after {
   display: none !important;
+}
+
+/* =========================================================================
+   SPECIAL LOCKED SLOTS (Unlock via Gems or Time Bonus)
+   ========================================================================= */
+.slot.locked-special {
+  background-image: url("../Assets/Gameplay/Lock Base.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  cursor: pointer; /* Can be clicked to trigger an action */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slot.locked-special .locked-patch {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95%; /* Adjust to fit well inside the lock base */
+  height: 95%;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Green Patch for Gem Unlock */
+.slot.locked-gem .locked-patch {
+  background-image: url("../Assets/Gameplay/Green Patch_.png");
+}
+
+/* Blue Patch for Time Bonus */
+.slot.locked-time .locked-patch {
+  background-image: url("../Assets/Gameplay/Blue Patch_.png");
+}
+
+.locked-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.locked-icon-plus {
+  width: clamp(14px, 4vw, 20px);
+  height: clamp(14px, 4vw, 20px);
+}
+
+.locked-icon-gem {
+  width: clamp(12px, 3vw, 16px);
+  height: clamp(12px, 3vw, 16px);
+}
+
+.locked-icon-time {
+  width: clamp(24px, 6vw, 32px);
+  height: clamp(24px, 6vw, 32px);
+}
+
+.locked-cost {
+  color: white;
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  font-weight: 900;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin-top: 2px;
 }
 
 /* Golden Starburst Lens Flare Animation */

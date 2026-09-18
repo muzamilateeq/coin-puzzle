@@ -15,8 +15,18 @@ export class Board {
   }
 
   unlockSlotsUpTo(count) {
+    let lockedCount = 0;
     this.slots.forEach((slot, index) => {
       slot.isLocked = index < CONFIG.TOTAL_SLOTS - count;
+      if (slot.isLocked) {
+        lockedCount++;
+        // Demo mapping: make the first locked slot a 'gem' lock, and the second a 'time' lock
+        if (lockedCount === 1) slot.lockType = 'gem';
+        else if (lockedCount === 2) slot.lockType = 'time';
+        else slot.lockType = null;
+      } else {
+        slot.lockType = null;
+      }
     });
   }
 

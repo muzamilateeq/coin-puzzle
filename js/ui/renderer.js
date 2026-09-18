@@ -72,12 +72,46 @@ export class Renderer {
 
       // Update slot classes — preserve animation classes already set
       let slotClass = 'slot';
-      if (slot.isLocked) slotClass += ' locked';
+      if (slot.isLocked) {
+        slotClass += ' locked';
+        if (slot.lockType) {
+          slotClass += ` locked-special locked-${slot.lockType}`;
+        }
+      }
       if (selectedSlotIndex === index) slotClass += ' selected';
       // BUG FIX: Don't strip animation classes set by processTransferLifecycle
       if (slotEl.classList.contains('slot-celebrate')) slotClass += ' slot-celebrate';
 
       slotEl.className = slotClass;
+
+      // Handle rendering special locked slot internals
+      if (slot.isLocked && slot.lockType) {
+        if (!slotEl.querySelector('.locked-patch')) {
+          slotEl.innerHTML = ''; // clear any existing children just in case
+          const patchEl = document.createElement('div');
+          patchEl.className = 'locked-patch';
+          
+          if (slot.lockType === 'gem') {
+            patchEl.innerHTML = `
+              <div class="locked-icon-row">
+                <img src="./Assets/Gameplay/Plus Iocn_.png" class="locked-icon-plus" />
+                <img src="./Assets/Gameplay/Gem.png" class="locked-icon-gem" />
+              </div>
+              <div class="locked-cost">50</div>
+            `;
+          } else if (slot.lockType === 'time') {
+            patchEl.innerHTML = `
+              <div class="locked-icon-row">
+                <img src="./Assets/Gameplay/Extra Time Icon_.png" class="locked-icon-time" />
+              </div>
+            `;
+          }
+          slotEl.appendChild(patchEl);
+        }
+      } else if (slot.isLocked) {
+        // Normal lock, clean up if it used to be a special lock
+        slotEl.innerHTML = '';
+      }
 
       // Sync coins
       const matchCount = slot.getConsecutiveMatches();

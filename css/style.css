@@ -162,6 +162,22 @@ body {
   /* Enable 3D space */
 }
 
+/* On mobile, allow the container to fill the screen entirely to remove black bars */
+@media (max-width: 600px) {
+  #loading-screen,
+  #game-container {
+    max-width: 100%;
+    padding-left: 2%;
+    padding-right: 2%;
+  }
+
+  /* Prevent HUD from spilling off-screen on mobile */
+  #top-hud {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
+
 /* =========================================================================
    TOP HUD
    ========================================================================= */

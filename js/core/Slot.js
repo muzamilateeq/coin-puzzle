@@ -4,6 +4,7 @@ export class Slot {
   constructor() {
     this.coins = [];
     this.isLocked = true;
+    this.lockType = null; // 'gem' | 'time' | null
   }
 
   push(...coins) {
