@@ -131,7 +131,7 @@ export class Animations {
     const promises = moves.map(({ el, dx, dy, flightIndex }) => {
       const coinDuration = 380; // Crisp 380ms flight per coin
       const delay = flightIndex * 55; // 55ms fluid cascade wave stagger (coins stream together!)
-      
+
       const distance = Math.hypot(dx, dy);
       const arcHeight = Math.max(55, Math.min(110, distance * 0.28));
 
@@ -157,9 +157,9 @@ export class Animations {
 
     const totalDuration = (moves.length - 1) * 55 + 380 + 50;
     const timeoutPromise = new Promise(r => setTimeout(r, totalDuration + 300));
-    
+
     try {
-      await Promise.race([Promise.all(promises).catch(() => {}), timeoutPromise]);
+      await Promise.race([Promise.all(promises).catch(() => { }), timeoutPromise]);
     } finally {
       // Always cleanup parent slot z-indexes after animation finishes
       parentSlots.forEach(slotEl => slotEl.style.removeProperty('z-index'));
@@ -239,11 +239,11 @@ export class Animations {
       fill: 'forwards'
     });
 
-    await swingAnim.finished.catch(() => {});
+    await swingAnim.finished.catch(() => { });
 
     // 3. Contact! Shake the slot and shatter the coins
     slotEl.classList.add('slot-smash');
-    
+
     // Scatter the coins inside the slot
     const coins = Array.from(slotEl.querySelectorAll('.coin'));
     coins.forEach(coin => {
@@ -253,7 +253,7 @@ export class Animations {
       const tx = Math.sin(angle) * force + 'px';
       const ty = (-Math.cos(angle) * force - 100) + 'px'; // Fly up and out
       const rot = (Math.random() - 0.5) * 720 + 'deg';
-      
+
       coin.style.setProperty('--tx', tx);
       coin.style.setProperty('--ty', ty);
       coin.style.setProperty('--rot', rot);

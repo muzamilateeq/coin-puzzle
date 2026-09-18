@@ -209,11 +209,6 @@ class GameController {
   checkGameEndState() {
     if (this.logic.gameState === 'won') {
       this.renderer.showModal('You Win!', `Excellent! You cleared ${CONFIG.TARGET_SCORE} stacks.`, () => this.init());
-    } else {
-      this.logic.checkGameOver();
-      if (this.logic.gameState === 'lost') {
-        this.renderer.showModal('Game Over', 'No more valid moves and the board is full!', () => this.init());
-      }
     }
   }
 

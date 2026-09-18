@@ -161,8 +161,7 @@ export class GameLogic {
   }
 
   checkGameOver() {
-    if (!this.board.hasEmptySpace() && !this.hasValidMoves()) {
-      this.gameState = 'lost';
-    }
+    // Game over disabled
+    return;
   }
 }
