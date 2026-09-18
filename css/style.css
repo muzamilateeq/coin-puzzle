@@ -1,5 +1,5 @@
 :root {
-  --bg-color: #0f172a;
+  --bg-color: #000000;
   --text-color: #f8fafc;
 }
 
@@ -26,7 +26,6 @@ body {
 
 body {
   background: var(--bg-color);
-  background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
   color: var(--text-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
@@ -47,14 +46,14 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  max-width: 9cm;
+  max-width: 340px;
   height: 100%;
   z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 4vh 16px 6vh 16px;
+  padding: 4vh 4% 6vh 4%;
   background-image: url("../Assets/Loading/BG_.png");
   background-size: 100% 100%;
   background-position: center;
@@ -79,10 +78,10 @@ body {
 }
 
 .loading-center-art {
-  width: 92%;
-  max-width: 400px;
+  width: 98%;
+  max-width: 450px;
   height: auto;
-  max-height: 44vh;
+  max-height: 48vh;
   flex: 0 1 auto;
   object-fit: contain;
   margin-top: -2.5vh;
@@ -94,7 +93,7 @@ body {
   position: relative;
   width: 75%;
   max-width: 280px;
-  margin-bottom: 0.5vh;
+  margin-bottom: 4vh;
   filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.6));
 }
 
@@ -142,7 +141,7 @@ body {
   background-image: url("../Assets/Loading/BG_.png");
   background-size: 100% 100%;
   background-position: center;
-  padding: 30px 10px;
+  padding: 4vh 2%;
   /* Padding inside the container */
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.7),
@@ -155,7 +154,7 @@ body {
   justify-content: flex-start;
   /* Pack from top down */
   width: 100%;
-  max-width: 9cm;
+  max-width: 340px;
   min-height: 100vh;
   /* Stretch at least full height of screen */
   overflow: hidden;
@@ -167,12 +166,14 @@ body {
    TOP HUD
    ========================================================================= */
 #top-hud {
-  width: 100%;
+  width: 108%;
+  margin-left: -4%;
+  margin-top: 1.5vh;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1px 2px;
-  /* Reduced left/right padding */
+  padding: 1px 0;
+  /* Pushed outwards to reduce side margins and downwards from top */
   flex: 0 0 auto;
 }
 
@@ -195,6 +196,7 @@ body {
   line-height: 1;
   /* Normal line height to stop heavy overlapping */
   margin-bottom: 2px;
+  margin-left: 10%;
   /* Small gap so it touches perfectly without burying the text */
   position: relative;
   z-index: 2;

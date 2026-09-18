@@ -5,12 +5,12 @@
 
 .board-3d-wrapper {
   position: relative;
-  width: 100%;
-  max-width: calc((100vh - 160px) * 0.7289);
+  width: 102%;
+  max-width: calc((100vh - 18vh) * 0.7289); /* Responsive max-width relying on viewport height minus HUD approx space */
   height: auto;
   aspect-ratio: 390 / 535;
-  margin: -35px auto 0 auto;
-  /* Pushed the board down away from the top HUD */
+  margin: -4.5vh -1% 0 -1%;
+  /* Pushed the board down away from the top HUD fluidly */
   flex: 0 0 auto;
   align-self: center;
 
@@ -131,8 +131,10 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100px;
-  height: 100px;
+  width: 25vw;
+  max-width: 100px;
+  height: 25vw;
+  max-height: 100px;
   background: radial-gradient(circle, rgba(254, 240, 138, 0.95) 0%, rgba(253, 224, 71, 0.7) 35%, rgba(234, 179, 8, 0) 70%);
   border-radius: 50%;
   pointer-events: none;

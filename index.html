@@ -8,12 +8,12 @@
   <link rel="stylesheet" href="./css/style.css?v=639.0">
   <link rel="stylesheet" href="./css/board.css?v=639.0">
   <link rel="stylesheet" href="./css/coin.css?v=639.0">
+  <link rel="stylesheet" href="./css/settings.css?v=639.0">
 </head>
 
 <body>
 
   <!-- loading screen moved inside game-container -->
-
   <div id="game-container">
     <!-- Loading Screen Overlay -->
     <div id="loading-screen">
@@ -72,7 +72,7 @@
             <img src="./Assets/Gameplay/Gem.png" alt="Gems" class="hud-gem-icon" />
           </div>
         </div>
-        <img src="./Assets/Gameplay/Settings.png" alt="Settings" class="hud-settings-icon" />
+        <img src="./Assets/Gameplay/Settings.png" alt="Settings" class="hud-settings-icon" id="btn-settings" style="cursor: pointer;" />
       </div>
     </div>
 
@@ -84,6 +84,48 @@
         <button id="btn-drop" class="drop-btn-custom">
           <img src="./Assets/Gameplay/Coins_.png" class="drop-btn-icon" alt="Coins" />
           <span class="drop-btn-text">DROP</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal Overlay -->
+  <div class="modal-overlay hidden" id="settings-modal">
+    <div class="settings-modal-content">
+      <!-- Close Button -->
+      <img src="./Assets/Settings/Cross.png" alt="Close" id="btn-settings-close" class="settings-close-btn" />
+
+      <!-- Settings Frame Background -->
+      <img src="./Assets/Settings/Layer 27.png" alt="Settings Frame" class="settings-frame-img" />
+
+      <!-- Settings Header Text -->
+      <div class="settings-header-text">Settings</div>
+
+      <!-- Inner Settings Body -->
+      <div class="settings-inner-body">
+        <!-- Toggles Buttons -->
+        <div class="settings-toggles-row">
+          <button id="toggle-music" class="settings-toggle-btn" title="Toggle Music">
+            <img src="./Assets/Settings/Toggles Base.png" class="settings-toggle-bg" alt="Base" />
+            <img src="./Assets/Settings/Music On_.png" id="img-toggle-music" class="settings-toggle-icon" alt="Music" />
+          </button>
+          <button id="toggle-sound" class="settings-toggle-btn" title="Toggle Sound">
+            <img src="./Assets/Settings/Toggles Base.png" class="settings-toggle-bg" alt="Base" />
+            <img src="./Assets/Settings/Sound On_.png" id="img-toggle-sound" class="settings-toggle-icon" alt="Sound" />
+          </button>
+          <button id="toggle-vibrate" class="settings-toggle-btn" title="Toggle Vibration">
+            <img src="./Assets/Settings/Toggles Base.png" class="settings-toggle-bg" alt="Base" />
+            <img src="./Assets/Settings/Vibrate On_.png" id="img-toggle-vibrate" class="settings-toggle-icon" alt="Vibration" />
+          </button>
+        </div>
+
+        <!-- Restart Button -->
+        <button id="btn-settings-restart" class="settings-restart-btn">
+          <span class="restart-text">RESTART</span>
+          <div class="restart-heart-badge">
+            <img src="./Assets/Gameplay/Heart.png" alt="Heart" class="restart-heart-icon" />
+            <span class="restart-heart-text">-1</span>
+          </div>
         </button>
       </div>
     </div>

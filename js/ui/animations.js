@@ -37,8 +37,8 @@ export class Animations {
           const delay = index * 55;
 
           const anim = el.animate([
-            { transform: 'translateY(-120px) scale(0.7)', opacity: 0 },
-            { transform: 'translateY(6px) scale(1.04)', opacity: 1, offset: 0.75 },
+            { transform: 'translateY(-150%) scale(0.7)', opacity: 0 },
+            { transform: 'translateY(10%) scale(1.04)', opacity: 1, offset: 0.75 },
             { transform: 'translateY(0) scale(1)', opacity: 1 }
           ], {
             duration: 400,
@@ -85,21 +85,16 @@ export class Animations {
       startPositions.set(el, el.getBoundingClientRect());
     });
 
-    // Collect all parent slot containers of flying coins BEFORE DOM mutation
+    // 2. Mutate DOM (render coins inside destination slot)
+    updateFn();
+
+    // Collect destination parent slot containers AFTER DOM mutation
     const parentSlots = new Set();
     validEls.forEach(el => {
       if (el.parentElement) parentSlots.add(el.parentElement);
     });
 
-    // 2. Mutate DOM (render coins inside destination slot)
-    updateFn();
-
-    // Collect destination parent slot containers AFTER DOM mutation
-    validEls.forEach(el => {
-      if (el.parentElement) parentSlots.add(el.parentElement);
-    });
-
-    // Promote parent slots to highest z-index so flying coins render above ALL other board slots & coins
+    // Promote destination parent slots to highest z-index so flying coins render above ALL other board slots
     parentSlots.forEach(slotEl => {
       slotEl.style.setProperty('z-index', '9999', 'important');
     });
@@ -229,10 +224,10 @@ export class Animations {
     // 2. Animate the hammer swinging down
     Animations._promote(hammer);
     const swingAnim = hammer.animate([
-      { transform: 'rotate(-45deg) translateY(-20px) scale(1.2)', opacity: 0 },
-      { transform: 'rotate(-45deg) translateY(-20px) scale(1.2)', opacity: 1, offset: 0.2 },
-      { transform: 'rotate(15deg) translateY(20px) scale(1)', opacity: 1, offset: 0.8 },
-      { transform: 'rotate(0deg) translateY(10px) scale(1)', opacity: 1 } // Contact!
+      { transform: 'rotate(-45deg) translateY(-30%) scale(1.2)', opacity: 0 },
+      { transform: 'rotate(-45deg) translateY(-30%) scale(1.2)', opacity: 1, offset: 0.2 },
+      { transform: 'rotate(15deg) translateY(30%) scale(1)', opacity: 1, offset: 0.8 },
+      { transform: 'rotate(0deg) translateY(15%) scale(1)', opacity: 1 } // Contact!
     ], {
       duration: 350,
       easing: 'cubic-bezier(0.5, 0, 0.75, 0)', // Accelerate down
@@ -246,12 +241,13 @@ export class Animations {
 
     // Scatter the coins inside the slot
     const coins = Array.from(slotEl.querySelectorAll('.coin'));
+    const vh = window.innerHeight;
     coins.forEach(coin => {
       // Generate random explosion vector
       const angle = (Math.random() - 0.5) * Math.PI; // -90 to 90 degrees (upwards)
-      const force = 150 + Math.random() * 150;
+      const force = vh * (0.15 + Math.random() * 0.15); // Dynamic force based on screen height
       const tx = Math.sin(angle) * force + 'px';
-      const ty = (-Math.cos(angle) * force - 100) + 'px'; // Fly up and out
+      const ty = (-Math.cos(angle) * force - (vh * 0.1)) + 'px'; // Fly up and out
       const rot = (Math.random() - 0.5) * 720 + 'deg';
 
       coin.style.setProperty('--tx', tx);
@@ -261,9 +257,9 @@ export class Animations {
     });
 
     // 4. Hammer recoil and fade out
-    const recoilAnim = hammer.animate([
-      { transform: 'rotate(0deg) translateY(10px) scale(1)', opacity: 1 },
-      { transform: 'rotate(-20deg) translateY(-30px) scale(1.1)', opacity: 0 }
+    const hammerFinish = hammer.animate([
+      { transform: 'rotate(0deg) translateY(15%) scale(1)', opacity: 1 },
+      { transform: 'rotate(-20deg) translateY(-40%) scale(1.1)', opacity: 0 }
     ], {
       duration: 250,
       easing: 'ease-out',

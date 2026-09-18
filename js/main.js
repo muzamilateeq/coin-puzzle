@@ -5,6 +5,7 @@ import { GameLogic } from './logic/gameLogic.js';
 import { DropManager } from './logic/dropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
+import { SettingsManager } from './settings/settingsManager.js';
 
 class GameController {
   constructor() {
@@ -12,6 +13,7 @@ class GameController {
     this.logic = new GameLogic(this.board);
     this.dropManager = new DropManager(this.board);
     this.renderer = new Renderer(this.board, this.logic, this.dropManager);
+    this.settingsManager = new SettingsManager(() => this.init());
 
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
