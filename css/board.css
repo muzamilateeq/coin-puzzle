@@ -5,12 +5,11 @@
 
 .board-3d-wrapper {
   position: relative;
-  width: 102%;
-  max-width: calc((100vh - 18vh) * 0.7289); /* Responsive max-width relying on viewport height minus HUD approx space */
+  width: 95%;
+  max-width: calc((100vh - 18vh) * 0.7289);
   height: auto;
   aspect-ratio: 390 / 535;
-  margin: -4.5vh -1% 0 -1%;
-  /* Pushed the board down away from the top HUD fluidly */
+  margin: -4.5vh auto 0 auto;
   flex: 0 0 auto;
   align-self: center;
 
@@ -26,14 +25,7 @@
   transform-style: preserve-3d;
 }
 
-/* Prevent board from spilling off-screen on mobile */
-@media (max-width: 600px) {
-  .board-3d-wrapper {
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
+/* Removed unnecessary board mobile media query since it now natively fits 100% safely */
 
 #game-board {
   display: grid;
@@ -122,7 +114,7 @@
    SPECIAL LOCKED SLOTS (Unlock via Gems or Time Bonus)
    ========================================================================= */
 .slot.locked-special {
-  background-image: url("../Assets/Gameplay/Lock Base.png");
+  background-image: url("../Assets/board-ui/Closed Pocket_.png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -130,7 +122,8 @@
   border: none;
   box-shadow: none;
   backdrop-filter: none;
-  cursor: pointer; /* Can be clicked to trigger an action */
+  cursor: pointer;
+  /* Can be clicked to trigger an action */
   position: relative;
   display: flex;
   justify-content: center;
@@ -142,8 +135,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 95%; /* Adjust to fit well inside the lock base */
-  height: 95%;
+  width: 78%;
+  /* Adjust to fit well inside the lock base */
+  height: 88%;
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -163,10 +157,85 @@
   background-image: url("../Assets/Gameplay/Blue Patch_.png");
 }
 
+.slot.pending-shift .locked-patch {
+  animation: pending-pulse 1s infinite alternate ease-in-out;
+  filter: hue-rotate(-20deg) saturate(1.5);
+}
+
+@keyframes pending-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1.05); }
+}
+
+.slot-temp-timer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  color: white;
+  font-size: 14px;
+  font-weight: 900;
+  z-index: 20;
+  text-shadow: 0px 1px 3px rgba(0,0,0,0.9), 0px 2px 5px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
+.slot-temp-timer.pending {
+  color: #ff4444;
+  animation: pending-timer-pulse 0.5s infinite alternate;
+}
+@keyframes pending-timer-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
 .locked-icon-row {
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+.locked-icon-plus-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75%;
+  height: auto;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
+}
+
+.locked-icon-time-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75%;
+  height: auto;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
+}
+
+.locked-bottom-row {
+  position: absolute;
+  bottom: 8%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.locked-level {
+  position: absolute;
+  top: 8%;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.5px;
 }
 
 .locked-icon-plus {
@@ -184,12 +253,23 @@
   height: clamp(24px, 6vw, 32px);
 }
 
+.locked-icon-padlock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75%;
+  height: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
 .locked-cost {
   color: white;
-  font-size: clamp(0.7rem, 2vw, 0.9rem);
-  font-weight: 900;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  margin-top: 2px;
+  font-size: clamp(0.5rem, 1.5vw, 0.65rem);
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  white-space: nowrap;
 }
 
 /* Golden Starburst Lens Flare Animation */

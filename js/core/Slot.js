@@ -4,7 +4,15 @@ export class Slot {
   constructor() {
     this.coins = [];
     this.isLocked = true;
-    this.lockType = null; // 'gem' | 'time' | null
+    this.lockType = null; // 'gem' | 'time' | 'padlock' | null
+    this.unlockCost = null;
+    this.unlockLevel = null;
+    this.timeBonus = null;
+    
+    // Temporary time unlock state
+    this.isTempUnlocked = false;
+    this.tempUnlockTimeLeft = null;
+    this.isPendingShift = false;
   }
 
   push(...coins) {

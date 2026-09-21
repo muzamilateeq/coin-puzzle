@@ -141,8 +141,8 @@ body {
   background-image: url("../Assets/Loading/BG_.png");
   background-size: 100% 100%;
   background-position: center;
-  padding: 4vh 2%;
-  /* Padding inside the container */
+  /* Use a consistent minimal horizontal padding that works well on all screens without needing negative inner margins */
+  padding: 4vh 12px;
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.7),
     inset 0 1px 2px rgba(255, 255, 255, 0.1);
@@ -154,7 +154,7 @@ body {
   justify-content: flex-start;
   /* Pack from top down */
   width: 100%;
-  max-width: 340px;
+  max-width: clamp(342px, 55vh, 650px);
   min-height: 100vh;
   /* Stretch at least full height of screen */
   overflow: hidden;
@@ -164,17 +164,13 @@ body {
 
 /* On mobile, allow the container to fill the screen entirely to remove black bars */
 @media (max-width: 600px) {
+
   #loading-screen,
   #game-container {
     max-width: 100%;
-    padding-left: 2%;
-    padding-right: 2%;
-  }
-
-  /* Prevent HUD from spilling off-screen on mobile */
-  #top-hud {
-    width: 100% !important;
-    margin-left: 0 !important;
+    /* Keep the consistent padding to match the desktop inset */
+    padding-left: 12px;
+    padding-right: 12px;
   }
 }
 
@@ -182,14 +178,12 @@ body {
    TOP HUD
    ========================================================================= */
 #top-hud {
-  width: 108%;
-  margin-left: -4%;
-  margin-top: 1.5vh;
+  width: 100%;
+  /* margin: 1.5vh 0 0 0; */
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1px 0;
-  /* Pushed outwards to reduce side margins and downwards from top */
+  padding: 0;
   flex: 0 0 auto;
 }
 
@@ -203,7 +197,7 @@ body {
 }
 
 .hud-level-text {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 4vw, 1.2rem);
   font-weight: 900;
   color: #fff;
   text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
@@ -212,7 +206,7 @@ body {
   line-height: 1;
   /* Normal line height to stop heavy overlapping */
   margin-bottom: 2px;
-  margin-left: 10%;
+  margin-left: 5px;
   /* Small gap so it touches perfectly without burying the text */
   position: relative;
   z-index: 2;
@@ -230,8 +224,8 @@ body {
 }
 
 .hud-coin-base {
-  width: 60px;
-  height: 60px;
+  width: clamp(45px, 12vw, 60px);
+  height: clamp(45px, 12vw, 60px);
   background-image: url("../Assets/Gameplay/Coin Base.png");
   background-size: contain;
   /* Prevents stretching */
@@ -248,7 +242,7 @@ body {
 
 .hud-coin-count {
   color: #fff;
-  font-size: 0.8rem;
+  font-size: clamp(0.65rem, 2.5vw, 0.8rem);
   font-weight: bold;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   margin-bottom: 1px;
@@ -280,13 +274,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
+  width: clamp(35px, 10vw, 44px);
   /* Reduced container width instead of squishing image */
-  height: 18px;
+  height: clamp(14px, 4vw, 18px);
 }
 
 .hud-bar-bg.long-bar {
-  width: 60px;
+  width: clamp(45px, 14vw, 60px);
   /* Reduced width */
 }
 

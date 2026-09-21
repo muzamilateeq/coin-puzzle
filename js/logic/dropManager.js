@@ -15,8 +15,11 @@ export class DropManager {
     const slots = this.board.getAllSlots();
     const assignedTypePerSlot = new Map();
     
-    // Find valid target slots initially
-    let validSlots = slots.map((s, index) => ({s, index})).filter(item => !item.s.isFull() && !item.s.isLocked);
+    // Filter slots that are full or strictly locked (not temp unlocked)
+    let validSlots = slots.map((s, index) => ({s, index})).filter(item => {
+      const isLocked = item.s.isLocked && !item.s.isTempUnlocked;
+      return !item.s.isFull() && !isLocked;
+    });
     
     if (groupSameSlot && validSlots.length > 0) {
       // Pre-assign types to slots to guarantee all numbers are represented
@@ -41,8 +44,11 @@ export class DropManager {
     }
     
     for (let i = 0; i < count; i++) {
-      // Re-filter valid slots because they might fill up during the loop
-      validSlots = slots.map((s, index) => ({s, index})).filter(item => !item.s.isFull() && !item.s.isLocked);
+      // Re-evaluate valid slots
+      validSlots = slots.map((s, index) => ({s, index})).filter(item => {
+        const isLocked = item.s.isLocked && !item.s.isTempUnlocked;
+        return !item.s.isFull() && !isLocked;
+      });
       
       if (validSlots.length === 0) break;
       

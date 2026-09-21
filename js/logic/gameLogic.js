@@ -5,6 +5,9 @@ export class GameLogic {
   constructor(board) {
     this.board = board;
     this.score = 0;
+    this.gems = 1000;
+    this.hearts = 5;
+    this.nextHeartTime = null;
     this.gameState = 'playing'; // 'playing', 'won', 'lost'
   }
 
@@ -19,7 +22,10 @@ export class GameLogic {
     const sourceSlot = this.board.getSlot(sourceIndex);
     const destSlot = this.board.getSlot(destIndex);
 
-    if (sourceSlot.isLocked || destSlot.isLocked) return false;
+    const isSourceLocked = sourceSlot.isLocked && !sourceSlot.isTempUnlocked;
+    const isDestLocked = destSlot.isLocked && !destSlot.isTempUnlocked;
+
+    if (isSourceLocked || isDestLocked) return false;
     if (sourceSlot.isEmpty()) return false;
     if (destSlot.isFull()) return false;
 
@@ -61,7 +67,8 @@ export class GameLogic {
 
   isSlotMatchFull(slotIndex) {
     const slot = this.board.getSlot(slotIndex);
-    if (!slot || slot.isLocked || !slot.isFull()) return false;
+    const isSlotLocked = slot.isLocked && !slot.isTempUnlocked;
+    if (!slot || isSlotLocked || !slot.isFull()) return false;
     const firstType = slot.coins[0].type;
     return slot.coins.every(c => c.type === firstType);
   }
@@ -110,6 +117,7 @@ export class GameLogic {
 
     if (firstType >= currentMaxCoin) {
       this.score++;
+      this.gems += 50;
       this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + this.score);
     }
 
@@ -142,14 +150,16 @@ export class GameLogic {
     
     for (let i = 0; i < CONFIG.TOTAL_SLOTS; i++) {
       const srcSlot = slots[i];
-      if (srcSlot.isLocked || srcSlot.isEmpty()) continue;
+      const isSrcLocked = srcSlot.isLocked && !srcSlot.isTempUnlocked;
+      if (isSrcLocked || srcSlot.isEmpty()) continue;
       
       const srcType = srcSlot.topCoin.type;
       
       for (let j = 0; j < CONFIG.TOTAL_SLOTS; j++) {
         if (i === j) continue;
         const destSlot = slots[j];
-        if (destSlot.isLocked) continue;
+        const isDestLocked = destSlot.isLocked && !destSlot.isTempUnlocked;
+        if (isDestLocked) continue;
         
         if (destSlot.isEmpty()) return true;
         if (!destSlot.isFull() && destSlot.topCoin.type === srcType) {

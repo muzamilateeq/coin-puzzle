@@ -1,8 +1,8 @@
 import { CONFIG } from './config.js';
 import { resetCoinCounter } from './core/Coin.js';
 import { Board } from './core/Board.js';
-import { GameLogic } from './logic/gameLogic.js';
-import { DropManager } from './logic/dropManager.js';
+import { GameLogic } from './logic/GameLogic.js';
+import { DropManager } from './logic/DropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
@@ -13,7 +13,7 @@ class GameController {
     this.logic = new GameLogic(this.board);
     this.dropManager = new DropManager(this.board);
     this.renderer = new Renderer(this.board, this.logic, this.dropManager);
-    this.settingsManager = new SettingsManager(() => this.init());
+    this.settingsManager = new SettingsManager(() => this.handleRestart());
 
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
@@ -32,6 +32,49 @@ class GameController {
     if (btnHammer) {
       btnHammer.addEventListener('click', () => this.toggleHammerMode());
     }
+
+    this.startGameTimers();
+  }
+
+  startGameTimers() {
+    setInterval(() => {
+      // Heart Timer Logic
+      if (this.logic.hearts < 5) {
+        if (!this.logic.nextHeartTime) {
+          // 5 minutes in milliseconds
+          this.logic.nextHeartTime = Date.now() + 5 * 60 * 1000;
+        }
+        
+        const remaining = this.logic.nextHeartTime - Date.now();
+        if (remaining <= 0) {
+          this.logic.hearts++;
+          if (this.logic.hearts < 5) {
+            this.logic.nextHeartTime = Date.now() + 5 * 60 * 1000;
+          } else {
+            this.logic.nextHeartTime = null;
+          }
+        }
+      } else {
+        this.logic.nextHeartTime = null;
+      }
+      this.renderer.renderHeartTimer();
+
+      // Slot Timer Logic
+      let needsRender = false;
+      this.board.getAllSlots().forEach((slot, index) => {
+        if (slot.isTempUnlocked && !slot.isPendingShift) {
+          slot.tempUnlockTimeLeft--;
+          if (slot.tempUnlockTimeLeft <= 0) {
+            slot.tempUnlockTimeLeft = 0;
+            slot.isPendingShift = true; // Timer expired, wait for empty slot
+            this.tryProcessPendingShifts(); // Try to shift immediately if possible
+          }
+          needsRender = true;
+        }
+      });
+      if (needsRender) this.renderer.render(this.selectedSlotIndex);
+
+    }, 1000);
   }
 
   toggleHammerMode() {
@@ -73,6 +116,37 @@ class GameController {
     this.checkGameEndState();
   }
 
+  async handleRestart() {
+    if (this.logic.hearts <= 0) {
+      // Out of hearts, do nothing or show a message (can be expanded later)
+      return;
+    }
+
+    this.logic.hearts--;
+    if (this.logic.hearts < 5 && !this.logic.nextHeartTime) {
+      this.logic.nextHeartTime = Date.now() + 5 * 60 * 1000;
+    }
+    this.renderer.renderHeartTimer();
+
+    resetCoinCounter();
+    this.board.clearAll();
+    // Do NOT call this.logic.reset() to keep score and extraUnlockedSlots intact
+    this.dropManager.reset();
+    this.selectedSlotIndex = null;
+    this.busySlots.clear();
+    this.setHammerMode(false);
+
+    // Re-apply same slots based on current level progress
+    this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + this.logic.score);
+
+    this.renderer.hideModal();
+    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, Math.max(CONFIG.COIN_TYPES, (CONFIG.COIN_TYPES - 1) + this.logic.score), true);
+
+    this.renderer.render(this.selectedSlotIndex);
+    
+    await this.processAllFullSlots();
+  }
+
   async handleSlotClick(index) {
     if (this.logic.gameState !== 'playing') return;
     if (this.busySlots.size > 0) return; // Prevent clicks while animations or conversions are active
@@ -95,6 +169,46 @@ class GameController {
       }
       return;
     }
+
+    const slot = this.board.getSlot(index);
+
+    // Handle unlocking via gems
+    if (slot.isLocked && slot.lockType === 'gem') {
+      if (this.logic.gems >= slot.unlockCost) {
+        this.logic.gems -= slot.unlockCost;
+        
+        // Add visual unlock animation
+        const slotEl = this.renderer.boardEl.children[index];
+        this.busySlots.add(index);
+        await Animations.animateSlotUnlock(slotEl);
+        this.busySlots.delete(index);
+
+        // Unlock specific slot
+        this.board.unlockSpecificSlot(index);
+        this.renderer.render(this.selectedSlotIndex);
+        return;
+      } else {
+        // Not enough gems (could add visual shake effect here later)
+        return;
+      }
+    }
+
+    // Handle temporary unlock of time slots
+    if (slot.isLocked && slot.lockType === 'time' && !slot.isTempUnlocked && !slot.isPendingShift) {
+      slot.isTempUnlocked = true;
+      slot.tempUnlockTimeLeft = slot.timeBonus !== null ? slot.timeBonus : 60;
+      
+      // Add visual unlock animation
+      const slotEl = this.renderer.boardEl.children[index];
+      this.busySlots.add(index);
+      await Animations.animateSlotUnlock(slotEl);
+      this.busySlots.delete(index);
+      
+      this.renderer.render(this.selectedSlotIndex);
+      return;
+    }
+
+    if (slot.isLocked && !slot.isTempUnlocked) return;
 
     if (this.selectedSlotIndex === null) {
       if (!this.board.getSlot(index).isEmpty()) {
@@ -130,6 +244,7 @@ class GameController {
         }
 
         await this.processAllFullSlots();
+        await this.tryProcessPendingShifts();
         this.checkGameEndState();
 
       } else {
@@ -145,6 +260,61 @@ class GameController {
         }, 300);
       }
     }
+  }
+
+  async tryProcessPendingShifts() {
+    let shiftedAny = false;
+    const slots = this.board.getAllSlots();
+    
+    for (let srcIndex = 0; srcIndex < slots.length; srcIndex++) {
+      const srcSlot = slots[srcIndex];
+      if (srcSlot.isPendingShift && srcSlot.length > 0) {
+        // Find a valid destination slot
+        const emptyIndex = slots.findIndex(s => {
+          if (s.isLocked || s.isTempUnlocked || s.isPendingShift) return false;
+          if (s.spaceAvailable < srcSlot.length) return false;
+          return s.isEmpty() || s.topCoin.type === srcSlot.topCoin.type;
+        });
+        if (emptyIndex !== -1) {
+          // Transfer all coins
+          const destSlot = slots[emptyIndex];
+          const coinsToMove = srcSlot.pop(srcSlot.length);
+          destSlot.push(...coinsToMove);
+          
+          // Revert time slot to locked
+          srcSlot.isTempUnlocked = false;
+          srcSlot.isPendingShift = false;
+          srcSlot.tempUnlockTimeLeft = null;
+          
+          const movingCoinEls = coinsToMove
+            .map(c => this.renderer.coinDomMap.get(c.id))
+            .filter(Boolean);
+            
+          this.busySlots.add(srcIndex);
+          this.busySlots.add(emptyIndex);
+          
+          try {
+            await Animations.animateSlowFlight(() => {
+              this.renderer.render(this.selectedSlotIndex);
+            }, movingCoinEls);
+          } finally {
+            this.busySlots.delete(srcIndex);
+            this.busySlots.delete(emptyIndex);
+          }
+          
+          shiftedAny = true;
+          // After a shift, it might fill a slot, so process again
+          await this.processAllFullSlots();
+        }
+      } else if (srcSlot.isPendingShift && srcSlot.length === 0) {
+        // No coins to shift, just lock it back
+        srcSlot.isTempUnlocked = false;
+        srcSlot.isPendingShift = false;
+        srcSlot.tempUnlockTimeLeft = null;
+        this.renderer.render(this.selectedSlotIndex);
+      }
+    }
+    return shiftedAny;
   }
 
   /**

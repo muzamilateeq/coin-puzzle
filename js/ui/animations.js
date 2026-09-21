@@ -18,6 +18,101 @@ export class Animations {
   }
 
   /**
+   * Beautiful glowing pop animation when a slot is unlocked using gems.
+   */
+  static async animateSlotUnlock(slotEl) {
+    const patchEl = slotEl.querySelector('.locked-patch');
+    if (!patchEl) return;
+
+    Animations._cancelExisting(patchEl);
+    Animations._promote(patchEl);
+    Animations._promote(slotEl); // Ensure the slot itself is above other elements during explosion
+
+    // 1. Shake and glow (cracking pressure)
+    const shakeAnim = patchEl.animate([
+      { transform: 'translate(-50%, -50%) rotate(0deg) scale(1)', filter: 'brightness(1)' },
+      { transform: 'translate(-53%, -47%) rotate(-4deg) scale(1.02)', filter: 'brightness(1.2)' },
+      { transform: 'translate(-47%, -53%) rotate(4deg) scale(1.04)', filter: 'brightness(1.4)' },
+      { transform: 'translate(-53%, -47%) rotate(-4deg) scale(1.06)', filter: 'brightness(1.6)' },
+      { transform: 'translate(-47%, -53%) rotate(4deg) scale(1.08)', filter: 'brightness(1.8)' },
+      { transform: 'translate(-50%, -50%) rotate(0deg) scale(1.15)', filter: 'brightness(2)' }
+    ], { duration: 350, easing: 'linear' });
+
+    await shakeAnim.finished.catch(() => {});
+    
+    // Hide the original patch completely
+    patchEl.style.opacity = '0';
+
+    // 2. Balanced Shatter explosion
+    const isTimeSlot = slotEl.classList.contains('locked-time');
+    const colors = isTimeSlot ? ['#2A3C93', '#4A5CC3', '#FFFFFF'] : ['#5A3311', '#8B4513', '#D28522', '#FFD700'];
+    
+    const animPromises = [];
+    
+    // Shockwave effect
+    const wave = document.createElement('div');
+    wave.style.position = 'absolute';
+    wave.style.top = '50%'; wave.style.left = '50%';
+    wave.style.width = '40px'; wave.style.height = '40px';
+    wave.style.border = `3px solid ${colors[0]}`;
+    wave.style.borderRadius = '50%';
+    wave.style.transform = 'translate(-50%, -50%) scale(0)';
+    wave.style.zIndex = '89';
+    wave.style.pointerEvents = 'none';
+    slotEl.appendChild(wave);
+    animPromises.push(wave.animate([
+      { transform: 'translate(-50%, -50%) scale(0)', opacity: 0.8, borderWidth: '6px' },
+      { transform: 'translate(-50%, -50%) scale(3.5)', opacity: 0, borderWidth: '0px' }
+    ], { duration: 400, easing: 'ease-out' }).finished.then(() => wave.remove()));
+
+    // Debris Particles
+    const particleCount = 20; // Reduced for balance
+    
+    for (let i = 0; i < particleCount; i++) {
+      const p = document.createElement('div');
+      p.style.position = 'absolute';
+      const size = 5 + Math.random() * 15; // 5px to 20px
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      p.style.clipPath = Math.random() > 0.5 
+        ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' 
+        : 'polygon(0 0, 100% 30%, 70% 100%, 10% 80%)';
+      p.style.top = '50%';
+      p.style.left = '50%';
+      p.style.zIndex = '100';
+      p.style.pointerEvents = 'none';
+      if (Math.random() > 0.8) {
+        p.style.boxShadow = `0 0 5px ${p.style.backgroundColor}`;
+      }
+      slotEl.appendChild(p);
+      
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() * 0.5);
+      const velocity = 50 + Math.random() * 70; // Slower burst
+      const tx = Math.cos(angle) * velocity;
+      const ty = Math.sin(angle) * velocity - 40; // Slight upward bias
+      const fallY = ty + 100 + Math.random() * 100; // Softer fall
+      const rot = (Math.random() - 0.5) * 720;
+      
+      const pAnim = p.animate([
+        { transform: `translate(-50%, -50%) rotate(0deg) scale(1)`, opacity: 1 },
+        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${rot/2}deg) scale(1.1)`, opacity: 1, offset: 0.5 },
+        { transform: `translate(calc(-50% + ${tx * 1.2}px), calc(-50% + ${fallY}px)) rotate(${rot}deg) scale(0)`, opacity: 0 }
+      ], {
+        duration: 600 + Math.random() * 300,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        fill: 'forwards'
+      });
+      
+      animPromises.push(pAnim.finished.then(() => p.remove()).catch(() => p.remove()));
+    }
+
+    await Promise.all(animPromises);
+    Animations._demote(patchEl);
+    Animations._demote(slotEl);
+  }
+
+  /**
    * Staggered falling drop animation for newly dropped coins.
    * Coins fall in from above one by one with a gentle bounce.
    */

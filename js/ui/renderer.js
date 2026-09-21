@@ -10,6 +10,8 @@ export class Renderer {
     // DOM Elements
     this.boardEl = document.getElementById('game-board');
     this.scoreEl = document.getElementById('ui-score');
+    this.gemsEl = document.getElementById('ui-gems');
+    this.heartsEl = document.getElementById('ui-hearts');
     this.targetEl = document.getElementById('ui-target');
     this.dropsEl = document.getElementById('ui-drops');
     this.dropBtn = document.getElementById('btn-drop');
@@ -29,6 +31,8 @@ export class Renderer {
   render(selectedSlotIndex) {
     // Update Stats UI
     if (this.scoreEl) this.scoreEl.textContent = this.gameLogic.score;
+    if (this.gemsEl) this.gemsEl.textContent = this.gameLogic.gems;
+    if (this.heartsEl) this.heartsEl.textContent = this.gameLogic.hearts;
     if (this.dropsEl) this.dropsEl.textContent = '∞';
 
     // Dynamic Target Coin Level required for next slot unlock
@@ -49,6 +53,27 @@ export class Renderer {
       !hasEmptySpace
     );
 
+    this.renderBoard(selectedSlotIndex);
+    this.renderHeartTimer();
+  }
+
+  renderHeartTimer() {
+    const timerEl = document.getElementById('ui-heart-timer');
+    if (!timerEl) return;
+    
+    if (this.gameLogic.hearts >= 5) {
+      timerEl.textContent = 'Full';
+    } else if (this.gameLogic.nextHeartTime) {
+      const remaining = Math.max(0, Math.ceil((this.gameLogic.nextHeartTime - Date.now()) / 1000));
+      const mins = Math.floor(remaining / 60).toString().padStart(2, '0');
+      const secs = (remaining % 60).toString().padStart(2, '0');
+      timerEl.textContent = `${mins}:${secs}`;
+    }
+    
+    if (this.heartsEl) this.heartsEl.textContent = this.gameLogic.hearts;
+  }
+
+  renderBoard(selectedSlotIndex) {
     const slots = this.board.getAllSlots();
 
     // Initialize slots if they don't exist yet
@@ -72,45 +97,90 @@ export class Renderer {
 
       // Update slot classes — preserve animation classes already set
       let slotClass = 'slot';
-      if (slot.isLocked) {
+      const isEffectivelyLocked = slot.isLocked && !slot.isTempUnlocked;
+      
+      if (isEffectivelyLocked) {
         slotClass += ' locked';
         if (slot.lockType) {
           slotClass += ` locked-special locked-${slot.lockType}`;
         }
       }
       if (selectedSlotIndex === index) slotClass += ' selected';
+      if (slot.isPendingShift) slotClass += ' pending-shift'; // Visual cue when timer ends
       // BUG FIX: Don't strip animation classes set by processTransferLifecycle
       if (slotEl.classList.contains('slot-celebrate')) slotClass += ' slot-celebrate';
 
       slotEl.className = slotClass;
 
       // Handle rendering special locked slot internals
-      if (slot.isLocked && slot.lockType) {
-        if (!slotEl.querySelector('.locked-patch')) {
-          slotEl.innerHTML = ''; // clear any existing children just in case
-          const patchEl = document.createElement('div');
+      if (isEffectivelyLocked && slot.lockType) {
+        let patchEl = slotEl.querySelector('.locked-patch');
+        
+        // Rebuild patch if it doesn't exist or if its type/level/temp state has changed
+        const currentLevel = slot.unlockLevel ? String(slot.unlockLevel) : '';
+        const tempState = slot.isTempUnlocked ? '1' : '0';
+        
+        if (!patchEl || patchEl.dataset.lockType !== slot.lockType || patchEl.dataset.unlockLevel !== currentLevel || patchEl.dataset.tempState !== tempState) {
+          if (patchEl) patchEl.remove();
+          
+          patchEl = document.createElement('div');
           patchEl.className = 'locked-patch';
+          patchEl.dataset.lockType = slot.lockType;
+          patchEl.dataset.unlockLevel = currentLevel;
+          patchEl.dataset.tempState = tempState;
           
           if (slot.lockType === 'gem') {
+            const levelText = slot.unlockLevel ? `<div class="locked-level">LEVEL ${slot.unlockLevel}</div>` : '';
+            const costText = slot.unlockCost !== null ? slot.unlockCost : 600;
+            
             patchEl.innerHTML = `
-              <div class="locked-icon-row">
-                <img src="./Assets/Gameplay/Plus Iocn_.png" class="locked-icon-plus" />
+              ${levelText}
+              <img src="./Assets/Gameplay/Plus Iocn_.png" class="locked-icon-plus-center" />
+              <div class="locked-bottom-row">
                 <img src="./Assets/Gameplay/Gem.png" class="locked-icon-gem" />
+                <span class="locked-cost">${costText}</span>
               </div>
-              <div class="locked-cost">50</div>
             `;
           } else if (slot.lockType === 'time') {
+            const timeVal = slot.timeBonus !== null ? slot.timeBonus : 60;
+            
             patchEl.innerHTML = `
-              <div class="locked-icon-row">
-                <img src="./Assets/Gameplay/Extra Time Icon_.png" class="locked-icon-time" />
+              <div class="locked-level">EXTRA</div>
+              <img src="./Assets/Gameplay/Extra Time Icon_.png" class="locked-icon-time-center" />
+              <div class="locked-bottom-row">
+                <span class="locked-cost">${timeVal} Sec</span>
               </div>
             `;
+          } else if (slot.lockType === 'padlock') {
+            patchEl.innerHTML = `
+              <img src="./Assets/Gameplay/Lock Base.png" class="locked-icon-padlock" />
+            `;
           }
-          slotEl.appendChild(patchEl);
+          // Insert at the beginning so it stays behind coins if any
+          slotEl.insertBefore(patchEl, slotEl.firstChild);
         }
-      } else if (slot.isLocked) {
-        // Normal lock, clean up if it used to be a special lock
-        slotEl.innerHTML = '';
+      } else {
+        // Normal lock or Unlocked: clean up the special patch if it exists
+        const patchEl = slotEl.querySelector('.locked-patch');
+        if (patchEl) patchEl.remove();
+      }
+
+      // Handle floating temp timer overlay
+      let tempTimerEl = slotEl.querySelector('.slot-temp-timer');
+      if (slot.isTempUnlocked) {
+        if (!tempTimerEl) {
+          tempTimerEl = document.createElement('div');
+          tempTimerEl.className = 'slot-temp-timer';
+          slotEl.appendChild(tempTimerEl);
+        }
+        tempTimerEl.textContent = `${slot.tempUnlockTimeLeft}s`;
+        if (slot.isPendingShift) {
+          tempTimerEl.classList.add('pending');
+        } else {
+          tempTimerEl.classList.remove('pending');
+        }
+      } else if (tempTimerEl) {
+        tempTimerEl.remove();
       }
 
       // Sync coins
