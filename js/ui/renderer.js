@@ -120,7 +120,7 @@ export class Renderer {
         const currentLevel = slot.unlockLevel ? String(slot.unlockLevel) : '';
         const tempState = slot.isTempUnlocked ? '1' : '0';
         
-        if (!patchEl || patchEl.dataset.lockType !== slot.lockType || patchEl.dataset.unlockLevel !== currentLevel || patchEl.dataset.tempState !== tempState) {
+        if (!patchEl || patchEl.dataset.lockType !== slot.lockType || patchEl.dataset.tempState !== tempState) {
           if (patchEl) patchEl.remove();
           
           patchEl = document.createElement('div');
@@ -130,7 +130,7 @@ export class Renderer {
           patchEl.dataset.tempState = tempState;
           
           if (slot.lockType === 'gem') {
-            const levelText = slot.unlockLevel ? `<div class="locked-level">LEVEL ${slot.unlockLevel}</div>` : '';
+            const levelText = slot.unlockLevel ? `<div class="locked-level">LEVEL ${slot.unlockLevel}</div>` : '<div class="locked-level"></div>';
             const costText = slot.unlockCost !== null ? slot.unlockCost : 600;
             
             patchEl.innerHTML = `
@@ -158,6 +158,15 @@ export class Renderer {
           }
           // Insert at the beginning so it stays behind coins if any
           slotEl.insertBefore(patchEl, slotEl.firstChild);
+        } else {
+          // If patch exists and type is same, just update text to avoid image flickering
+          if (patchEl.dataset.unlockLevel !== currentLevel) {
+            patchEl.dataset.unlockLevel = currentLevel;
+            const levelEl = patchEl.querySelector('.locked-level');
+            if (levelEl && currentLevel) {
+              levelEl.textContent = `LEVEL ${currentLevel}`;
+            }
+          }
         }
       } else {
         // Normal lock or Unlocked: clean up the special patch if it exists

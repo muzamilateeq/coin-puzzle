@@ -61,6 +61,7 @@ const GAME_ASSETS = [
   './Assets/Gameplay/Heart.png',
   './Assets/Gameplay/Lock Base.png',
   './Assets/Gameplay/Plus Icon_.png',
+  './Assets/Gameplay/Plus Iocn_.png',
   './Assets/Gameplay/Settings.png',
   './Assets/Settings/Music Off_.png',
   './Assets/Settings/Music On_.png',

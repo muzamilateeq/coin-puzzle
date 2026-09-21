@@ -46,19 +46,14 @@
 }
 
 /* ─────────────────────────────────────────────────────
-   Stacking offsets
-   Slot height H ≈ 2.65 × slot_width  (board 300:490, 5col×3row)
-   Coin diameter D = 84% × slot_width
-   D as % of H = 84 / 2.65 ≈ 31.7% of slot height
-
-   Visible overlap step so 10 coins fit:
-   base + step × 9 + coinHeight ≤ 100%
-   step ≤ (100 - 2 - 32) / 9 ≈ 7.3%  →  use 7%
+   Stacking offsets (Top to Bottom Sequence as requested)
+   Adjusted step so exactly 8 coins stretch all the way 
+   down to perfectly fill the bottom of the wallet.
    ───────────────────────────────────────────────────── */
 .coin {
   /* Adjusted for the wider board so 8 coins perfectly fit */
   --base: -11%;
-  --step: 10%;
+  --step: 11%;
 }
 
 .coin:nth-child(1) {
