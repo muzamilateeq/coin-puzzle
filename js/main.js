@@ -390,7 +390,8 @@ class GameController {
       const slots = this.board.getAllSlots();
       for (let i = 0; i < slots.length; i++) {
         const slot = slots[i];
-        if (!slot.isLocked && !slot.isConverting && this.logic.isSlotMatchFull(i)) {
+        const isUnlocked = !slot.isLocked || slot.isTempUnlocked;
+        if (isUnlocked && !slot.isConverting && this.logic.isSlotMatchFull(i)) {
           foundFull = true;
           await this.celebrateAndConvertSlot(i);
         }
