@@ -38,12 +38,15 @@ class AssetLoader {
   }
 }
 
-const ASSETS = [
+const LOADING_ASSETS = [
   './Assets/Loading/BG_.png',
   './Assets/Loading/Logo Titile_.png',
   './Assets/Loading/Coins In Pockets_.png',
   './Assets/Loading/Loading Bar_.png',
-  './Assets/Loading/Loading Fill_.png',
+  './Assets/Loading/Loading Fill_.png'
+];
+
+const GAME_ASSETS = [
   './Assets/board-ui/Closed Pocket_.png',
   './Assets/board-ui/Coin Pocket.png',
   './Assets/board-ui/image (2).png',
@@ -484,13 +487,19 @@ class GameController {
 // Start game robustly
 async function initApp() {
   if (window.updateLoadingProgress) {
+    
+    // PHASE 1: Load the Loading Screen Assets FIRST (so it isn't blank)
+    await AssetLoader.loadAll(LOADING_ASSETS);
+    // At this point, background, logo, and empty bar are fully visible.
+
+    // PHASE 2: Load the heavy game assets while running the yellow bar
     let assetProgress = 0;
     let timeProgress = 0;
     const startTime = Date.now();
     const MIN_LOAD_TIME = 3000;
     
-    // 1. REAL ASSET LOADING: Load images into cache
-    const loadPromise = AssetLoader.loadAll(ASSETS, (percent) => {
+    // REAL ASSET LOADING: Load images into cache
+    const loadPromise = AssetLoader.loadAll(GAME_ASSETS, (percent) => {
       assetProgress = percent;
     });
 

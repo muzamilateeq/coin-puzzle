@@ -129,14 +129,14 @@ export class Animations {
     const animFinished = new Promise(resolve => {
       requestAnimationFrame(() => {
         const promises = coinEls.map((el, index) => {
-          const delay = index * 55;
+          const delay = index * 80; // Increased stagger from 55 to 80ms
 
           const anim = el.animate([
             { transform: 'translateY(-150%) scale(0.7)', opacity: 0 },
             { transform: 'translateY(10%) scale(1.04)', opacity: 1, offset: 0.75 },
             { transform: 'translateY(0) scale(1)', opacity: 1 }
           ], {
-            duration: 400,
+            duration: 650, // Increased duration from 400 to 650ms for smooth elegant drop
             delay,
             easing: 'cubic-bezier(0.34, 1.4, 0.64, 1)',
             fill: 'both'
@@ -219,11 +219,11 @@ export class Animations {
 
     // 4. Trigger Web Animations API: Fluid Stream Cascade Wave
     const promises = moves.map(({ el, dx, dy, flightIndex }) => {
-      const coinDuration = 380; // Crisp 380ms flight per coin
-      const delay = flightIndex * 55; // 55ms fluid cascade wave stagger (coins stream together!)
+      const coinDuration = 550; // Increased flight duration from 380 to 550ms
+      const delay = flightIndex * 75; // Increased stagger from 55 to 75ms
 
       const distance = Math.hypot(dx, dy);
-      const arcHeight = Math.max(55, Math.min(110, distance * 0.28));
+      const arcHeight = Math.max(70, Math.min(140, distance * 0.35)); // slightly higher arc
 
       const anim = el.animate([
         { transform: `translate3d(${dx}px, ${dy}px, 0)`, offset: 0 },
@@ -245,7 +245,7 @@ export class Animations {
       return anim.finished;
     });
 
-    const totalDuration = (moves.length - 1) * 55 + 380 + 50;
+    const totalDuration = (moves.length - 1) * 75 + 550 + 50;
     const timeoutPromise = new Promise(r => setTimeout(r, totalDuration + 300));
 
     try {

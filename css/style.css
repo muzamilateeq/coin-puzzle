@@ -157,8 +157,6 @@ body {
   min-height: 100vh;
   /* Stretch at least full height of screen */
   overflow: hidden;
-  perspective: 1200px;
-  /* Enable 3D space */
 }
 
 /* On mobile, allow the container to fill the screen entirely to remove black bars */
