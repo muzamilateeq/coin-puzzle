@@ -6,7 +6,37 @@ import { DropManager } from './logic/DropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
-import { AssetLoader } from './utils/AssetLoader.js';
+
+class AssetLoader {
+  static async loadAll(assets, progressCallback) {
+    let loadedCount = 0;
+    const totalAssets = assets.length;
+
+    if (totalAssets === 0) {
+      if (progressCallback) progressCallback(100);
+      return Promise.resolve();
+    }
+
+    const promises = assets.map(src => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          loadedCount++;
+          if (progressCallback) progressCallback(Math.floor((loadedCount / totalAssets) * 100));
+          resolve(img);
+        };
+        img.onerror = () => {
+          loadedCount++;
+          if (progressCallback) progressCallback(Math.floor((loadedCount / totalAssets) * 100));
+          resolve(null);
+        };
+        img.src = src;
+      });
+    });
+
+    await Promise.all(promises);
+  }
+}
 
 const ASSETS = [
   './Assets/Loading/BG_.png',
@@ -450,21 +480,20 @@ class GameController {
 
 }
 
-// Start game robustly with preloading
+// Start game robustly
 async function initApp() {
   if (window.updateLoadingProgress) {
     let assetProgress = 0;
     let timeProgress = 0;
-    
     const startTime = Date.now();
     const MIN_LOAD_TIME = 3000;
     
-    // 1. Start loading assets in the background
+    // 1. REAL ASSET LOADING: Load images into cache
     const loadPromise = AssetLoader.loadAll(ASSETS, (percent) => {
       assetProgress = percent;
     });
 
-    // 2. Enforce a minimum 3-second visual timer with a jumpy "rukh rukh" effect
+    // 2. Purely visual 3-second jumpy timer ("rukh rukh k")
     const timePromise = new Promise(resolve => {
       let lastJumpTime = Date.now();
       
@@ -472,7 +501,7 @@ async function initApp() {
         const now = Date.now();
         const elapsed = now - startTime;
         
-        // Jump every 300-600ms to give that "stuck then move" vibe
+        // Jumpy logic: Add chunks randomly
         if (now - lastJumpTime > 300 + Math.random() * 300) {
           lastJumpTime = now;
           const jumpAmount = 10 + Math.random() * 20; // Jump 10% to 30%
@@ -484,25 +513,25 @@ async function initApp() {
           timeProgress = 100;
         }
 
-        // Display whichever is slower: network speed or jumpy 3-second timer.
-        // This ensures if assets take 10s, it takes 10s. If assets take 0s, it takes 3s.
+        // Use the SLOWER of the two progresses
         window.updateLoadingProgress(Math.min(assetProgress, timeProgress));
         
         if (elapsed >= MIN_LOAD_TIME) {
           clearInterval(interval);
           resolve();
         }
-      }, 50); // Fast interval just to check jumps
+      }, 50);
     });
 
-    // Wait for BOTH the network download AND the 3-second timer to finish
+    // WAIT for BOTH actual loading and minimum 3s timer to finish!
     await Promise.all([loadPromise, timePromise]);
-    
-    // Small delay to let the user see the 100% full bar
+
+    // Small delay to let the user see the 100% full bar before hiding
     setTimeout(() => {
       window.hideLoadingScreen();
       new GameController();
     }, 400);
+
   } else {
     new GameController();
   }
