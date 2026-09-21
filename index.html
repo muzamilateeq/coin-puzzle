@@ -140,29 +140,20 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    window.updateLoadingProgress = function(percent) {
       const loadingFill = document.querySelector('.loading-bar-fill-img');
+      if (loadingFill) {
+        loadingFill.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
+      }
+    };
+
+    window.hideLoadingScreen = function() {
       const loadingScreen = document.getElementById('loading-screen');
-      
-      // Simulate loading progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 12; // Random jump
-        if (progress > 100) progress = 100;
-        
-        // Use clip-path inset from right side to mask the image perfectly
-        loadingFill.style.clipPath = `inset(0 ${100 - progress}% 0 0)`;
-        
-        if (progress === 100) {
-          clearInterval(interval);
-          
-          // Wait 1 full second after hitting 100% before revealing the game!
-          setTimeout(() => {
-            loadingScreen.classList.add('hidden');
-          }, 1000);
-        }
-      }, 100); // Tick faster for smoother animation
-    });
+      if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        setTimeout(() => loadingScreen.remove(), 500); // Clean up DOM
+      }
+    };
   </script>
   <script type="module" src="./js/main.js?v=639.0"></script>
 </body>

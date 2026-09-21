@@ -6,6 +6,38 @@ import { DropManager } from './logic/DropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
+import { AssetLoader } from './utils/AssetLoader.js';
+
+const ASSETS = [
+  './Assets/Loading/BG_.png',
+  './Assets/Loading/Logo Titile_.png',
+  './Assets/Loading/Coins In Pockets_.png',
+  './Assets/Loading/Loading Bar_.png',
+  './Assets/Loading/Loading Fill_.png',
+  './Assets/board-ui/Closed Pocket_.png',
+  './Assets/board-ui/Coin Pocket.png',
+  './Assets/board-ui/image (2).png',
+  './Assets/board-ui/Wallet Base.png',
+  './Assets/Gameplay/Bar_.png',
+  './Assets/Gameplay/Blue Patch_.png',
+  './Assets/Gameplay/Coin Base.png',
+  './Assets/Gameplay/Coins_.png',
+  './Assets/Gameplay/Drop Button_.png',
+  './Assets/Gameplay/Extra Time Icon_.png',
+  './Assets/Gameplay/Gem.png',
+  './Assets/Gameplay/Heart.png',
+  './Assets/Gameplay/Lock Base.png',
+  './Assets/Gameplay/Plus Icon_.png',
+  './Assets/Gameplay/Settings.png',
+  './Assets/Settings/Music Off_.png',
+  './Assets/Settings/Music On_.png',
+  './Assets/Settings/Sound Off_.png',
+  './Assets/Settings/Sound On_.png',
+  './Assets/Settings/Toggles Base.png',
+  './Assets/Settings/Vibrate Off_.png',
+  './Assets/Settings/Vibrate On_.png',
+  './Assets/Settings/Cross.png'
+];
 
 class GameController {
   constructor() {
@@ -418,9 +450,62 @@ class GameController {
 
 }
 
-// Start game robustly (handles ES module deferred loading)
-function initApp() {
-  new GameController();
+// Start game robustly with preloading
+async function initApp() {
+  if (window.updateLoadingProgress) {
+    let assetProgress = 0;
+    let timeProgress = 0;
+    
+    const startTime = Date.now();
+    const MIN_LOAD_TIME = 3000;
+    
+    // 1. Start loading assets in the background
+    const loadPromise = AssetLoader.loadAll(ASSETS, (percent) => {
+      assetProgress = percent;
+    });
+
+    // 2. Enforce a minimum 3-second visual timer with a jumpy "rukh rukh" effect
+    const timePromise = new Promise(resolve => {
+      let lastJumpTime = Date.now();
+      
+      const interval = setInterval(() => {
+        const now = Date.now();
+        const elapsed = now - startTime;
+        
+        // Jump every 300-600ms to give that "stuck then move" vibe
+        if (now - lastJumpTime > 300 + Math.random() * 300) {
+          lastJumpTime = now;
+          const jumpAmount = 10 + Math.random() * 20; // Jump 10% to 30%
+          timeProgress = Math.min(100, timeProgress + jumpAmount);
+        }
+        
+        // Force it to 100% when 3 seconds are up
+        if (elapsed >= MIN_LOAD_TIME) {
+          timeProgress = 100;
+        }
+
+        // Display whichever is slower: network speed or jumpy 3-second timer.
+        // This ensures if assets take 10s, it takes 10s. If assets take 0s, it takes 3s.
+        window.updateLoadingProgress(Math.min(assetProgress, timeProgress));
+        
+        if (elapsed >= MIN_LOAD_TIME) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 50); // Fast interval just to check jumps
+    });
+
+    // Wait for BOTH the network download AND the 3-second timer to finish
+    await Promise.all([loadPromise, timePromise]);
+    
+    // Small delay to let the user see the 100% full bar
+    setTimeout(() => {
+      window.hideLoadingScreen();
+      new GameController();
+    }, 400);
+  } else {
+    new GameController();
+  }
 }
 
 if (document.readyState === 'loading') {
