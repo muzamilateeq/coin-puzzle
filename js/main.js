@@ -75,6 +75,7 @@ const GAME_ASSETS = [
 
 class GameController {
   constructor() {
+    window.gameMain = this; // Expose globally for GameLogic to trigger re-renders
     this.board = new Board();
     this.logic = new GameLogic(this.board);
     this.dropManager = new DropManager(this.board);
@@ -84,6 +85,9 @@ class GameController {
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
     this.isHammerActive = false;
+    
+    this.dropsSinceLevelUp = 5; // Start at 5 so the first drop is normal if no level up yet
+    this.lastMaxCoinType = CONFIG.COIN_TYPES;
 
     this.bindEvents();
     this.init();
@@ -171,10 +175,13 @@ class GameController {
     this.busySlots.clear();
     this.setHammerMode(false);
 
-    this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + this.logic.score);
+    const extraSlots = this.logic.getExtraSlots(this.logic.score);
+    this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + extraSlots);
 
     this.renderer.hideModal();
-    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, Math.max(CONFIG.COIN_TYPES, (CONFIG.COIN_TYPES - 1) + this.logic.score), true);
+    const currentMaxCoin = CONFIG.COIN_TYPES + this.logic.score;
+    const dropMaxCoin = currentMaxCoin >= 5 ? currentMaxCoin - 1 : currentMaxCoin;
+    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, dropMaxCoin, true);
 
     this.renderer.render(this.selectedSlotIndex);
 
@@ -203,10 +210,13 @@ class GameController {
     this.setHammerMode(false);
 
     // Re-apply same slots based on current level progress
-    this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + this.logic.score);
+    const extraSlots = this.logic.getExtraSlots(this.logic.score);
+    this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + extraSlots);
 
     this.renderer.hideModal();
-    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, Math.max(CONFIG.COIN_TYPES, (CONFIG.COIN_TYPES - 1) + this.logic.score), true);
+    const currentMaxCoin = CONFIG.COIN_TYPES + this.logic.score;
+    const dropMaxCoin = currentMaxCoin >= 5 ? currentMaxCoin - 1 : currentMaxCoin;
+    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, dropMaxCoin, true);
 
     this.renderer.render(this.selectedSlotIndex);
     
@@ -454,8 +464,21 @@ class GameController {
   async handleDrop() {
     if (this.logic.gameState !== 'playing' || this.busySlots.size > 0) return;
 
+    const maxCoinType = CONFIG.COIN_TYPES + this.logic.score;
+    const dropMaxCoin = maxCoinType >= 5 ? maxCoinType - 1 : maxCoinType;
+    
+    if (maxCoinType !== this.lastMaxCoinType) {
+      this.lastMaxCoinType = maxCoinType;
+      this.dropsSinceLevelUp = 0;
+    }
+    this.dropsSinceLevelUp++;
+
+    // Only apply the "limit to 1" logic specifically for the newly arrived 4 coin
+    const limitMaxCoinToOne = this.dropsSinceLevelUp <= 5 && maxCoinType === 4;
+
     const success = this.dropManager.handleDropButton(
-      Math.max(CONFIG.COIN_TYPES, (CONFIG.COIN_TYPES - 1) + this.logic.score)
+      dropMaxCoin,
+      limitMaxCoinToOne
     );
 
     if (success) {

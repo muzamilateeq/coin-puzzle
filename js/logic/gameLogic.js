@@ -115,16 +115,107 @@ export class GameLogic {
 
     const currentMaxCoin = CONFIG.COIN_TYPES + this.score;
 
-    if (firstType >= currentMaxCoin) {
-      this.score++;
-      this.gems += 50;
-      this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + this.score);
+    if (firstType >= currentMaxCoin && !this.isLevelingUp) {
+      this.isLevelingUp = true;
+      const event = new CustomEvent('hudGoalCompleted', { detail: { coinType: firstType + 1 } });
+      window.dispatchEvent(event);
+
+      setTimeout(() => {
+        this.score++;
+        this.gems += 50 + 10; // Extra 10 for completing the goal
+        const slotsToUnlock = CONFIG.INITIAL_UNLOCKED_SLOTS + this.getExtraSlots(this.score);
+        this.board.unlockSlotsUpTo(slotsToUnlock);
+        this.isLevelingUp = false;
+        
+        const mainInstance = window.gameMain; 
+        if (mainInstance && mainInstance.renderer) {
+            mainInstance.renderer.render();
+        }
+      }, 1500);
     }
+
+    this.checkCollectionLevelUp();
 
     if (this.score >= CONFIG.TARGET_SCORE) {
       this.gameState = 'won';
     }
     return true;
+  }
+
+  getExtraSlots(score) {
+    if (score === 0) return 0;
+    if (score === 1) return 0; // Working on 3-coin
+    if (score === 2) return 1; // Completed 3-coin. First slot opens!
+    if (score === 3) return 2; // Completed 4-coin. Second slot opens!
+    if (score === 4) return 3; // Level 4. Third slot opens!
+    if (score === 5) return 3; // Level 5 (paused)
+    if (score === 6) return 3; // Level 6 (paused)
+    return score - 3; // Level 7 opens next slot
+  }
+
+  checkCollectionLevelUp() {
+    if (this.isLevelingUp) return false;
+
+    let leveledUp = false;
+    let targetCoinType = null;
+    const totalCount = (type) => {
+      let total = 0;
+      for (const slot of this.board.getAllSlots()) {
+        if (slot.isEmpty()) continue;
+        for (const c of slot.coins) {
+          if (c.type === type) total++;
+        }
+      }
+      return total;
+    };
+
+    if (this.score >= 4) {
+      if (this.score % 2 === 0) {
+        // Phase A: (Scores 4, 6, 8...) -> Target = 6 of coin N
+        const N = (this.score / 2) + 4;
+        if (totalCount(N) >= 6) {
+          targetCoinType = N;
+          leveledUp = true;
+        }
+      } else {
+        // Phase B: (Scores 5, 7, 9...) -> Target = 1 of coin N+1
+        const N = ((this.score - 1) / 2) + 4;
+        if (totalCount(N + 1) >= 1) {
+          targetCoinType = N + 1;
+          leveledUp = true;
+        }
+      }
+    }
+    
+    if (leveledUp) {
+      this.isLevelingUp = true;
+      
+      // Dispatch event to UI
+      const event = new CustomEvent('hudGoalCompleted', { detail: { coinType: targetCoinType } });
+      window.dispatchEvent(event);
+
+      // Wait 1.5 seconds for animation
+      setTimeout(() => {
+        this.score++;
+        this.gems += 10 + (this.score % 2 === 0 ? 100 : 200) + (this.score * 10);
+        
+        const slotsToUnlock = CONFIG.INITIAL_UNLOCKED_SLOTS + this.getExtraSlots(this.score);
+        this.board.unlockSlotsUpTo(slotsToUnlock);
+        
+        if (this.score >= CONFIG.TARGET_SCORE) {
+          this.gameState = 'won';
+        }
+        
+        this.isLevelingUp = false;
+        
+        // Force re-render to update UI with new score/goals
+        const mainInstance = window.gameMain; 
+        if (mainInstance && mainInstance.renderer) {
+            mainInstance.renderer.render();
+        }
+      }, 1500);
+    }
+    return leveledUp;
   }
 
   checkClear(slotIndex) {

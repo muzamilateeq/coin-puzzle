@@ -65,7 +65,7 @@ export class Board {
 
     // Assign special types to the remaining locked slots from right to left
     if (lockedSlotIndices.length > 0) {
-      const idx1 = lockedSlotIndices[lockedSlotIndices.length - 1];
+      const idx1 = lockedSlotIndices[lockedSlotIndices.length - 3] || lockedSlotIndices[0];
       this.slots[idx1].lockType = 'time';
       this.slots[idx1].timeBonus = 60;
     }
@@ -76,10 +76,26 @@ export class Board {
     }
     
     if (lockedSlotIndices.length > 2) {
-      const idx3 = lockedSlotIndices[lockedSlotIndices.length - 3];
+      const idx3 = lockedSlotIndices[lockedSlotIndices.length - 1];
       this.slots[idx3].lockType = 'gem';
       this.slots[idx3].unlockCost = 600;
-      this.slots[idx3].unlockLevel = baseCount + this.manuallyUnlockedIndices.size - 3; // Dynamic Level display
+      
+      // Calculate exactly when the NEXT slot (this gem slot) will open
+      let unlockScore = 1;
+      const targetBaseCount = 15 - idx3;
+      for (let s = 1; s <= 50; s++) {
+          let extra = 0;
+          if (s === 2) extra = 1;
+          else if (s === 3) extra = 2;
+          else if (s >= 4 && s <= 6) extra = 3;
+          else if (s >= 7) extra = s - 3;
+          
+          if (5 + extra >= targetBaseCount) {
+              unlockScore = s;
+              break;
+          }
+      }
+      this.slots[idx3].unlockLevel = unlockScore;
     }
   }
 

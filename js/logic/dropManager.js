@@ -11,76 +11,84 @@ export class DropManager {
     // No drops limit anymore
   }
 
-  dealRandomCoins(count, maxCoinType = 5, groupSameSlot = false, animate = false) {
+  dealRandomCoins(count, maxCoinType = 5, groupSameSlot = false, animate = false, limitMaxCoinToOne = false) {
     const slots = this.board.getAllSlots();
-    const assignedTypePerSlot = new Map();
+    let coinsDropped = 0;
+    let usedSlotsInBatch = new Set();
     
-    // Filter slots that are full or strictly locked (not temp unlocked)
-    let validSlots = slots.map((s, index) => ({s, index})).filter(item => {
-      const isLocked = item.s.isLocked && !item.s.isTempUnlocked;
-      return !item.s.isFull() && !isLocked;
-    });
-    
-    if (groupSameSlot && validSlots.length > 0) {
-      // Pre-assign types to slots to guarantee all numbers are represented
-      let typesToAssign = [];
-      for (let i = 1; i <= maxCoinType; i++) typesToAssign.push(i);
-      
-      // If there are more slots than types, fill the rest with random types
-      while (typesToAssign.length < validSlots.length) {
-        typesToAssign.push(Math.floor(Math.random() * maxCoinType) + 1);
-      }
-      
-      // Shuffle the types using Fisher-Yates
-      for (let i = typesToAssign.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [typesToAssign[i], typesToAssign[j]] = [typesToAssign[j], typesToAssign[i]];
-      }
-      
-      // Assign them to the valid slots
-      validSlots.forEach((slotInfo, idx) => {
-        assignedTypePerSlot.set(slotInfo.index, typesToAssign[idx]);
-      });
-    }
-    
-    for (let i = 0; i < count; i++) {
-      // Re-evaluate valid slots
-      validSlots = slots.map((s, index) => ({s, index})).filter(item => {
+    while (coinsDropped < count) {
+      // Find valid slots with available space
+      const validSlots = slots.map((s, index) => ({s, index})).filter(item => {
         const isLocked = item.s.isLocked && !item.s.isTempUnlocked;
         return !item.s.isFull() && !isLocked;
       });
       
       if (validSlots.length === 0) break;
       
-      const randomSlotIndex = validSlots[Math.floor(Math.random() * validSlots.length)].index;
-      
-      let typeToDrop;
-      if (groupSameSlot && assignedTypePerSlot.has(randomSlotIndex)) {
-        // 75% chance to match the assigned group, 25% chance to be random noise
-        if (Math.random() < 0.75) {
-          typeToDrop = assignedTypePerSlot.get(randomSlotIndex);
-        } else {
-          typeToDrop = Math.floor(Math.random() * maxCoinType) + 1;
-        }
-      } else {
-        typeToDrop = Math.floor(Math.random() * maxCoinType) + 1;
-        if (groupSameSlot) assignedTypePerSlot.set(randomSlotIndex, typeToDrop);
+      // Try to pick a slot we haven't used in this drop batch yet to spread them out
+      let unusedSlots = validSlots.filter(s => !usedSlotsInBatch.has(s.index));
+      if (unusedSlots.length === 0) {
+        usedSlotsInBatch.clear(); // Reset if all slots have been used
+        unusedSlots = validSlots;
       }
       
-      const newCoin = new Coin(typeToDrop);
-      // Only mark as animated drop when explicitly requested (button click), not on init
-      if (animate) newCoin.isNewDrop = true;
-      try {
-        slots[randomSlotIndex].push(newCoin);
-      } catch (e) {
-        // Slot filled between re-validation and push — skip this coin safely
+      // Pick a random valid slot
+      const randomSlotInfo = unusedSlots[Math.floor(Math.random() * unusedSlots.length)];
+      const randomSlotIndex = randomSlotInfo.index;
+      const spaceAvailable = randomSlotInfo.s.spaceAvailable;
+      
+      usedSlotsInBatch.add(randomSlotIndex);
+      
+      // Determine cluster size (2 to 3 coins to prevent overloading one slot)
+      let clusterSize = Math.floor(Math.random() * 2) + 2; 
+      clusterSize = Math.min(clusterSize, count - coinsDropped, spaceAvailable);
+      
+      let typeToDrop = Math.floor(Math.random() * maxCoinType) + 1;
+
+      // strict logic for limitMaxCoinToOne
+      let isForcedMaxCoin = false;
+      if (limitMaxCoinToOne) {
+          if (coinsDropped === 0) {
+              // Guarantee the first coin drop is EXACTLY ONE max coin
+              typeToDrop = maxCoinType;
+              clusterSize = 1;
+              isForcedMaxCoin = true;
+          } else if (typeToDrop === maxCoinType) {
+              // Downgrade any other attempt to drop max coin
+              typeToDrop = Math.floor(Math.random() * (maxCoinType - 1)) + 1;
+          }
+      }
+
+      // NEW RULE: Actively AVOID dropping a cluster of the same coin on top of itself!
+      // This forces the player to manually sort the coins.
+      if (!isForcedMaxCoin && !randomSlotInfo.s.isEmpty()) {
+          const topType = randomSlotInfo.s.topCoin.type;
+          if (typeToDrop === topType) {
+              // Shift the coin type to something else valid
+              let shiftMax = limitMaxCoinToOne ? (maxCoinType - 1) : maxCoinType;
+              if (shiftMax < 1) shiftMax = 1;
+              typeToDrop = (typeToDrop % shiftMax) + 1;
+          }
+      }
+
+      // Drop the cluster of identical coins into the selected slot
+      for (let j = 0; j < clusterSize; j++) {
+         const newCoin = new Coin(typeToDrop);
+         if (animate) newCoin.isNewDrop = true;
+         try {
+             slots[randomSlotIndex].push(newCoin);
+         } catch (e) {}
+         coinsDropped++;
       }
     }
   }
 
-
-  handleDropButton(maxCoinType = 5) {
-    this.dealRandomCoins(CONFIG.DROP_AMOUNT, maxCoinType, true, true); // animate=true
+  handleDropButton(maxCoinType = 5, limitMaxCoinToOne = false) {
+    // Dynamically calculate how many coins to drop based on open slots
+    const openSlotsCount = this.board.getAllSlots().filter(s => !s.isLocked || s.isTempUnlocked).length;
+    const dynamicDropAmount = Math.floor(openSlotsCount * 1.3); // e.g., 5 slots -> 6 coins, 10 slots -> 13 coins
+    
+    this.dealRandomCoins(dynamicDropAmount, maxCoinType, true, true, limitMaxCoinToOne); // animate=true
     return true;
   }
 }
