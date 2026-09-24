@@ -18,7 +18,7 @@ export class GameLogic {
 
   isValidMove(sourceIndex, destIndex) {
     if (sourceIndex === destIndex) return false;
-    
+
     const sourceSlot = this.board.getSlot(sourceIndex);
     const destSlot = this.board.getSlot(destIndex);
 
@@ -37,13 +37,13 @@ export class GameLogic {
 
   getMovingCoins(sourceIndex, destIndex) {
     if (!this.isValidMove(sourceIndex, destIndex)) return [];
-    
+
     const sourceSlot = this.board.getSlot(sourceIndex);
     const destSlot = this.board.getSlot(destIndex);
-    
+
     const matchCount = sourceSlot.getConsecutiveMatches();
     const spaceAvailable = destSlot.spaceAvailable;
-    
+
     const transferCount = Math.min(matchCount, spaceAvailable);
     return sourceSlot.coins.slice(sourceSlot.length - transferCount);
   }
@@ -56,12 +56,12 @@ export class GameLogic {
 
     const matchCount = sourceSlot.getConsecutiveMatches();
     const spaceAvailable = destSlot.spaceAvailable;
-    
+
     const transferCount = Math.min(matchCount, spaceAvailable);
-    
+
     const coinsToMove = sourceSlot.pop(transferCount);
     destSlot.push(...coinsToMove);
-    
+
     return true;
   }
 
@@ -123,13 +123,17 @@ export class GameLogic {
       setTimeout(() => {
         this.score++;
         this.gems += 50 + 10; // Extra 10 for completing the goal
-        const slotsToUnlock = CONFIG.INITIAL_UNLOCKED_SLOTS + this.getExtraSlots(this.score);
-        this.board.unlockSlotsUpTo(slotsToUnlock);
-        this.isLevelingUp = false;
         
-        const mainInstance = window.gameMain; 
-        if (mainInstance && mainInstance.renderer) {
-            mainInstance.renderer.render();
+        const oldSlots = this.getTotalUnlockedSlots(this.score - 1);
+        const slotsToUnlock = this.getTotalUnlockedSlots(this.score);
+        this.board.unlockSlotsUpTo(slotsToUnlock, (idx) => this.getScoreToUnlockSlot(idx, this.score));
+        this.isLevelingUp = false;
+
+        const mainInstance = window.gameMain;
+        if (oldSlots === 15 && slotsToUnlock === 7 && mainInstance) {
+          mainInstance.renderer.playBoardTransitionAnimation(7);
+        } else if (mainInstance && mainInstance.renderer) {
+          mainInstance.renderer.render();
         }
       }, 1500);
     }
@@ -142,15 +146,56 @@ export class GameLogic {
     return true;
   }
 
-  getExtraSlots(score) {
-    if (score === 0) return 0;
-    if (score === 1) return 0; // Working on 3-coin
-    if (score === 2) return 1; // Completed 3-coin. First slot opens!
-    if (score === 3) return 2; // Completed 4-coin. Second slot opens!
-    if (score === 4) return 3; // Level 4. Third slot opens!
-    if (score === 5) return 3; // Level 5 (paused)
-    if (score === 6) return 3; // Level 6 (paused)
-    return score - 3; // Level 7 opens next slot
+  getTotalUnlockedSlots(score) {
+    let extra = 0;
+    if (score === 2) extra = 1;
+    else if (score === 3) extra = 2;
+    else if (score >= 4 && score <= 6) extra = 3;
+    else if (score >= 7 && score <= 11) extra = 4;
+    else if (score >= 12) extra = Math.floor((score - 12) / 2) + 5;
+    
+    let total = CONFIG.INITIAL_UNLOCKED_SLOTS + extra;
+    
+    if (total > 15) {
+      let over = total - 15;
+      let currentInCycle = ((over - 1) % 9) + 7;
+      return currentInCycle;
+    }
+    
+    return total;
+  }
+
+  getScoreToUnlockSlot(targetIndex, currentScore) {
+    for (let s = currentScore; s <= currentScore + 200; s++) {
+      if (this.getTotalUnlockedSlots(s) >= targetIndex) {
+        return s;
+      }
+    }
+    return currentScore;
+  }
+
+  getDropMaxCoin() {
+    const maxCoinType = CONFIG.COIN_TYPES + this.score;
+    let mergingCoin;
+    if (this.score < 4) {
+      mergingCoin = this.score + 2;
+    } else {
+      mergingCoin = Math.floor(this.score / 2) + 4;
+    }
+    
+    let dropMaxCoin = mergingCoin >= 5 ? mergingCoin - 1 : mergingCoin;
+    
+    if (dropMaxCoin > maxCoinType) {
+      dropMaxCoin = maxCoinType;
+    }
+    return dropMaxCoin;
+  }
+
+  getDropMinCoin() {
+    const dropMaxCoin = this.getDropMaxCoin();
+    // Keep a sliding window of max 6 coin types dropping at a time
+    // E.g. if dropMax is 15, min will be 10.
+    return Math.max(1, dropMaxCoin - 5);
   }
 
   checkCollectionLevelUp() {
@@ -186,10 +231,10 @@ export class GameLogic {
         }
       }
     }
-    
+
     if (leveledUp) {
       this.isLevelingUp = true;
-      
+
       // Dispatch event to UI
       const event = new CustomEvent('hudGoalCompleted', { detail: { coinType: targetCoinType } });
       window.dispatchEvent(event);
@@ -198,20 +243,23 @@ export class GameLogic {
       setTimeout(() => {
         this.score++;
         this.gems += 10 + (this.score % 2 === 0 ? 100 : 200) + (this.score * 10);
-        
-        const slotsToUnlock = CONFIG.INITIAL_UNLOCKED_SLOTS + this.getExtraSlots(this.score);
-        this.board.unlockSlotsUpTo(slotsToUnlock);
-        
+
+        const oldSlots = this.getTotalUnlockedSlots(this.score - 1);
+        const slotsToUnlock = this.getTotalUnlockedSlots(this.score);
+        this.board.unlockSlotsUpTo(slotsToUnlock, (idx) => this.getScoreToUnlockSlot(idx, this.score));
+
         if (this.score >= CONFIG.TARGET_SCORE) {
           this.gameState = 'won';
         }
-        
+
         this.isLevelingUp = false;
-        
+
         // Force re-render to update UI with new score/goals
-        const mainInstance = window.gameMain; 
-        if (mainInstance && mainInstance.renderer) {
-            mainInstance.renderer.render();
+        const mainInstance = window.gameMain;
+        if (oldSlots === 15 && slotsToUnlock === 7 && mainInstance) {
+          mainInstance.renderer.playBoardTransitionAnimation(7);
+        } else if (mainInstance && mainInstance.renderer) {
+          mainInstance.renderer.render();
         }
       }, 1500);
     }
@@ -238,20 +286,20 @@ export class GameLogic {
 
   hasValidMoves() {
     const slots = this.board.getAllSlots();
-    
+
     for (let i = 0; i < CONFIG.TOTAL_SLOTS; i++) {
       const srcSlot = slots[i];
       const isSrcLocked = srcSlot.isLocked && !srcSlot.isTempUnlocked;
       if (isSrcLocked || srcSlot.isEmpty()) continue;
-      
+
       const srcType = srcSlot.topCoin.type;
-      
+
       for (let j = 0; j < CONFIG.TOTAL_SLOTS; j++) {
         if (i === j) continue;
         const destSlot = slots[j];
         const isDestLocked = destSlot.isLocked && !destSlot.isTempUnlocked;
         if (isDestLocked) continue;
-        
+
         if (destSlot.isEmpty()) return true;
         if (!destSlot.isFull() && destSlot.topCoin.type === srcType) {
           return true;
@@ -264,5 +312,19 @@ export class GameLogic {
   checkGameOver() {
     // Game over disabled
     return;
+  }
+
+  getRequiredCoinTypes() {
+    let required = new Set();
+    const dropMax = this.getDropMaxCoin();
+    
+    // The player's "earned progress" are any coins that they manually crafted.
+    // Manually crafted coins are exactly the ones strictly greater than the max coin that drops.
+    // Anything <= dropMax is just a random drop and should be cleared on restart.
+    for (let i = dropMax + 1; i <= 30; i++) {
+      required.add(i);
+    }
+    
+    return required;
   }
 }

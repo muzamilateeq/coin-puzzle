@@ -11,7 +11,7 @@ export class DropManager {
     // No drops limit anymore
   }
 
-  dealRandomCoins(count, maxCoinType = 5, groupSameSlot = false, animate = false, limitMaxCoinToOne = false) {
+  dealRandomCoins(count, maxCoinType = 5, groupSameSlot = false, animate = false, limitMaxCoinToOne = false, minCoinType = 1) {
     const slots = this.board.getAllSlots();
     let coinsDropped = 0;
     let usedSlotsInBatch = new Set();
@@ -33,7 +33,17 @@ export class DropManager {
       }
       
       // Pick a random valid slot
-      const randomSlotInfo = unusedSlots[Math.floor(Math.random() * unusedSlots.length)];
+      // USER REQUEST: Prioritize completely empty slots so they get used more often
+      let emptySlots = unusedSlots.filter(item => item.s.isEmpty());
+      let randomSlotInfo;
+      
+      if (emptySlots.length > 0 && Math.random() < 0.60) {
+        // 60% chance to force picking an empty slot if one exists
+        randomSlotInfo = emptySlots[Math.floor(Math.random() * emptySlots.length)];
+      } else {
+        randomSlotInfo = unusedSlots[Math.floor(Math.random() * unusedSlots.length)];
+      }
+      
       const randomSlotIndex = randomSlotInfo.index;
       const spaceAvailable = randomSlotInfo.s.spaceAvailable;
       
@@ -43,7 +53,9 @@ export class DropManager {
       let clusterSize = Math.floor(Math.random() * 2) + 2; 
       clusterSize = Math.min(clusterSize, count - coinsDropped, spaceAvailable);
       
-      let typeToDrop = Math.floor(Math.random() * maxCoinType) + 1;
+      // Generate a random coin between minCoinType and maxCoinType
+      const range = maxCoinType - minCoinType + 1;
+      let typeToDrop = Math.floor(Math.random() * range) + minCoinType;
 
       // strict logic for limitMaxCoinToOne
       let isForcedMaxCoin = false;
@@ -53,21 +65,25 @@ export class DropManager {
               typeToDrop = maxCoinType;
               clusterSize = 1;
               isForcedMaxCoin = true;
-          } else if (typeToDrop === maxCoinType) {
+          } else if (typeToDrop === maxCoinType && range > 1) {
               // Downgrade any other attempt to drop max coin
-              typeToDrop = Math.floor(Math.random() * (maxCoinType - 1)) + 1;
+              typeToDrop = Math.floor(Math.random() * (range - 1)) + minCoinType;
           }
       }
 
       // NEW RULE: Actively AVOID dropping a cluster of the same coin on top of itself!
       // This forces the player to manually sort the coins.
+      // USER REQUEST: Allow a small chance (30%) for the same coin to drop on itself as a lucky moment.
       if (!isForcedMaxCoin && !randomSlotInfo.s.isEmpty()) {
           const topType = randomSlotInfo.s.topCoin.type;
-          if (typeToDrop === topType) {
-              // Shift the coin type to something else valid
+          if (typeToDrop === topType && Math.random() < 0.70) {
+              // Shift the coin type to something else valid within [minCoinType, shiftMax]
               let shiftMax = limitMaxCoinToOne ? (maxCoinType - 1) : maxCoinType;
-              if (shiftMax < 1) shiftMax = 1;
-              typeToDrop = (typeToDrop % shiftMax) + 1;
+              if (shiftMax < minCoinType) shiftMax = minCoinType;
+              
+              const currentOffset = typeToDrop - minCoinType;
+              const rangeLimit = shiftMax - minCoinType + 1;
+              typeToDrop = ((currentOffset + 1) % rangeLimit) + minCoinType;
           }
       }
 

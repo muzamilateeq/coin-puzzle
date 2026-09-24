@@ -85,7 +85,7 @@ class GameController {
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
     this.isHammerActive = false;
-    
+
     this.dropsSinceLevelUp = 5; // Start at 5 so the first drop is normal if no level up yet
     this.lastMaxCoinType = CONFIG.COIN_TYPES;
 
@@ -114,7 +114,7 @@ class GameController {
           // 5 minutes in milliseconds
           this.logic.nextHeartTime = Date.now() + 5 * 60 * 1000;
         }
-        
+
         const remaining = this.logic.nextHeartTime - Date.now();
         if (remaining <= 0) {
           this.logic.hearts++;
@@ -175,13 +175,14 @@ class GameController {
     this.busySlots.clear();
     this.setHammerMode(false);
 
-    const extraSlots = this.logic.getExtraSlots(this.logic.score);
-    this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + extraSlots);
+    const totalSlots = this.logic.getTotalUnlockedSlots(this.logic.score);
+    this.board.unlockSlotsUpTo(totalSlots, (idx) => this.logic.getScoreToUnlockSlot(idx, this.logic.score));
 
     this.renderer.hideModal();
     const currentMaxCoin = CONFIG.COIN_TYPES + this.logic.score;
-    const dropMaxCoin = currentMaxCoin >= 5 ? currentMaxCoin - 1 : currentMaxCoin;
-    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, dropMaxCoin, true);
+    const dropMaxCoin = this.logic.getDropMaxCoin();
+    const dropMinCoin = this.logic.getDropMinCoin();
+    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, dropMaxCoin, true, false, false, dropMinCoin);
 
     this.renderer.render(this.selectedSlotIndex);
 
@@ -201,8 +202,16 @@ class GameController {
     }
     this.renderer.renderHeartTimer();
 
-    resetCoinCounter();
-    this.board.clearAll();
+    // Preserve required coins (user's progress) instead of wiping the whole board
+    const requiredTypes = this.logic.getRequiredCoinTypes();
+    this.board.clearNonRequiredCoins(requiredTypes);
+    
+    // Count how many coins were kept
+    let coinsKept = 0;
+    this.board.getAllSlots().forEach(slot => {
+      coinsKept += slot.length;
+    });
+
     // Do NOT call this.logic.reset() to keep score and extraUnlockedSlots intact
     this.dropManager.reset();
     this.selectedSlotIndex = null;
@@ -210,16 +219,21 @@ class GameController {
     this.setHammerMode(false);
 
     // Re-apply same slots based on current level progress
-    const extraSlots = this.logic.getExtraSlots(this.logic.score);
-    this.board.unlockSlotsUpTo(CONFIG.INITIAL_UNLOCKED_SLOTS + extraSlots);
+    const totalSlots = this.logic.getTotalUnlockedSlots(this.logic.score);
+    this.board.unlockSlotsUpTo(totalSlots, (idx) => this.logic.getScoreToUnlockSlot(idx, this.logic.score));
 
     this.renderer.hideModal();
-    const currentMaxCoin = CONFIG.COIN_TYPES + this.logic.score;
-    const dropMaxCoin = currentMaxCoin >= 5 ? currentMaxCoin - 1 : currentMaxCoin;
-    this.dropManager.dealRandomCoins(CONFIG.INITIAL_DEAL, dropMaxCoin, true);
+    const dropMaxCoin = this.logic.getDropMaxCoin();
+    const dropMinCoin = this.logic.getDropMinCoin();
+    
+    // Drop only enough coins to reach INITIAL_DEAL, so the board doesn't overflow
+    const coinsToDrop = Math.max(0, CONFIG.INITIAL_DEAL - coinsKept);
+    if (coinsToDrop > 0) {
+      this.dropManager.dealRandomCoins(coinsToDrop, dropMaxCoin, true, true, false, dropMinCoin);
+    }
 
     this.renderer.render(this.selectedSlotIndex);
-    
+
     await this.processAllFullSlots();
   }
 
@@ -252,7 +266,7 @@ class GameController {
     if (slot.isLocked && slot.lockType === 'gem') {
       if (this.logic.gems >= slot.unlockCost) {
         this.logic.gems -= slot.unlockCost;
-        
+
         // Add visual unlock animation
         const slotEl = this.renderer.boardEl.children[index];
         this.busySlots.add(index);
@@ -273,13 +287,13 @@ class GameController {
     if (slot.isLocked && slot.lockType === 'time' && !slot.isTempUnlocked && !slot.isPendingShift) {
       slot.isTempUnlocked = true;
       slot.tempUnlockTimeLeft = slot.timeBonus !== null ? slot.timeBonus : 60;
-      
+
       // Add visual unlock animation
       const slotEl = this.renderer.boardEl.children[index];
       this.busySlots.add(index);
       await Animations.animateSlotUnlock(slotEl);
       this.busySlots.delete(index);
-      
+
       this.renderer.render(this.selectedSlotIndex);
       return;
     }
@@ -341,7 +355,7 @@ class GameController {
   async tryProcessPendingShifts() {
     let shiftedAny = false;
     const slots = this.board.getAllSlots();
-    
+
     for (let srcIndex = 0; srcIndex < slots.length; srcIndex++) {
       const srcSlot = slots[srcIndex];
       if (srcSlot.isPendingShift && srcSlot.length > 0) {
@@ -356,19 +370,19 @@ class GameController {
           const destSlot = slots[emptyIndex];
           const coinsToMove = srcSlot.pop(srcSlot.length);
           destSlot.push(...coinsToMove);
-          
+
           // Revert time slot to locked
           srcSlot.isTempUnlocked = false;
           srcSlot.isPendingShift = false;
           srcSlot.tempUnlockTimeLeft = null;
-          
+
           const movingCoinEls = coinsToMove
             .map(c => this.renderer.coinDomMap.get(c.id))
             .filter(Boolean);
-            
+
           this.busySlots.add(srcIndex);
           this.busySlots.add(emptyIndex);
-          
+
           try {
             await Animations.animateSlowFlight(() => {
               this.renderer.render(this.selectedSlotIndex);
@@ -377,7 +391,7 @@ class GameController {
             this.busySlots.delete(srcIndex);
             this.busySlots.delete(emptyIndex);
           }
-          
+
           shiftedAny = true;
           // After a shift, it might fill a slot, so process again
           await this.processAllFullSlots();
@@ -446,6 +460,7 @@ class GameController {
 
       // Step 3: Transform into 2 upgraded level-up coins
       this.logic.executeClearUpgrade(slotIndex);
+      
       this.renderer.render(this.selectedSlotIndex);
       await new Promise(r => setTimeout(r, 450));
     } finally {
@@ -465,8 +480,8 @@ class GameController {
     if (this.logic.gameState !== 'playing' || this.busySlots.size > 0) return;
 
     const maxCoinType = CONFIG.COIN_TYPES + this.logic.score;
-    const dropMaxCoin = maxCoinType >= 5 ? maxCoinType - 1 : maxCoinType;
-    
+    const dropMaxCoin = this.logic.getDropMaxCoin();
+
     if (maxCoinType !== this.lastMaxCoinType) {
       this.lastMaxCoinType = maxCoinType;
       this.dropsSinceLevelUp = 0;
@@ -476,9 +491,11 @@ class GameController {
     // Only apply the "limit to 1" logic specifically for the newly arrived 4 coin
     const limitMaxCoinToOne = this.dropsSinceLevelUp <= 5 && maxCoinType === 4;
 
+    const dropMinCoin = this.logic.getDropMinCoin();
     const success = this.dropManager.handleDropButton(
       dropMaxCoin,
-      limitMaxCoinToOne
+      limitMaxCoinToOne,
+      dropMinCoin
     );
 
     if (success) {
@@ -511,7 +528,7 @@ class GameController {
 // Start game robustly
 async function initApp() {
   if (window.updateLoadingProgress) {
-    
+
     // PHASE 1: Load the Loading Screen Assets FIRST (so it isn't blank)
     await AssetLoader.loadAll(LOADING_ASSETS);
     // At this point, background, logo, and empty bar are fully visible.
@@ -521,7 +538,7 @@ async function initApp() {
     let timeProgress = 0;
     const startTime = Date.now();
     const MIN_LOAD_TIME = 3000;
-    
+
     // REAL ASSET LOADING: Load images into cache
     const loadPromise = AssetLoader.loadAll(GAME_ASSETS, (percent) => {
       assetProgress = percent;
@@ -530,18 +547,18 @@ async function initApp() {
     // 2. Purely visual 3-second jumpy timer ("rukh rukh k")
     const timePromise = new Promise(resolve => {
       let lastJumpTime = Date.now();
-      
+
       const interval = setInterval(() => {
         const now = Date.now();
         const elapsed = now - startTime;
-        
+
         // Jumpy logic: Add chunks randomly
         if (now - lastJumpTime > 300 + Math.random() * 300) {
           lastJumpTime = now;
           const jumpAmount = 10 + Math.random() * 20; // Jump 10% to 30%
           timeProgress = Math.min(100, timeProgress + jumpAmount);
         }
-        
+
         // Force it to 100% when 3 seconds are up
         if (elapsed >= MIN_LOAD_TIME) {
           timeProgress = 100;
@@ -549,7 +566,7 @@ async function initApp() {
 
         // Use the SLOWER of the two progresses
         window.updateLoadingProgress(Math.min(assetProgress, timeProgress));
-        
+
         if (elapsed >= MIN_LOAD_TIME) {
           clearInterval(interval);
           resolve();

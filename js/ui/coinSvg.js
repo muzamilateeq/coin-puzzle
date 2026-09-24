@@ -13,105 +13,93 @@
 
 /* ─── Color Palettes ─────────────────────────────────────────────────────── */
 const P = {
-  1: { // Copper Orange
+  1: { // Orange
     edge:'#3D0E00', rim1:'#FF9030', rim2:'#C05010', rim3:'#7A2800',
-    f1:'#FFD090', f2:'#F07020', f3:'#B04800',
-    r1:'#CC5500', r2:'#7A2800',
-    nf:'#FFD080', ns:'#5A1800'
+    f1:'#FFD090', f2:'#F07020', f3:'#B04800', r1:'#CC5500', r2:'#7A2800', nf:'#FFD080', ns:'#5A1800'
   },
-  2: { // Platinum Silver
+  2: { // Silver
     edge:'#182030', rim1:'#FFFFFF', rim2:'#90A8C0', rim3:'#3A5060',
-    f1:'#FFFFFF', f2:'#B0C8DC', f3:'#607888',
-    r1:'#4868A0', r2:'#203040',
-    nf:'#DCF0FF', ns:'#101820'
+    f1:'#FFFFFF', f2:'#B0C8DC', f3:'#607888', r1:'#4868A0', r2:'#203040', nf:'#DCF0FF', ns:'#101820'
   },
-  3: { // Imperial Gold ← matches reference image exactly
+  3: { // Gold
     edge:'#3A1800', rim1:'#FFE060', rim2:'#D89020', rim3:'#8B5008',
-    f1:'#FFF498', f2:'#F0A818', f3:'#C07010',
-    r1:'#C87818', r2:'#7A4400',
-    nf:'#FFE84A', ns:'#5A2C00'
+    f1:'#FFF498', f2:'#F0A818', f3:'#C07010', r1:'#C87818', r2:'#7A4400', nf:'#FFE84A', ns:'#5A2C00'
   },
-  4: { // Emerald Green
+  4: { // Green
     edge:'#001A08', rim1:'#80FF80', rim2:'#18B030', rim3:'#086020',
-    f1:'#C0FFC0', f2:'#25C845', f3:'#0E7825',
-    r1:'#0E7828', r2:'#024012',
-    nf:'#C0FFD0', ns:'#012810'
+    f1:'#C0FFC0', f2:'#25C845', f3:'#0E7825', r1:'#0E7828', r2:'#024012', nf:'#C0FFD0', ns:'#012810'
   },
-  5: { // Crimson Red
+  5: { // Red
     edge:'#2E0000', rim1:'#FF7070', rim2:'#D01818', rim3:'#880008',
-    f1:'#FFAAAA', f2:'#EC2828', f3:'#A00808',
-    r1:'#B01010', r2:'#600008',
-    nf:'#FFAAAA', ns:'#3A0004'
+    f1:'#FFAAAA', f2:'#EC2828', f3:'#A00808', r1:'#B01010', r2:'#600008', nf:'#FFAAAA', ns:'#3A0004'
   },
-  6: { // Sapphire Blue
+  6: { // Blue
     edge:'#000830', rim1:'#70B0FF', rim2:'#1045D8', rim3:'#082068',
-    f1:'#B0D4FF', f2:'#2060F0', f3:'#0830A8',
-    r1:'#0838B8', r2:'#040F68',
-    nf:'#C0D8FF', ns:'#020830'
+    f1:'#B0D4FF', f2:'#2060F0', f3:'#0830A8', r1:'#0838B8', r2:'#040F68', nf:'#C0D8FF', ns:'#020830'
   },
-  7: { // Amethyst Purple
+  7: { // Purple
     edge:'#140038', rim1:'#D880FF', rim2:'#7818C8', rim3:'#420078',
-    f1:'#EAB8FF', f2:'#9828DC', f3:'#5808A0',
-    r1:'#6818B0', r2:'#300058',
-    nf:'#EEB8FF', ns:'#200040'
+    f1:'#EAB8FF', f2:'#9828DC', f3:'#5808A0', r1:'#6818B0', r2:'#300058', nf:'#EEB8FF', ns:'#200040'
   },
-  8: { // Ocean Cyan
+  8: { // Cyan
     edge:'#001C28', rim1:'#50E8FF', rim2:'#0898C0', rim3:'#004A68',
-    f1:'#A0F5FF', f2:'#0AAED5', f3:'#005878',
-    r1:'#077898', r2:'#003848',
-    nf:'#A8F8FF', ns:'#002030'
+    f1:'#A0F5FF', f2:'#0AAED5', f3:'#005878', r1:'#077898', r2:'#003848', nf:'#A8F8FF', ns:'#002030'
   },
-  9: { // Rose Pink
+  9: { // Pink
     edge:'#2E0018', rim1:'#FF80C0', rim2:'#D01868', rim3:'#880040',
-    f1:'#FFB8D8', f2:'#EE2878', f3:'#A81048',
-    r1:'#BE1868', r2:'#680038',
-    nf:'#FFB0D8', ns:'#420020'
+    f1:'#FFB8D8', f2:'#EE2878', f3:'#A81048', r1:'#BE1868', r2:'#680038', nf:'#FFB0D8', ns:'#420020'
   },
-  10: { // Warm Amber
-    edge:'#281000', rim1:'#FFC040', rim2:'#C07808', rim3:'#7A4800',
-    f1:'#FFE098', f2:'#DE8C18', f3:'#9A5E08',
-    r1:'#B07018', r2:'#603800',
-    nf:'#FFE090', ns:'#3C2000'
+  10: { // Brown/Bronze
+    edge:'#241004', rim1:'#C08050', rim2:'#804020', rim3:'#4A2010',
+    f1:'#E0B090', f2:'#905030', f3:'#5A2C18', r1:'#804020', r2:'#4A2010', nf:'#FFD0B0', ns:'#3A1A0C'
   },
-  11: { // Mint Teal
-    edge:'#001818', rim1:'#50FFD8', rim2:'#10B090', rim3:'#085860',
-    f1:'#A0FFE8', f2:'#18C098', f3:'#087068',
-    r1:'#0A9878', r2:'#024840',
-    nf:'#A8FFE8', ns:'#013030'
+  11: { // Lime
+    edge:'#1A2800', rim1:'#D0FF40', rim2:'#80D010', rim3:'#407A00',
+    f1:'#E8FFB0', f2:'#98E018', f3:'#5A9008', r1:'#88C818', r2:'#407A00', nf:'#E8FF90', ns:'#2A4800'
   },
-  12: { // Coral Red
-    edge:'#320010', rim1:'#FF7890', rim2:'#D02048', rim3:'#8A0828',
-    f1:'#FFB0C0', f2:'#EE3060', f3:'#AA1040',
-    r1:'#C02050', r2:'#700028',
-    nf:'#FFB0C8', ns:'#440018'
+  12: { // Navy
+    edge:'#040018', rim1:'#8060FF', rim2:'#3010B0', rim3:'#180468',
+    f1:'#C0A8FF', f2:'#4020D0', f3:'#200888', r1:'#3818A8', r2:'#180468', nf:'#D8C8FF', ns:'#100040'
   },
-  13: { // Cobalt Navy
-    edge:'#000828', rim1:'#6890F8', rim2:'#0828B8', rim3:'#060F78',
-    f1:'#A8C0FF', f2:'#1840E0', f3:'#0A20A0',
-    r1:'#0B28B8', r2:'#030A68',
-    nf:'#B0C8FF', ns:'#020840'
+  13: { // Maroon
+    edge:'#180004', rim1:'#F04070', rim2:'#901030', rim3:'#500018',
+    f1:'#FFB0C8', f2:'#A01840', f3:'#600820', r1:'#901030', r2:'#500018', nf:'#FFC0D8', ns:'#300010'
   },
-  14: { // Deep Violet
-    edge:'#100028', rim1:'#C090FF', rim2:'#5C10C0', rim3:'#300070',
-    f1:'#DCB8FF', f2:'#7C20D8', f3:'#4808A0',
-    r1:'#5418B0', r2:'#200058',
-    nf:'#DDB8FF', ns:'#180040'
+  14: { // Black
+    edge:'#000000', rim1:'#A0A0A0', rim2:'#404040', rim3:'#1A1A1A',
+    f1:'#C0C0C0', f2:'#505050', f3:'#202020', r1:'#404040', r2:'#1A1A1A', nf:'#E0E0E0', ns:'#000000'
   },
-  15: { // Golden Sun
-    edge:'#302000', rim1:'#FFE028', rim2:'#C09008', rim3:'#785808',
-    f1:'#FFFAAA', f2:'#E8B010', f3:'#A07008',
-    r1:'#B88018', r2:'#604C00',
-    nf:'#FFF060', ns:'#302000'
+  15: { // Peach
+    edge:'#301010', rim1:'#FFC0B0', rim2:'#F08060', rim3:'#A04028',
+    f1:'#FFE0D8', f2:'#FF9880', f3:'#C05840', r1:'#E88068', r2:'#903820', nf:'#FFD8C8', ns:'#702010'
   }
 };
 
 /**
- * @param {number}  type      - 1–15
+ * @param {number}  type      - 1–15 and beyond
  * @param {boolean} showLabel - show number on top coin, else crown
  * @returns {string} SVG markup
  */
 export function createCoinSvg(type, showLabel = false) {
-  const p   = P[type] || P[3];
+  let p = P[type];
+  if (!p) {
+    // Mathematically generate infinitely distinct colors using the Golden Angle (137.5 degrees)
+    const hue = (type * 137.5) % 360;
+    p = {
+      edge: `hsl(${hue}, 80%, 10%)`,
+      rim1: `hsl(${hue}, 100%, 80%)`,
+      rim2: `hsl(${hue}, 90%, 45%)`,
+      rim3: `hsl(${hue}, 90%, 20%)`,
+      f1:   `hsl(${hue}, 100%, 85%)`,
+      f2:   `hsl(${hue}, 80%, 50%)`,
+      f3:   `hsl(${hue}, 90%, 25%)`,
+      r1:   `hsl(${hue}, 80%, 40%)`,
+      r2:   `hsl(${hue}, 90%, 15%)`,
+      nf:   `hsl(${hue}, 100%, 90%)`,
+      ns:   `hsl(${hue}, 80%, 10%)`
+    };
+  }
+
   const uid = `c${type}_${(Math.random()*1e7)|0}`;
   const num = String(type);
   const fs  = num.length > 1 ? 32 : 40; // font size (reduced)

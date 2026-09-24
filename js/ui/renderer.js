@@ -134,7 +134,7 @@ export class Renderer {
 
       if (score >= 4) {
         if (score % 2 === 0) {
-          // Phase A: (Scores 4, 6, 8...) -> Target = 5 of coin N
+          // Phase A: (Scores 4, 6, 8...) -> Target = 6 of coin N
           const N = (score / 2) + 4;
           this.hudBaseNext.style.display = 'none';
           
@@ -255,6 +255,51 @@ export class Renderer {
     }
     
     if (this.heartsEl) this.heartsEl.textContent = this.gameLogic.hearts;
+  }
+
+  async playBoardTransitionAnimation(newTotalSlots) {
+    // 1. Clone the current board for the exit animation
+    const clone = this.boardEl.cloneNode(true);
+    clone.style.position = 'absolute';
+    clone.style.top = this.boardEl.offsetTop + 'px';
+    clone.style.left = this.boardEl.offsetLeft + 'px';
+    clone.style.width = this.boardEl.offsetWidth + 'px';
+    clone.style.height = this.boardEl.offsetHeight + 'px';
+    clone.style.zIndex = '100';
+    clone.style.transition = 'transform 1s ease-in-out, opacity 1s ease-in-out';
+    this.boardEl.parentElement.appendChild(clone);
+
+    // 2. Clear the actual game board in logic and DOM
+    this.board.clearAll();
+    this.board.unlockSlotsUpTo(newTotalSlots, (idx) => this.gameLogic.getScoreToUnlockSlot(idx, this.gameLogic.score));
+    
+    Array.from(this.boardEl.children).forEach(slotEl => {
+       const coins = slotEl.querySelectorAll('.coin');
+       coins.forEach(c => c.remove());
+    });
+    this.coinDomMap.clear();
+
+    // 3. Render the updated locks on the real board
+    this.renderBoard(null);
+
+    // 4. Position the real board below the screen
+    this.boardEl.style.transition = 'none';
+    this.boardEl.style.transform = 'translateY(100vh)';
+    
+    // Force reflow
+    this.boardEl.offsetHeight;
+
+    // 5. Animate both
+    this.boardEl.style.transition = 'transform 1s ease-in-out';
+    clone.style.transform = 'translateY(-100vh)';
+    this.boardEl.style.transform = 'translateY(0)';
+
+    // 6. Wait for animation
+    await new Promise(r => setTimeout(r, 1000));
+
+    // 7. Cleanup
+    clone.remove();
+    this.boardEl.style.transition = 'none';
   }
 
   renderBoard(selectedSlotIndex) {

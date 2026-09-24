@@ -21,15 +21,11 @@ export class Board {
     this.updateLocksAndTypes(this.lastScoreCount);
   }
 
-  unlockSlotsUpTo(count) {
-    // Treat the count param as the base level progression count
-    // Since main.js passes CONFIG.INITIAL_UNLOCKED_SLOTS + score + extraUnlockedSlots
-    // we need to adjust this because we are now managing extraUnlockedSlots via the Set.
-    // However, to keep it simple, we'll rename this internally to updateLocksAndTypes.
-    this.updateLocksAndTypes(count);
+  unlockSlotsUpTo(count, unlockScoreCalculator = null) {
+    this.updateLocksAndTypes(count, unlockScoreCalculator);
   }
 
-  updateLocksAndTypes(baseCount) {
+  updateLocksAndTypes(baseCount, unlockScoreCalculator = null) {
     this.lastScoreCount = baseCount;
     
     // First, determine which ones are unlocked by default level progression
@@ -81,21 +77,10 @@ export class Board {
       this.slots[idx3].unlockCost = 600;
       
       // Calculate exactly when the NEXT slot (this gem slot) will open
-      let unlockScore = 1;
-      const targetBaseCount = 15 - idx3;
-      for (let s = 1; s <= 50; s++) {
-          let extra = 0;
-          if (s === 2) extra = 1;
-          else if (s === 3) extra = 2;
-          else if (s >= 4 && s <= 6) extra = 3;
-          else if (s >= 7) extra = s - 3;
-          
-          if (5 + extra >= targetBaseCount) {
-              unlockScore = s;
-              break;
-          }
+      let targetIndexForLogic = 15 - idx3; 
+      if (unlockScoreCalculator) {
+          this.slots[idx3].unlockLevel = unlockScoreCalculator(targetIndexForLogic);
       }
-      this.slots[idx3].unlockLevel = unlockScore;
     }
   }
 
@@ -108,5 +93,11 @@ export class Board {
 
   clearAll() {
     this.slots.forEach(slot => slot.clear());
+  }
+
+  clearNonRequiredCoins(requiredSet) {
+    this.slots.forEach(slot => {
+      slot.coins = slot.coins.filter(c => requiredSet.has(c.type));
+    });
   }
 }
