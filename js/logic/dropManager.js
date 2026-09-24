@@ -99,12 +99,18 @@ export class DropManager {
     }
   }
 
-  handleDropButton(maxCoinType = 5, limitMaxCoinToOne = false) {
-    // Dynamically calculate how many coins to drop based on open slots
-    const openSlotsCount = this.board.getAllSlots().filter(s => !s.isLocked || s.isTempUnlocked).length;
-    const dynamicDropAmount = Math.floor(openSlotsCount * 1.3); // e.g., 5 slots -> 6 coins, 10 slots -> 13 coins
+  handleDropButton(maxCoinType = 5, limitMaxCoinToOne = false, minCoinType = 1) {
+    const openSlots = this.board.getAllSlots().filter(s => !s.isLocked || s.isTempUnlocked);
+    const totalSpace = openSlots.reduce((sum, slot) => sum + slot.spaceAvailable, 0);
     
-    this.dealRandomCoins(dynamicDropAmount, maxCoinType, true, true, limitMaxCoinToOne); // animate=true
+    // Normal drop amount based on open slots (e.g. 5 slots -> 7 coins)
+    let baseAmount = Math.floor(openSlots.length * 1.5);
+    
+    // If board is getting full, restrict the drop to half of the available space
+    let dynamicDropAmount = Math.min(baseAmount, Math.floor(totalSpace / 2));
+    if (dynamicDropAmount < 1 && totalSpace > 0) dynamicDropAmount = 1;
+    
+    this.dealRandomCoins(dynamicDropAmount, maxCoinType, true, true, limitMaxCoinToOne, minCoinType); // animate=true
     return true;
   }
 }
