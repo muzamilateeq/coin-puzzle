@@ -195,7 +195,7 @@ export class GameLogic {
     const dropMaxCoin = this.getDropMaxCoin();
     // Keep a sliding window of max 6 coin types dropping at a time
     // E.g. if dropMax is 15, min will be 10.
-    return Math.max(1, dropMaxCoin - 5);
+    return Math.max(1, dropMaxCoin - CONFIG.MAX_COIN_WINDOW);
   }
 
   checkCollectionLevelUp() {
@@ -218,14 +218,14 @@ export class GameLogic {
       if (this.score % 2 === 0) {
         // Phase A: (Scores 4, 6, 8...) -> Target = 6 of coin N
         const N = (this.score / 2) + 4;
-        if (totalCount(N) >= 6) {
+        if (totalCount(N) >= CONFIG.PHASE_A_TARGET) {
           targetCoinType = N;
           leveledUp = true;
         }
       } else {
         // Phase B: (Scores 5, 7, 9...) -> Target = 1 of coin N+1
         const N = ((this.score - 1) / 2) + 4;
-        if (totalCount(N + 1) >= 1) {
+        if (totalCount(N + 1) >= CONFIG.PHASE_B_TARGET) {
           targetCoinType = N + 1;
           leveledUp = true;
         }

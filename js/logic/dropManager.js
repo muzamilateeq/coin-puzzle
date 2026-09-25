@@ -37,8 +37,8 @@ export class DropManager {
       let emptySlots = unusedSlots.filter(item => item.s.isEmpty());
       let randomSlotInfo;
       
-      if (emptySlots.length > 0 && Math.random() < 0.60) {
-        // 60% chance to force picking an empty slot if one exists
+      if (emptySlots.length > 0 && Math.random() < CONFIG.EMPTY_SLOT_PRIORITY) {
+        // Force picking an empty slot if one exists based on priority
         randomSlotInfo = emptySlots[Math.floor(Math.random() * emptySlots.length)];
       } else {
         randomSlotInfo = unusedSlots[Math.floor(Math.random() * unusedSlots.length)];
@@ -73,10 +73,10 @@ export class DropManager {
 
       // NEW RULE: Actively AVOID dropping a cluster of the same coin on top of itself!
       // This forces the player to manually sort the coins.
-      // USER REQUEST: Allow a small chance (30%) for the same coin to drop on itself as a lucky moment.
+      // USER REQUEST: Allow a small chance for the same coin to drop on itself as a lucky moment.
       if (!isForcedMaxCoin && !randomSlotInfo.s.isEmpty()) {
           const topType = randomSlotInfo.s.topCoin.type;
-          if (typeToDrop === topType && Math.random() < 0.70) {
+          if (typeToDrop === topType && Math.random() >= CONFIG.LUCKY_DROP_CHANCE) {
               // Shift the coin type to something else valid within [minCoinType, shiftMax]
               let shiftMax = limitMaxCoinToOne ? (maxCoinType - 1) : maxCoinType;
               if (shiftMax < minCoinType) shiftMax = minCoinType;
@@ -104,7 +104,7 @@ export class DropManager {
     const totalSpace = openSlots.reduce((sum, slot) => sum + slot.spaceAvailable, 0);
     
     // Normal drop amount based on open slots (e.g. 5 slots -> 7 coins)
-    let baseAmount = Math.floor(openSlots.length * 1.5);
+    let baseAmount = Math.floor(openSlots.length * CONFIG.DYNAMIC_DROP_MULTIPLIER);
     
     // If board is getting full, restrict the drop to half of the available space
     let dynamicDropAmount = Math.min(baseAmount, Math.floor(totalSpace / 2));

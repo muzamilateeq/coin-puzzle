@@ -222,7 +222,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 0px;
 }
 
 .locked-level {
@@ -230,12 +230,13 @@
   top: 8%;
   width: 100%;
   text-align: center;
-  font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+  font-size: clamp(0.4rem, 1.3vw, 0.55rem);
   font-weight: 900;
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   letter-spacing: 0.5px;
+
 }
 
 .locked-icon-plus {
@@ -265,7 +266,7 @@
 
 .locked-cost {
   color: white;
-  font-size: clamp(0.5rem, 1.5vw, 0.65rem);
+  font-size: clamp(0.45rem, 1.2vw, 0.55rem);
   font-weight: bold;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

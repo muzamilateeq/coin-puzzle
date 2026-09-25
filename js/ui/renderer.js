@@ -79,7 +79,7 @@ export class Renderer {
       this.scoreEl.textContent = this.gameLogic.score;
       const hudLevelContainer = this.scoreEl.closest('.hud-level-text');
       if (hudLevelContainer) {
-        hudLevelContainer.style.display = this.gameLogic.score === 0 ? 'none' : 'block';
+        hudLevelContainer.style.visibility = this.gameLogic.score === 0 ? 'hidden' : 'visible';
       }
     }
     if (this.gemsEl) this.gemsEl.textContent = this.gameLogic.gems;
@@ -121,10 +121,10 @@ export class Renderer {
     // Update HUD Coin Bases Visibility
     const hudCoinBases = document.getElementById('hud-coin-bases');
     if (hudCoinBases) {
-      if (this.gameLogic.score > 1) { // Only show when '3' coin row completes (Level 2)
-        hudCoinBases.style.display = 'flex';
+      if (this.gameLogic.score >= 1) { // Hide on score 0, show from score 1 (Coin 4 target)
+        hudCoinBases.style.visibility = 'visible';
       } else {
-        hudCoinBases.style.display = 'none';
+        hudCoinBases.style.visibility = 'hidden';
       }
     }
 
@@ -152,7 +152,7 @@ export class Renderer {
           
           if (this.hudCountCurrent) {
             const maxCount = getTotalCount(leftCoin);
-            this.hudCountCurrent.textContent = Math.max(0, 6 - maxCount);
+            this.hudCountCurrent.textContent = Math.max(0, CONFIG.PHASE_A_TARGET - maxCount);
           }
         } else {
           // Phase B: (Scores 5, 7, 9...) -> Target = 1 of coin N+1, AND reach MAX_PER_SLOT for coin N
@@ -185,47 +185,71 @@ export class Renderer {
           }
           
           if (this.hudCountCurrent) {
-            this.hudCountCurrent.textContent = Math.max(0, 1 - getTotalCount(leftCoin));
+            this.hudCountCurrent.textContent = Math.max(0, CONFIG.PHASE_B_TARGET - getTotalCount(leftCoin));
           }
           if (this.hudCountNext) {
             this.hudCountNext.textContent = Math.max(0, CONFIG.MAX_PER_SLOT - getTotalCount(rightCoin));
           }
         }
       } else {
-        // Normal level progression
-        this.hudBaseNext.style.display = 'flex';
-        
-        // 1. Left Box (Next Upcoming Locked Coin, e.g., 5)
-        const leftCoin = currentMaxCoin + 1;
-        const svgKey1 = `${leftCoin}_true`;
-        if (this.hudBaseCurrent.dataset.svgKey !== svgKey1) {
-          const oldSvg = this.hudBaseCurrent.querySelector('svg');
-          if (oldSvg) oldSvg.remove();
+        // Early levels (Score 1, 2, 3)
+        if (score === 1) {
+          // At Level 1, ONLY show the target box (Coin 4)
+          this.hudBaseNext.style.display = 'none';
           
-          let svgStr = createCoinSvg(leftCoin, true);
-          svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg next-locked-coin"');
-          this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
-          this.hudBaseCurrent.dataset.svgKey = svgKey1;
-        }
-        
-        // 2. Right Box (Currently Collecting Coin, e.g., 4)
-        const rightCoin = currentMaxCoin;
-        const svgKey2 = `${rightCoin}_true`;
-        if (this.hudBaseNext.dataset.svgKey !== svgKey2) {
-          const oldSvg = this.hudBaseNext.querySelector('svg');
-          if (oldSvg) oldSvg.remove();
+          const targetCoin = currentMaxCoin + 1;
+          const svgKey = `${targetCoin}_true`;
           
-          let svgStr = createCoinSvg(rightCoin, true);
-          svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
-          this.hudBaseNext.insertAdjacentHTML('afterbegin', svgStr);
-          this.hudBaseNext.dataset.svgKey = svgKey2;
-        }
-        
-        // Set the text under the coins
-        if (this.hudCountCurrent) this.hudCountCurrent.textContent = '1';
-        if (this.hudCountNext) {
-          const maxCount = getTotalCount(rightCoin);
-          this.hudCountNext.textContent = Math.max(0, CONFIG.MAX_PER_SLOT - maxCount);
+          if (this.hudBaseCurrent.dataset.svgKey !== svgKey) {
+            const oldSvg = this.hudBaseCurrent.querySelector('svg');
+            if (oldSvg) oldSvg.remove();
+            
+            let svgStr = createCoinSvg(targetCoin, true);
+            svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
+            this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
+            this.hudBaseCurrent.dataset.svgKey = svgKey;
+          }
+          
+          if (this.hudCountCurrent) {
+            const maxCount = getTotalCount(targetCoin);
+            this.hudCountCurrent.textContent = Math.max(0, 1 - maxCount).toString();
+          }
+        } else {
+          // At Level 2 & 3, show TWO boxes (Target and Current Max)
+          this.hudBaseNext.style.display = 'flex';
+          
+          // 1. Left Box (Next Upcoming Locked Coin, e.g., 5)
+          const leftCoin = currentMaxCoin + 1;
+          const svgKey1 = `${leftCoin}_true`;
+          if (this.hudBaseCurrent.dataset.svgKey !== svgKey1) {
+            const oldSvg = this.hudBaseCurrent.querySelector('svg');
+            if (oldSvg) oldSvg.remove();
+            
+            let svgStr = createCoinSvg(leftCoin, true);
+            svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg next-locked-coin"');
+            this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
+            this.hudBaseCurrent.dataset.svgKey = svgKey1;
+          }
+          
+          // 2. Right Box (Currently Collecting Coin, e.g., 4)
+          const rightCoin = currentMaxCoin;
+          const svgKey2 = `${rightCoin}_true`;
+          if (this.hudBaseNext.dataset.svgKey !== svgKey2) {
+            const oldSvg = this.hudBaseNext.querySelector('svg');
+            if (oldSvg) oldSvg.remove();
+            
+            let svgStr = createCoinSvg(rightCoin, true);
+            svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
+            this.hudBaseNext.insertAdjacentHTML('afterbegin', svgStr);
+            this.hudBaseNext.dataset.svgKey = svgKey2;
+          }
+          
+          // Set the text under the coins
+          if (this.hudCountCurrent) this.hudCountCurrent.textContent = '1';
+          if (this.hudCountNext) {
+            const maxCount = getTotalCount(rightCoin);
+            this.hudCountNext.textContent = Math.max(0, CONFIG.MAX_PER_SLOT - maxCount);
+          }
         }
       }
     }

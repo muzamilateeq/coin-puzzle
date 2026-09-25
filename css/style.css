@@ -218,11 +218,13 @@ body {
 }
 
 .hud-coin-base+.hud-coin-base {
-  margin-left: -2px; /* Pulls them close together */
+  margin-left: -2px;
+  /* Pulls them close together */
 }
 
 .hud-coin-base {
-  position: relative; /* Fixes the absolute positioning of the child SVG */
+  position: relative;
+  /* Fixes the absolute positioning of the child SVG */
   width: clamp(45px, 12vw, 60px);
   height: clamp(45px, 12vw, 60px);
   background-image: url("../Assets/Gameplay/Coin Base.png");
@@ -249,7 +251,7 @@ body {
   width: 60%;
   height: auto;
   position: absolute;
-  top: 45%;
+  top: 38%;
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -265,8 +267,8 @@ body {
 .hud-top-row {
   display: flex;
   align-items: center;
-  gap: 2px;
-  /* Even smaller gap between the two bars */
+  gap: 8px;
+  /* Increased gap to prevent the larger plus icon from touching the heart bar */
   margin-top: 14px;
 }
 
@@ -281,14 +283,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(35px, 10vw, 44px);
-  /* Reduced container width instead of squishing image */
-  height: clamp(14px, 4vw, 18px);
+  width: clamp(48px, 12vw, 60px);
+  height: clamp(20px, 5vw, 26px);
 }
 
 .hud-bar-bg.long-bar {
-  width: clamp(45px, 14vw, 60px);
-  /* Reduced width */
+  width: clamp(60px, 16vw, 80px);
 }
 
 .hud-bar-img {
@@ -306,13 +306,12 @@ body {
   color: #481803;
   /* Dark brown text as seen in screenshot */
   font-weight: 800;
-  font-size: 0.55rem;
+  font-size: 0.75rem;
 }
 
 .hud-heart-wrapper {
   position: absolute;
-  left: -12px;
-  /* Adjusted for smaller heart */
+  left: -16px;
   z-index: 3;
   display: flex;
   align-items: center;
@@ -320,8 +319,7 @@ body {
 }
 
 .hud-heart-icon {
-  width: 24px;
-  /* Reduced size */
+  width: 32px;
   height: auto;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
@@ -330,19 +328,16 @@ body {
   position: absolute;
   color: white;
   font-weight: 900;
-  font-size: 0.70rem;
+  font-size: 0.85rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .hud-plus-icon {
   position: absolute;
-  left: -6px;
-  /* Adjusted slightly for larger size */
-  margin-top: 2px;
-  /* Nudged down by 1px */
+  left: -12px;
+  margin-top: 1px;
   z-index: 3;
-  width: 28px;
-  /* Increased size */
+  width: 38px;
   height: auto;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   cursor: pointer;
@@ -355,11 +350,9 @@ body {
 
 .hud-gem-icon {
   position: absolute;
-  right: 8px;
-  /* Adjusted slightly for smaller size */
+  right: 6px;
   z-index: 3;
-  width: 10px;
-  /* Reduced size */
+  width: 15px;
   height: auto;
 }
 
@@ -427,7 +420,7 @@ body {
   width: 36px;
   /* Slightly reduced */
   height: auto;
-  transform: translateY(-8px);
+  transform: translateY(-12px);
   /* Shift icon up clearly onto the bright face */
 }
 
@@ -444,7 +437,7 @@ body {
     0px 3px 3px rgba(0, 0, 0, 0.6);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   letter-spacing: 0.5px;
-  transform: translateY(-8px);
+  transform: translateY(-12px);
   /* Shift text up clearly onto the bright face */
   margin-top: 0;
 }
@@ -680,12 +673,31 @@ button:disabled {
 }
 
 @keyframes hudBounce {
-  0%, 100% { transform: scale(1); }
-  15% { transform: scale(1.2) rotate(5deg); }
-  30% { transform: scale(1.1) rotate(-5deg); }
-  45% { transform: scale(1.15) rotate(3deg); }
-  60% { transform: scale(1.05) rotate(-2deg); }
-  75% { transform: scale(1.1) rotate(0deg); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  15% {
+    transform: scale(1.2) rotate(5deg);
+  }
+
+  30% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  45% {
+    transform: scale(1.15) rotate(3deg);
+  }
+
+  60% {
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+  75% {
+    transform: scale(1.1) rotate(0deg);
+  }
 }
 
 .floating-gem-text {
@@ -696,7 +708,7 @@ button:disabled {
   color: #FFD700;
   font-size: 20px;
   font-weight: 900;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.5);
   white-space: nowrap;
   pointer-events: none;
   z-index: 30;
@@ -704,10 +716,25 @@ button:disabled {
 }
 
 @keyframes floatUpFade {
-  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-  20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
-  80% { opacity: 1; transform: translate(-50%, -40px) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50px) scale(0.8); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.5);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -20px) scale(1.2);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -40px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50px) scale(0.8);
+  }
 }
 
 .landscape-warning h2 {
