@@ -141,9 +141,9 @@ export class GameLogic {
               mainInstance.renderer.render();
             }
           };
-          // Show new coin popup if a new coin type was unlocked
-          if (newMaxCoin > oldMaxCoin && window.showNewCoinPopup) {
-            window.showNewCoinPopup(newMaxCoin, doRender);
+          // Only show "New Coin Unlocked!" popup when a new slot actually opens on the board
+          if (slotsToUnlock > oldSlots && window.showNewCoinPopup) {
+            window.showNewCoinPopup(CONFIG.COIN_TYPES + this.score, doRender);
           } else {
             doRender();
           }
@@ -277,9 +277,9 @@ export class GameLogic {
               mainInstance.renderer.render();
             }
           };
-          // Show new coin popup if a new coin type was unlocked
-          if (newMaxCoin > oldMaxCoin && window.showNewCoinPopup) {
-            window.showNewCoinPopup(newMaxCoin, doRender);
+          // Only show "New Coin Unlocked!" popup when a new slot actually opens on the board
+          if (slotsToUnlock > oldSlots && window.showNewCoinPopup) {
+            window.showNewCoinPopup(CONFIG.COIN_TYPES + this.score, doRender);
           } else {
             doRender();
           }
