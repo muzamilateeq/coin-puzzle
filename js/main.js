@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js';
 import { resetCoinCounter } from './core/Coin.js';
 import { Board } from './core/Board.js';
-import { GameLogic } from './logic/gamelogic.js';
+import { GameLogic } from './logic/gameLogic.js';
 import { DropManager } from './logic/dropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
