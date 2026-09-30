@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg-color: #000000;
   --text-color: #f8fafc;
 }
@@ -838,4 +838,98 @@ button:disabled {
     transform: scale(0.3) translate3d(var(--tx), var(--ty), 50px) rotate(var(--rot));
     opacity: 0;
   }
+}
+
+/* Level Up Modal Styles */
+#level-up-modal {
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.level-up-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  gap: 15px;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.level-up-title {
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin: 0;
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.5);
+  font-family: 'Segoe UI', sans-serif;
+  letter-spacing: 2px;
+}
+
+.level-up-progression {
+  color: #ffd700;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.level-up-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#level-up-gem-amount {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.level-up-gem-icon {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.level-up-continue-btn {
+  margin-top: 15px;
+  background-image: url('../Assets/Gameplay/Drop Button_.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  width: 200px;
+  height: 75px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 8px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+  transition: transform 0.1s;
+}
+
+.level-up-continue-btn:active {
+  transform: scale(0.95);
+}
+
+.continue-btn-text {
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 800;
+  text-shadow: -1.5px -1.5px 0 #1b5b08, 1.5px -1.5px 0 #1b5b08, -1.5px 1.5px 0 #1b5b08, 1.5px 1.5px 0 #1b5b08, 0px 3px 3px rgba(0, 0, 0, 0.6);
+  font-family: 'Segoe UI', sans-serif;
+  letter-spacing: 1px;
+  transform: translateY(-8px);
 }

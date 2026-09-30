@@ -1,11 +1,12 @@
 import { CONFIG } from './config.js';
 import { resetCoinCounter } from './core/Coin.js';
 import { Board } from './core/Board.js';
-import { GameLogic } from './logic/gameLogic.js';
+import { GameLogic } from './logic/gamelogic.js';
 import { DropManager } from './logic/dropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
+import { createCoinSvg } from './ui/coinSvg.js';
 
 class AssetLoader {
   static async loadAll(assets, progressCallback) {
@@ -76,6 +77,143 @@ const GAME_ASSETS = [
 class GameController {
   constructor() {
     window.gameMain = this; // Expose globally for GameLogic to trigger re-renders
+
+    // Global function called by GameLogic when a level up happens
+    window.showLevelUpPopup = (oldLevel, newLevel, gems, onContinue) => {
+      // Create modal if it doesn't exist
+      let overlay = document.getElementById('lu-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'lu-overlay';
+        overlay.style.cssText = `
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: calc(100% - 40px);
+          max-width: 320px;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          display: flex; align-items: center; justify-content: center;
+          z-index: 99999;
+          flex-direction: column; gap: 14px;
+          border-radius: 20px;
+          padding: 28px 20px;
+          border: 1.5px solid rgba(255,255,255,0.15);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        `;
+        overlay.innerHTML = `
+          <div style="text-align:center; color:#fff; font-family:'Segoe UI',sans-serif;">
+            <div id="lu-title" style="font-size:2.4rem;font-weight:900;letter-spacing:3px;text-shadow:0 4px 8px rgba(0,0,0,0.9),0 0 20px rgba(255,215,0,0.6);">LEVEL UP!</div>
+            <div id="lu-levels" style="font-size:1.8rem;font-weight:800;color:#ffd700;margin-top:8px;text-shadow:0 2px 6px rgba(0,0,0,0.8);"></div>
+            <div id="lu-reward" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;background:rgba(0,0,0,0.5);padding:10px 24px;border-radius:20px;border:2px solid rgba(255,255,255,0.2);">
+              <span id="lu-gems" style="font-size:1.8rem;font-weight:bold;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.8);"></span>
+              <img src="./Assets/Gameplay/Gem.png" style="width:28px;height:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));" />
+            </div>
+          </div>
+          <button id="lu-continue" style="
+            margin-top:8px;
+            background-image: url('./Assets/Gameplay/Drop Button_.png');
+            background-size:100% 100%; background-color:transparent; border:none;
+            width:200px; height:75px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; padding-bottom:10px;
+            filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+          ">
+            <span style="color:#fff;font-size:1.6rem;font-weight:900;
+              text-shadow:-1.5px -1.5px 0 #1b5b08,1.5px -1.5px 0 #1b5b08,-1.5px 1.5px 0 #1b5b08,1.5px 1.5px 0 #1b5b08,0 3px 4px rgba(0,0,0,0.7);
+              font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-12px);display:inline-block;">CONTINUE</span>
+          </button>
+        `;
+        const gameContainer = document.getElementById('game-container');
+        (gameContainer || document.body).appendChild(overlay);
+      }
+
+      document.getElementById('lu-levels').textContent = `${oldLevel}  >  ${newLevel}`;
+      document.getElementById('lu-gems').textContent = `+${gems}`;
+      overlay.style.display = 'flex';
+
+      // Swap button to remove old listeners
+      const oldBtn = document.getElementById('lu-continue');
+      const newBtn = oldBtn.cloneNode(true);
+      oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+      newBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        if (onContinue) onContinue();
+      });
+    };
+
+    // Global function: show new coin unlocked popup
+    window.showNewCoinPopup = (coinType, onContinue) => {
+      let overlay = document.getElementById('nc-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'nc-overlay';
+        overlay.style.cssText = `
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: calc(100% - 40px);
+          max-width: 320px;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          display: flex; align-items: center; justify-content: center;
+          z-index: 99999;
+          flex-direction: column; gap: 14px;
+          border-radius: 20px;
+          padding: 28px 20px;
+          border: 1.5px solid rgba(255,255,255,0.15);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        `;
+        const gameContainer = document.getElementById('game-container');
+        (gameContainer || document.body).appendChild(overlay);
+      }
+
+      // Use the exact same SVG renderer as the board coins
+      const coinSvgStr = createCoinSvg(coinType, true);
+
+      overlay.innerHTML = `
+        <div style="text-align:center; color:#fff; font-family:'Segoe UI',sans-serif;">
+          <div style="font-size:1rem;font-weight:700;letter-spacing:4px;color:#ffd700;text-transform:uppercase;
+            text-shadow:0 2px 6px rgba(0,0,0,0.8);margin-bottom:12px;">New Coin Unlocked!</div>
+          <div style="
+            width:140px; height:140px;
+            display:inline-flex; align-items:center; justify-content:center;
+            filter:drop-shadow(0 0 24px rgba(255,215,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.9));
+            animation: nc-bounce 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+          ">${coinSvgStr}</div>
+          <div style="font-size:1.5rem;font-weight:900;margin-top:14px;
+            text-shadow:0 2px 6px rgba(0,0,0,0.8),0 0 16px rgba(255,215,0,0.5);">Coin ${coinType}</div>
+        </div>
+        <button id="nc-continue" style="
+          margin-top:8px;
+          background-image: url('./Assets/Gameplay/Drop Button_.png');
+          background-size:100% 100%; background-color:transparent; border:none;
+          width:200px; height:75px; cursor:pointer;
+          display:flex; align-items:center; justify-content:center; padding-bottom:10px;
+          filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+        ">
+          <span style="color:#fff;font-size:1.6rem;font-weight:900;
+            text-shadow:-1.5px -1.5px 0 #1b5b08,1.5px -1.5px 0 #1b5b08,-1.5px 1.5px 0 #1b5b08,1.5px 1.5px 0 #1b5b08,0 3px 4px rgba(0,0,0,0.7);
+            font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-12px);display:inline-block;">CONTINUE</span>
+        </button>
+      `;
+
+      // Add bounce animation style once
+      if (!document.getElementById('nc-style')) {
+        const style = document.createElement('style');
+        style.id = 'nc-style';
+        style.textContent = `@keyframes nc-bounce { from { transform: scale(0) rotate(-10deg); opacity:0; } to { transform: scale(1) rotate(0deg); opacity:1; } }`;
+        document.head.appendChild(style);
+      }
+
+      overlay.style.display = 'flex';
+      document.getElementById('nc-continue').addEventListener('click', () => {
+        overlay.style.display = 'none';
+        if (onContinue) onContinue();
+      });
+    };
+
     this.board = new Board();
     this.logic = new GameLogic(this.board);
     this.dropManager = new DropManager(this.board);
@@ -205,7 +343,7 @@ class GameController {
     // Preserve required coins (user's progress) instead of wiping the whole board
     const requiredTypes = this.logic.getRequiredCoinTypes();
     this.board.clearNonRequiredCoins(requiredTypes);
-    
+
     // Count how many coins were kept
     let coinsKept = 0;
     this.board.getAllSlots().forEach(slot => {
@@ -225,7 +363,7 @@ class GameController {
     this.renderer.hideModal();
     const dropMaxCoin = this.logic.getDropMaxCoin();
     const dropMinCoin = this.logic.getDropMinCoin();
-    
+
     // Drop only enough coins to reach INITIAL_DEAL, so the board doesn't overflow
     const coinsToDrop = Math.max(0, CONFIG.INITIAL_DEAL - coinsKept);
     if (coinsToDrop > 0) {
@@ -460,7 +598,7 @@ class GameController {
 
       // Step 3: Transform into 2 upgraded level-up coins
       this.logic.executeClearUpgrade(slotIndex);
-      
+
       this.renderer.render(this.selectedSlotIndex);
       await new Promise(r => setTimeout(r, 450));
     } finally {
