@@ -125,10 +125,10 @@ export class GameLogic {
         const newScore = this.score + 1;
         const gemsAwarded = 60;
         window.showLevelUpPopup(oldScore, newScore, gemsAwarded, () => {
-          const oldMaxCoin = CONFIG.COIN_TYPES + this.score;
+          const oldMaxCoin = this.getDropMaxCoin();
           this.score++;
           this.gems += gemsAwarded;
-          const newMaxCoin = CONFIG.COIN_TYPES + this.score;
+          const newMaxCoin = this.getDropMaxCoin();
           const oldSlots = this.getTotalUnlockedSlots(this.score - 1);
           const slotsToUnlock = this.getTotalUnlockedSlots(this.score);
           this.board.unlockSlotsUpTo(slotsToUnlock, (idx) => this.getScoreToUnlockSlot(idx, this.score));
@@ -258,10 +258,10 @@ export class GameLogic {
         const newScore = this.score + 1;
         const gemsAwarded = 10 + (newScore % 2 === 0 ? 100 : 200) + (newScore * 10);
         window.showLevelUpPopup(oldScore, newScore, gemsAwarded, () => {
-          const oldMaxCoin = CONFIG.COIN_TYPES + this.score;
+          const oldMaxCoin = this.getDropMaxCoin();
           this.score++;
           this.gems += gemsAwarded;
-          const newMaxCoin = CONFIG.COIN_TYPES + this.score;
+          const newMaxCoin = this.getDropMaxCoin();
           const oldSlots = this.getTotalUnlockedSlots(this.score - 1);
           const slotsToUnlock = this.getTotalUnlockedSlots(this.score);
           this.board.unlockSlotsUpTo(slotsToUnlock, (idx) => this.getScoreToUnlockSlot(idx, this.score));
@@ -330,6 +330,30 @@ export class GameLogic {
       }
     }
     return false;
+  }
+  getHintMove() {
+    const slots = this.board.getAllSlots();
+
+    for (let i = 0; i < CONFIG.TOTAL_SLOTS; i++) {
+      const srcSlot = slots[i];
+      const isSrcLocked = srcSlot.isLocked && !srcSlot.isTempUnlocked;
+      if (isSrcLocked || srcSlot.isEmpty()) continue;
+
+      const srcType = srcSlot.topCoin.type;
+
+      for (let j = 0; j < CONFIG.TOTAL_SLOTS; j++) {
+        if (i === j) continue;
+        const destSlot = slots[j];
+        const isDestLocked = destSlot.isLocked && !destSlot.isTempUnlocked;
+        if (isDestLocked) continue;
+
+        // ONLY suggest a move if it merges matching coins. No empty slot suggestions.
+        if (!destSlot.isFull() && !destSlot.isEmpty() && destSlot.topCoin.type === srcType) {
+          return { src: i, dest: j };
+        }
+      }
+    }
+    return null;
   }
 
   checkGameOver() {

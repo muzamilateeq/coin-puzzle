@@ -80,49 +80,60 @@ class GameController {
 
     // Global function called by GameLogic when a level up happens
     window.showLevelUpPopup = (oldLevel, newLevel, gems, onContinue) => {
+      // Immediately hide tutorial hand when level up occurs
+      if (window._gameController) {
+        window._gameController._tutorialRunning = false;
+        const hand = document.getElementById('tutorial-hand');
+        if (hand) hand.style.opacity = '0';
+      }
       // Create modal if it doesn't exist
       let overlay = document.getElementById('lu-overlay');
       if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'lu-overlay';
         overlay.style.cssText = `
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: calc(100% - 40px);
-          max-width: 320px;
-          background: rgba(0,0,0,0.6);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.4);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
           display: flex; align-items: center; justify-content: center;
           z-index: 99999;
-          flex-direction: column; gap: 14px;
-          border-radius: 20px;
-          padding: 28px 20px;
-          border: 1.5px solid rgba(255,255,255,0.15);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
         `;
         overlay.innerHTML = `
+          <div style="
+            width: calc(100% - 40px);
+            max-width: 260px;
+            background-image: url('./Assets/Loading/BG_.png');
+            background-size: cover; background-position: center;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 12px;
+            border-radius: 20px;
+            padding: 22px 16px;
+            border: 1.5px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+          ">
           <div style="text-align:center; color:#fff; font-family:'Segoe UI',sans-serif;">
-            <div id="lu-title" style="font-size:2.4rem;font-weight:900;letter-spacing:3px;text-shadow:0 4px 8px rgba(0,0,0,0.9),0 0 20px rgba(255,215,0,0.6);">LEVEL UP!</div>
-            <div id="lu-levels" style="font-size:1.8rem;font-weight:800;color:#ffd700;margin-top:8px;text-shadow:0 2px 6px rgba(0,0,0,0.8);"></div>
-            <div id="lu-reward" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;background:rgba(0,0,0,0.5);padding:10px 24px;border-radius:20px;border:2px solid rgba(255,255,255,0.2);">
-              <span id="lu-gems" style="font-size:1.8rem;font-weight:bold;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.8);"></span>
-              <img src="./Assets/Gameplay/Gem.png" style="width:28px;height:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));" />
+            <div id="lu-title" style="font-size:2.0rem;font-weight:900;letter-spacing:2px;text-shadow:0 4px 8px rgba(0,0,0,0.9),0 0 20px rgba(255,215,0,0.6);">LEVEL UP!</div>
+            <div id="lu-levels" style="font-size:1.5rem;font-weight:800;color:#ffd700;margin-top:6px;text-shadow:0 2px 6px rgba(0,0,0,0.8);"></div>
+            <div id="lu-reward" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;background:rgba(0,0,0,0.5);padding:8px 20px;border-radius:16px;border:2px solid rgba(255,255,255,0.2);">
+              <span id="lu-gems" style="font-size:1.6rem;font-weight:bold;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.8);"></span>
+              <img src="./Assets/Gameplay/Gem.png" style="width:24px;height:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));" />
             </div>
           </div>
           <button id="lu-continue" style="
             margin-top:8px;
             background-image: url('./Assets/Gameplay/Drop Button_.png');
             background-size:100% 100%; background-color:transparent; border:none;
-            width:200px; height:75px; cursor:pointer;
-            display:flex; align-items:center; justify-content:center; padding-bottom:10px;
+            width:160px; height:60px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; padding-bottom:12px;
             filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
           ">
-            <span style="color:#fff;font-size:1.6rem;font-weight:900;
+            <span style="color:#fff;font-size:1.4rem;font-weight:900;
               text-shadow:-1.5px -1.5px 0 #1b5b08,1.5px -1.5px 0 #1b5b08,-1.5px 1.5px 0 #1b5b08,1.5px 1.5px 0 #1b5b08,0 3px 4px rgba(0,0,0,0.7);
-              font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-12px);display:inline-block;">CONTINUE</span>
+              font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-10px);display:inline-block;">CONTINUE</span>
           </button>
+          </div>
         `;
         const gameContainer = document.getElementById('game-container');
         (gameContainer || document.body).appendChild(overlay);
@@ -149,21 +160,13 @@ class GameController {
         overlay = document.createElement('div');
         overlay.id = 'nc-overlay';
         overlay.style.cssText = `
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: calc(100% - 40px);
-          max-width: 320px;
-          background: rgba(0,0,0,0.6);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.4);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
           display: flex; align-items: center; justify-content: center;
           z-index: 99999;
-          flex-direction: column; gap: 14px;
-          border-radius: 20px;
-          padding: 28px 20px;
-          border: 1.5px solid rgba(255,255,255,0.15);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
         `;
         const gameContainer = document.getElementById('game-container');
         (gameContainer || document.body).appendChild(overlay);
@@ -173,30 +176,43 @@ class GameController {
       const coinSvgStr = createCoinSvg(coinType, true);
 
       overlay.innerHTML = `
+        <div style="
+          width: calc(100% - 40px);
+          max-width: 260px;
+          background-image: url('./Assets/Loading/BG_.png');
+          background-size: cover; background-position: center;
+          display: flex; align-items: center; justify-content: center;
+          flex-direction: column; gap: 12px;
+          border-radius: 20px;
+          padding: 22px 16px;
+          border: 1.5px solid rgba(255,255,255,0.15);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        ">
         <div style="text-align:center; color:#fff; font-family:'Segoe UI',sans-serif;">
-          <div style="font-size:1rem;font-weight:700;letter-spacing:4px;color:#ffd700;text-transform:uppercase;
-            text-shadow:0 2px 6px rgba(0,0,0,0.8);margin-bottom:12px;">New Coin Unlocked!</div>
+          <div style="font-size:0.9rem;font-weight:700;letter-spacing:3px;color:#ffd700;text-transform:uppercase;
+            text-shadow:0 2px 6px rgba(0,0,0,0.8);margin-bottom:8px;">New Coin Unlocked!</div>
           <div style="
-            width:140px; height:140px;
+            width:110px; height:110px;
             display:inline-flex; align-items:center; justify-content:center;
             filter:drop-shadow(0 0 24px rgba(255,215,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.9));
             animation: nc-bounce 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
           ">${coinSvgStr}</div>
-          <div style="font-size:1.5rem;font-weight:900;margin-top:14px;
+          <div style="font-size:1.3rem;font-weight:900;margin-top:10px;
             text-shadow:0 2px 6px rgba(0,0,0,0.8),0 0 16px rgba(255,215,0,0.5);">Coin ${coinType}</div>
         </div>
         <button id="nc-continue" style="
           margin-top:8px;
           background-image: url('./Assets/Gameplay/Drop Button_.png');
           background-size:100% 100%; background-color:transparent; border:none;
-          width:200px; height:75px; cursor:pointer;
-          display:flex; align-items:center; justify-content:center; padding-bottom:10px;
+          width:160px; height:60px; cursor:pointer;
+          display:flex; align-items:center; justify-content:center; padding-bottom:12px;
           filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
         ">
-          <span style="color:#fff;font-size:1.6rem;font-weight:900;
+          <span style="color:#fff;font-size:1.4rem;font-weight:900;
             text-shadow:-1.5px -1.5px 0 #1b5b08,1.5px -1.5px 0 #1b5b08,-1.5px 1.5px 0 #1b5b08,1.5px 1.5px 0 #1b5b08,0 3px 4px rgba(0,0,0,0.7);
-            font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-12px);display:inline-block;">CONTINUE</span>
+            font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-10px);display:inline-block;">CONTINUE</span>
         </button>
+        </div>
       `;
 
       // Add bounce animation style once
@@ -312,6 +328,9 @@ class GameController {
     this.selectedSlotIndex = null;
     this.busySlots.clear();
     this.setHammerMode(false);
+    // Reset tutorial so it shows fresh every new game (score 0)
+    this._tutorialRunning = false;
+    localStorage.removeItem('coinPuzzleTutorialDone');
 
     const totalSlots = this.logic.getTotalUnlockedSlots(this.logic.score);
     this.board.unlockSlotsUpTo(totalSlots, (idx) => this.logic.getScoreToUnlockSlot(idx, this.logic.score));
@@ -326,6 +345,9 @@ class GameController {
 
     await this.processAllFullSlots();
     this.checkGameEndState();
+
+    // Show tutorial hint automatically on game start
+    setTimeout(() => this.showTutorialHint(), 800);
   }
 
   async handleRestart() {
@@ -373,6 +395,9 @@ class GameController {
     this.renderer.render(this.selectedSlotIndex);
 
     await this.processAllFullSlots();
+    
+    // Call tutorial hint at start
+    setTimeout(() => this.showTutorialHint(), 500);
   }
 
   async handleSlotClick(index) {
@@ -458,6 +483,9 @@ class GameController {
       const success = this.logic.executeTransfer(srcIndex, destIndex);
 
       if (success) {
+        this._tutorialRunning = false;
+        const hand = document.getElementById('tutorial-hand');
+        if (hand) hand.style.opacity = '0';
         this.selectedSlotIndex = null;
         this.busySlots.add(srcIndex);
         this.busySlots.add(destIndex);
@@ -474,6 +502,14 @@ class GameController {
         await this.processAllFullSlots();
         await this.tryProcessPendingShifts();
         this.checkGameEndState();
+
+        // Auto-restart tutorial hint after each move (while score is 0)
+        if (this.logic.score === 0) {
+          setTimeout(() => {
+            this._tutorialRunning = false;
+            this.showTutorialHint();
+          }, 1000);
+        }
 
       } else {
         // Invalid move feedback
@@ -658,7 +694,153 @@ class GameController {
 
       await this.processAllFullSlots();
       this.checkGameEndState();
+      this.showTutorialHint();
     }
+  }
+
+  showTutorialHint() {
+    // Tutorial only shows at Level 1 (score = 0). Once score >= 1, stop.
+    if (this.logic.score > 0) {
+      this._tutorialRunning = false;
+      const hand = document.getElementById('tutorial-hand');
+      if (hand) hand.style.opacity = '0';
+      return;
+    }
+    
+    if (this._tutorialRunning) return;
+
+    // We no longer abort if there's no hint, because we want to show the DROP button instead.
+    // The runLoop will handle both cases.
+
+    this._tutorialRunning = true;
+
+    // Inject CSS once
+    if (!document.getElementById('tutorial-style')) {
+      const style = document.createElement('style');
+      style.id = 'tutorial-style';
+      style.textContent = `
+        #tutorial-hand {
+          position: fixed;
+          font-size: 4rem;
+          z-index: 9999;
+          pointer-events: none;
+          filter: drop-shadow(0 4px 14px rgba(0,0,0,0.7));
+          opacity: 0;
+          transition: left 0.55s cubic-bezier(.4,0,.2,1), top 0.55s cubic-bezier(.4,0,.2,1), opacity 0.3s;
+        }
+        @keyframes handBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(15px); }
+        }
+        .bouncing-hand {
+          animation: handBounce 0.6s ease-in-out infinite;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    let hand = document.getElementById('tutorial-hand');
+    if (!hand) {
+      hand = document.createElement('div');
+      hand.id = 'tutorial-hand';
+      hand.innerHTML = '👆';
+      document.body.appendChild(hand);
+    }
+
+    const getPos = (index) => {
+      const el = document.querySelector(`.slot[data-index="${index}"]`);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - 40, y: r.top + r.height / 2 - 10 };
+    };
+
+    const getDropBtnPos = () => {
+      const btn = document.getElementById('btn-drop');
+      if (!btn) return null;
+      const r = btn.getBoundingClientRect();
+      // Center of the drop button, slightly higher
+      return { x: r.left + r.width / 2 - 40, y: r.top + r.height / 2 - 30 };
+    };
+
+    const runLoop = () => {
+      if (!this._tutorialRunning) {
+        hand.style.opacity = '0';
+        return;
+      }
+
+      // Stop if level up already happened
+      if (this.logic.score > 0) {
+        this._tutorialRunning = false;
+        hand.style.opacity = '0';
+        return;
+      }
+
+      // Fetch FRESH hint on every iteration — board may have changed
+      const currentHint = this.logic.getHintMove();
+
+      if (currentHint) {
+        // === CASE 1: Valid slot move exists → show slot-to-slot animation ===
+        hand.classList.remove('bouncing-hand');
+        
+        const src = getPos(currentHint.src);
+        const dest = getPos(currentHint.dest);
+        if (!src || !dest) { setTimeout(runLoop, 2200); return; }
+
+        // Fade in at source
+        hand.style.transition = 'opacity 0.3s';
+        hand.style.left = src.x + 'px';
+        hand.style.top = src.y + 'px';
+        hand.style.opacity = '1';
+
+        // Slide to destination
+        setTimeout(() => {
+          if (!this._tutorialRunning) return;
+          hand.style.transition = 'left 0.6s cubic-bezier(.4,0,.2,1), top 0.6s cubic-bezier(.4,0,.2,1), opacity 0.3s';
+          hand.style.left = dest.x + 'px';
+          hand.style.top = dest.y + 'px';
+        }, 600);
+
+        // Fade out
+        setTimeout(() => {
+          if (!this._tutorialRunning) return;
+          hand.style.transition = 'opacity 0.3s';
+          hand.style.opacity = '0';
+        }, 1500);
+
+        setTimeout(runLoop, 2200);
+
+      } else {
+        // === CASE 2: No valid moves → point to DROP button ===
+        const dropPos = getDropBtnPos();
+        if (!dropPos) { setTimeout(runLoop, 2200); return; }
+
+        hand.style.transition = 'opacity 0.3s';
+        hand.style.left = dropPos.x + 'px';
+        hand.style.top = dropPos.y + 'px';
+        hand.style.opacity = '1';
+        
+        // Add CSS bounce animation
+        hand.classList.add('bouncing-hand');
+
+        // Fade out then repeat
+        setTimeout(() => {
+          if (!this._tutorialRunning) return;
+          hand.style.transition = 'opacity 0.3s';
+          hand.style.opacity = '0';
+        }, 1800);
+
+        setTimeout(runLoop, 2200);
+      }
+    };
+
+    runLoop();
+  }
+
+  hideTutorialHint() {
+    this._tutorialRunning = false;
+    const hand = document.getElementById('tutorial-hand');
+    if (hand) hand.style.opacity = '0';
+    localStorage.setItem('coinPuzzleTutorialDone', 'true');
   }
 
 }
@@ -718,11 +900,11 @@ async function initApp() {
     // Small delay to let the user see the 100% full bar before hiding
     setTimeout(() => {
       window.hideLoadingScreen();
-      new GameController();
+      window._gameController = new GameController();
     }, 400);
 
   } else {
-    new GameController();
+    window._gameController = new GameController();
   }
 }
 
