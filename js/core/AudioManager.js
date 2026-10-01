@@ -2,14 +2,16 @@ export class AudioManager {
   constructor(settingsManager) {
     this.settingsManager = settingsManager;
     
-    this.sounds = {
-      dropCoin: new Audio('./Assets/sounds/dropcoin-sound.mp3'),
-      levelUp: new Audio('./Assets/sounds/level-up98.mp3'),
-      slotComplete: new Audio('./Assets/sounds/slot-complete.mp3')
+    this.soundPaths = {
+      dropCoin: './Assets/sounds/dropcoin-sound.mp3',
+      levelUp: './Assets/sounds/level-up98.mp3',
+      slotComplete: './Assets/sounds/slot-complete.mp3'
     };
 
-    // Preload sounds
-    Object.values(this.sounds).forEach(audio => {
+    // Preload sounds by creating dummy audio elements
+    Object.values(this.soundPaths).forEach(src => {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
       audio.load();
     });
   }
@@ -17,13 +19,13 @@ export class AudioManager {
   playSound(name) {
     if (!this.settingsManager || !this.settingsManager.soundEnabled) return;
     
-    const audio = this.sounds[name];
-    if (audio) {
-      // Clone the node to allow overlapping sounds
-      const clone = audio.cloneNode();
-      clone.volume = 0.8; // Set default volume
-      clone.play().catch(e => {
-        // Audio play might fail if user hasn't interacted with page yet
+    const src = this.soundPaths[name];
+    if (src) {
+      // Create a fresh Audio object within the user interaction event
+      // This bypasses iOS Safari's strict cloneNode/autoplay restrictions
+      const audio = new Audio(src);
+      audio.volume = 0.8; 
+      audio.play().catch(e => {
         console.warn('Audio play failed:', e);
       });
     }
