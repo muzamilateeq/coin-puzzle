@@ -6,6 +6,7 @@ import { DropManager } from './logic/dropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
+import { AudioManager } from './core/AudioManager.js';
 import { createCoinSvg } from './ui/coinSvg.js';
 
 class AssetLoader {
@@ -80,70 +81,17 @@ class GameController {
 
     // Global function called by GameLogic when a level up happens
     window.showLevelUpPopup = (oldLevel, newLevel, gems, onContinue) => {
-      // Immediately hide tutorial hand when level up occurs
+      if (window.audioManager) window.audioManager.playSound('levelUp');
       if (window._gameController) {
         window._gameController._tutorialRunning = false;
         const hand = document.getElementById('tutorial-hand');
         if (hand) hand.style.opacity = '0';
       }
-      // Create modal if it doesn't exist
-      let overlay = document.getElementById('lu-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'lu-overlay';
-        overlay.style.cssText = `
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(4px);
-          -webkit-backdrop-filter: blur(4px);
-          display: flex; align-items: center; justify-content: center;
-          z-index: 99999;
-        `;
-        overlay.innerHTML = `
-          <div style="
-            width: calc(100% - 40px);
-            max-width: 260px;
-            background-image: url('./Assets/Loading/BG_.png');
-            background-size: cover; background-position: center;
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; gap: 12px;
-            border-radius: 20px;
-            padding: 22px 16px;
-            border: 1.5px solid rgba(255,255,255,0.15);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-          ">
-          <div style="text-align:center; color:#fff; font-family:'Segoe UI',sans-serif;">
-            <div id="lu-title" style="font-size:2.0rem;font-weight:900;letter-spacing:2px;text-shadow:0 4px 8px rgba(0,0,0,0.9),0 0 20px rgba(255,215,0,0.6);">LEVEL UP!</div>
-            <div id="lu-levels" style="font-size:1.5rem;font-weight:800;color:#ffd700;margin-top:6px;text-shadow:0 2px 6px rgba(0,0,0,0.8);"></div>
-            <div id="lu-reward" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;background:rgba(0,0,0,0.5);padding:8px 20px;border-radius:16px;border:2px solid rgba(255,255,255,0.2);">
-              <span id="lu-gems" style="font-size:1.6rem;font-weight:bold;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.8);"></span>
-              <img src="./Assets/Gameplay/Gem.png" style="width:24px;height:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));" />
-            </div>
-          </div>
-          <button id="lu-continue" style="
-            margin-top:8px;
-            background-image: url('./Assets/Gameplay/Drop Button_.png');
-            background-size:100% 100%; background-color:transparent; border:none;
-            width:160px; height:60px; cursor:pointer;
-            display:flex; align-items:center; justify-content:center; padding-bottom:12px;
-            filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-          ">
-            <span style="color:#fff;font-size:1.4rem;font-weight:900;
-              text-shadow:-1.5px -1.5px 0 #1b5b08,1.5px -1.5px 0 #1b5b08,-1.5px 1.5px 0 #1b5b08,1.5px 1.5px 0 #1b5b08,0 3px 4px rgba(0,0,0,0.7);
-              font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-10px);display:inline-block;">CONTINUE</span>
-          </button>
-          </div>
-        `;
-        const gameContainer = document.getElementById('game-container');
-        (gameContainer || document.body).appendChild(overlay);
-      }
-
-      document.getElementById('lu-levels').textContent = `${oldLevel}  >  ${newLevel}`;
+      
+      const overlay = document.getElementById('lu-overlay');
       document.getElementById('lu-gems').textContent = `+${gems}`;
       overlay.style.display = 'flex';
 
-      // Swap button to remove old listeners
       const oldBtn = document.getElementById('lu-continue');
       const newBtn = oldBtn.cloneNode(true);
       oldBtn.parentNode.replaceChild(newBtn, oldBtn);
@@ -155,76 +103,31 @@ class GameController {
 
     // Global function: show new coin unlocked popup
     window.showNewCoinPopup = (coinType, onContinue) => {
-      let overlay = document.getElementById('nc-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'nc-overlay';
-        overlay.style.cssText = `
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(4px);
-          -webkit-backdrop-filter: blur(4px);
-          display: flex; align-items: center; justify-content: center;
-          z-index: 99999;
-        `;
-        const gameContainer = document.getElementById('game-container');
-        (gameContainer || document.body).appendChild(overlay);
-      }
-
-      // Use the exact same SVG renderer as the board coins
-      const coinSvgStr = createCoinSvg(coinType, true);
-
-      overlay.innerHTML = `
-        <div style="
-          width: calc(100% - 40px);
-          max-width: 260px;
-          background-image: url('./Assets/Loading/BG_.png');
-          background-size: cover; background-position: center;
-          display: flex; align-items: center; justify-content: center;
-          flex-direction: column; gap: 12px;
-          border-radius: 20px;
-          padding: 22px 16px;
-          border: 1.5px solid rgba(255,255,255,0.15);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-        ">
-        <div style="text-align:center; color:#fff; font-family:'Segoe UI',sans-serif;">
-          <div style="font-size:0.9rem;font-weight:700;letter-spacing:3px;color:#ffd700;text-transform:uppercase;
-            text-shadow:0 2px 6px rgba(0,0,0,0.8);margin-bottom:8px;">New Coin Unlocked!</div>
-          <div style="
-            width:110px; height:110px;
-            display:inline-flex; align-items:center; justify-content:center;
-            filter:drop-shadow(0 0 24px rgba(255,215,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.9));
-            animation: nc-bounce 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
-          ">${coinSvgStr}</div>
-          <div style="font-size:1.3rem;font-weight:900;margin-top:10px;
-            text-shadow:0 2px 6px rgba(0,0,0,0.8),0 0 16px rgba(255,215,0,0.5);">Coin ${coinType}</div>
-        </div>
-        <button id="nc-continue" style="
-          margin-top:8px;
-          background-image: url('./Assets/Gameplay/Drop Button_.png');
-          background-size:100% 100%; background-color:transparent; border:none;
-          width:160px; height:60px; cursor:pointer;
-          display:flex; align-items:center; justify-content:center; padding-bottom:12px;
-          filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-        ">
-          <span style="color:#fff;font-size:1.4rem;font-weight:900;
-            text-shadow:-1.5px -1.5px 0 #1b5b08,1.5px -1.5px 0 #1b5b08,-1.5px 1.5px 0 #1b5b08,1.5px 1.5px 0 #1b5b08,0 3px 4px rgba(0,0,0,0.7);
-            font-family:'Segoe UI',sans-serif;letter-spacing:1px;transform:translateY(-10px);display:inline-block;">CONTINUE</span>
-        </button>
-        </div>
-      `;
-
-      // Add bounce animation style once
-      if (!document.getElementById('nc-style')) {
-        const style = document.createElement('style');
-        style.id = 'nc-style';
-        style.textContent = `@keyframes nc-bounce { from { transform: scale(0) rotate(-10deg); opacity:0; } to { transform: scale(1) rotate(0deg); opacity:1; } }`;
-        document.head.appendChild(style);
-      }
-
+      let svgStr = createCoinSvg(coinType, true);
+      svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg" style="width:100%; height:100%;"');
+      
+      const overlay = document.getElementById('nc-overlay');
+      document.getElementById('nc-svg-wrapper').innerHTML = svgStr;
+      document.getElementById('nc-coin-text').textContent = `Coin ${coinType}`;
       overlay.style.display = 'flex';
-      document.getElementById('nc-continue').addEventListener('click', () => {
+
+      const oldBtn = document.getElementById('nc-continue');
+      const newBtn = oldBtn.cloneNode(true);
+      oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+      newBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        if (onContinue) onContinue();
+      });
+    };
+
+    window.showAdsPopup = (onContinue) => {
+      const overlay = document.getElementById('ads-overlay');
+      overlay.style.display = 'flex';
+      
+      const btn = document.getElementById('ads-continue');
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', () => {
         overlay.style.display = 'none';
         if (onContinue) onContinue();
       });
@@ -235,6 +138,8 @@ class GameController {
     this.dropManager = new DropManager(this.board);
     this.renderer = new Renderer(this.board, this.logic, this.dropManager);
     this.settingsManager = new SettingsManager(() => this.handleRestart());
+    this.audioManager = new AudioManager(this.settingsManager);
+    window.audioManager = this.audioManager;
 
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
@@ -448,16 +353,34 @@ class GameController {
 
     // Handle temporary unlock of time slots
     if (slot.isLocked && slot.lockType === 'time' && !slot.isTempUnlocked && !slot.isPendingShift) {
-      slot.isTempUnlocked = true;
-      slot.tempUnlockTimeLeft = slot.timeBonus !== null ? slot.timeBonus : 60;
+      window.showAdsPopup(async () => {
+        slot.isTempUnlocked = true;
+        slot.tempUnlockTimeLeft = slot.timeBonus !== null ? slot.timeBonus : 60;
 
-      // Add visual unlock animation
-      const slotEl = this.renderer.boardEl.children[index];
-      this.busySlots.add(index);
-      await Animations.animateSlotUnlock(slotEl);
-      this.busySlots.delete(index);
+        // Add visual unlock animation
+        const slotEl = this.renderer.boardEl.children[index];
+        this.busySlots.add(index);
+        await Animations.animateSlotUnlock(slotEl);
+        this.busySlots.delete(index);
 
-      this.renderer.render(this.selectedSlotIndex);
+        this.renderer.render(this.selectedSlotIndex);
+      });
+      return;
+    }
+
+    // Handle unlocking via padlock (Ads)
+    if (slot.isLocked && slot.lockType === 'padlock') {
+      window.showAdsPopup(async () => {
+        // Add visual unlock animation
+        const slotEl = this.renderer.boardEl.children[index];
+        this.busySlots.add(index);
+        await Animations.animateSlotUnlock(slotEl);
+        this.busySlots.delete(index);
+
+        // Unlock specific slot
+        this.board.unlockSpecificSlot(index);
+        this.renderer.render(this.selectedSlotIndex);
+      });
       return;
     }
 
@@ -483,6 +406,7 @@ class GameController {
       const success = this.logic.executeTransfer(srcIndex, destIndex);
 
       if (success) {
+        if (this.audioManager) this.audioManager.playSound('dropCoin');
         this._tutorialRunning = false;
         const hand = document.getElementById('tutorial-hand');
         if (hand) hand.style.opacity = '0';
@@ -609,6 +533,7 @@ class GameController {
     if (!slot || slot.isConverting) return;
 
     try {
+      if (this.audioManager) this.audioManager.playSound('slotComplete');
       slot.isConverting = true;
       this.busySlots.add(slotIndex);
 

@@ -222,7 +222,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0px;
+  gap: 2px;
+  min-height: clamp(14px, 3.5vw, 18px);
 }
 
 .locked-level {
@@ -247,6 +248,10 @@
 .locked-icon-gem {
   width: clamp(12px, 3vw, 16px);
   height: clamp(12px, 3vw, 16px);
+}
+
+.locked-icon-gem + .locked-cost {
+  margin-left: -1px;
 }
 
 .locked-icon-time {

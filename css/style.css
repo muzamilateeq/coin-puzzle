@@ -147,7 +147,8 @@ body {
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.7),
     inset 0 1px 2px rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(80, 40, 10, 0.8);
+  border-right: 1px solid rgba(80, 40, 10, 0.8);
   backdrop-filter: blur(15px);
   display: flex;
   flex-direction: column;
@@ -170,6 +171,12 @@ body {
     /* Keep the consistent padding to match the desktop inset */
     padding-left: 12px;
     padding-right: 12px;
+    border-left: none;
+    border-right: none;
+  }
+
+  .modal-overlay {
+    box-shadow: none !important;
   }
 }
 
@@ -508,12 +515,14 @@ button.drop-btn-custom:disabled {
 }
 
 .modal-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(15, 23, 42, 0.9);
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(80, 40, 10, 0.8);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
@@ -940,4 +949,154 @@ button.drop-btn-custom:disabled {
   font-family: 'Segoe UI', sans-serif;
   letter-spacing: 1px;
   transform: translateY(-8px);
+}
+
+/* Popup Overlay Base */
+.popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(80, 40, 10, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.popup-container {
+  width: calc(100% - 40px);
+  max-width: 260px;
+  background-image: url('../Assets/Loading/BG_.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 20px;
+  padding: 22px 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.popup-title {
+  font-size: 2.0rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 215, 0, 0.6);
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+}
+
+.popup-subtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ddd;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.popup-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 20px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.popup-gems-text {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.popup-gem-icon {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.popup-btn {
+  margin-top: 16px;
+  background-image: url('../Assets/Gameplay/Drop\ Button_.png');
+  background-size: 100% 100%;
+  background-color: transparent;
+  border: none;
+  width: 160px;
+  height: 60px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 12px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.popup-btn-text {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 900;
+  text-shadow: -1.5px -1.5px 0 #1b5b08, 1.5px -1.5px 0 #1b5b08, -1.5px 1.5px 0 #1b5b08, 1.5px 1.5px 0 #1b5b08, 0 3px 4px rgba(0, 0, 0, 0.7);
+  font-family: 'Segoe UI', sans-serif;
+  letter-spacing: 1px;
+  transform: translateY(-10px);
+  display: inline-block;
+}
+
+/* New Coin Specific */
+.popup-nc-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #ffd700;
+  text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  margin-bottom: 8px;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.popup-nc-svg-container {
+  width: 110px;
+  height: 110px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 24px rgba(255, 215, 0, 0.8)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.9));
+  animation: nc-bounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.popup-nc-coin-text {
+  font-size: 1.3rem;
+  font-weight: 900;
+  margin-top: 10px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 215, 0, 0.5);
+  text-align: center;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+@keyframes nc-bounce {
+  from {
+    transform: scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }

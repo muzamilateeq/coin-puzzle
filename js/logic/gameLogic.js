@@ -141,9 +141,9 @@ export class GameLogic {
               mainInstance.renderer.render();
             }
           };
-          // Only show "New Coin Unlocked!" popup when a new slot actually opens on the board
-          if (slotsToUnlock > oldSlots && window.showNewCoinPopup) {
-            window.showNewCoinPopup(CONFIG.COIN_TYPES + this.score, doRender);
+          // Always show popup for the coin we JUST created (firstType + 1)
+          if (window.showNewCoinPopup) {
+            window.showNewCoinPopup(firstType + 1, doRender);
           } else {
             doRender();
           }
@@ -209,6 +209,18 @@ export class GameLogic {
     // Keep a sliding window of max 6 coin types dropping at a time
     // E.g. if dropMax is 15, min will be 10.
     return Math.max(1, dropMaxCoin - CONFIG.MAX_COIN_WINDOW);
+  }
+
+  getTargetCoin(score) {
+    if (score < 4) {
+      return score + 3; // 0->3, 1->4, 2->5, 3->6
+    } else {
+      if (score % 2 === 0) {
+        return (score / 2) + 4; // 4->6, 6->7
+      } else {
+        return ((score - 1) / 2) + 5; // 5->7, 7->8
+      }
+    }
   }
 
   checkCollectionLevelUp() {
@@ -277,9 +289,9 @@ export class GameLogic {
               mainInstance.renderer.render();
             }
           };
-          // Only show "New Coin Unlocked!" popup when a new slot actually opens on the board
-          if (slotsToUnlock > oldSlots && window.showNewCoinPopup) {
-            window.showNewCoinPopup(CONFIG.COIN_TYPES + this.score, doRender);
+          // Only show popup for the new coin created at the end of Phase B
+          if (oldScore % 2 !== 0 && window.showNewCoinPopup) {
+            window.showNewCoinPopup(targetCoinType, doRender);
           } else {
             doRender();
           }

@@ -13,10 +13,10 @@
   <link rel="preload" as="image" href="./Assets/Loading/Loading Bar_.png">
   <link rel="preload" as="image" href="./Assets/Loading/Loading Fill_.png">
 
-  <link rel="stylesheet" href="./css/style.css?v=639.0">
+  <link rel="stylesheet" href="./css/style.css?v=639.4">
   <link rel="stylesheet" href="./css/board.css?v=639.0">
   <link rel="stylesheet" href="./css/coin.css?v=639.0">
-  <link rel="stylesheet" href="./css/settings.css?v=639.0">
+  <link rel="stylesheet" href="./css/settings.css?v=639.5">
 </head>
 
 <body>
@@ -99,7 +99,6 @@
         </div>
       </div>
     </div>
-  </div>
 
   <!-- Settings Modal Overlay -->
   <div class="modal-overlay hidden" id="settings-modal">
@@ -109,6 +108,7 @@
 
       <!-- Settings Frame Background -->
       <img src="./Assets/Settings/Layer 27.png" alt="Settings Frame" class="settings-frame-img" />
+
 
       <!-- Settings Header Text -->
       <div class="settings-header-text">Settings</div>
@@ -144,12 +144,54 @@
     </div>
   </div>
 
+    <!-- Shared Popups (Hidden by default) -->
+    <!-- Level Up Popup -->
+    <div id="lu-overlay" class="popup-overlay">
+      <div class="popup-container">
+        <div class="popup-title">LEVEL UP!</div>
+        <div class="popup-reward">
+          <span id="lu-gems" class="popup-gems-text"></span>
+          <img src="./Assets/Gameplay/Gem.png" class="popup-gem-icon" />
+        </div>
+        <button id="lu-continue" class="popup-btn">
+          <span class="popup-btn-text">CONTINUE</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- New Coin Popup -->
+    <div id="nc-overlay" class="popup-overlay">
+      <div class="popup-container">
+        <div class="popup-nc-title">New Coin Unlocked!</div>
+        <div id="nc-svg-wrapper" class="popup-nc-svg-container"></div>
+        <div id="nc-coin-text" class="popup-nc-coin-text"></div>
+        <button id="nc-continue" class="popup-btn" style="margin-top:8px;">
+          <span class="popup-btn-text">CONTINUE</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Ads Popup -->
+    <div id="ads-overlay" class="popup-overlay">
+      <div class="popup-container">
+        <div class="popup-title" style="margin-bottom:12px;">SEE ADS</div>
+        <div class="popup-subtitle">Watch a short ad to unlock this slot!</div>
+        <button id="ads-continue" class="popup-btn">
+          <span class="popup-btn-text">CONTINUE</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+
   <div class="modal-overlay" id="modal">
     <div class="modal-content">
       <h2 class="modal-title" id="modal-title">Level Complete</h2>
       <p class="modal-msg" id="modal-msg">Great job!</p>
       <button id="btn-modal-restart" style="width: 100%;">Play Again</button>
     </div>
+  </div>
   </div>
 
   <script>
@@ -168,7 +210,7 @@
       }
     };
   </script>
-  <script type="module" src="./js/main.js?v=639.0"></script>
+  <script type="module" src="./js/main.js?v=639.4"></script>
 </body>
 
 </html>

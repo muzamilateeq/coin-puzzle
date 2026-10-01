@@ -188,6 +188,16 @@ export function createCoinSvg(type, showLabel = false) {
   <ellipse cx="${fx}" cy="${fy}" rx="${irx}" ry="${iry}" fill="none" stroke="${p.edge}" stroke-width="1.5" opacity="0.6"/>
 
   <!-- 6. Content (Number) -->
+  <!-- Text Shadow -->
+  <text x="${fx}" y="${fy + 6}"
+       text-anchor="middle" dominant-baseline="middle"
+       font-family="'Outfit','Nunito Black','Arial Rounded MT Bold',sans-serif"
+       font-size="${fs}" font-weight="900" letter-spacing="-0.5"
+       fill="${p.edge}"
+       stroke="${p.edge}" stroke-width="3"
+       paint-order="stroke fill" opacity="0.8">${num}</text>
+
+  <!-- Text Foreground -->
   <text x="${fx}" y="${fy + 3}"
        text-anchor="middle" dominant-baseline="middle"
        font-family="'Outfit','Nunito Black','Arial Rounded MT Bold',sans-serif"
