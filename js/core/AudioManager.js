@@ -23,8 +23,8 @@ export class AudioManager {
       }
     };
     
-    document.addEventListener('click', this.unlockAudio, { once: true });
-    document.addEventListener('touchstart', this.unlockAudio, { once: true });
+    document.addEventListener('click', this.unlockAudio);
+    document.addEventListener('touchstart', this.unlockAudio);
 
     this.preloadSounds();
   }
