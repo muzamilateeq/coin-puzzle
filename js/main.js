@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js';
 import { resetCoinCounter } from './core/Coin.js';
 import { Board } from './core/Board.js';
-import { GameLogic } from './logic/gameLogic.js';
+import { GameLogic } from './logic/GameLogic.js';
 import { DropManager } from './logic/dropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
@@ -103,6 +103,7 @@ class GameController {
 
     // Global function: show new coin unlocked popup
     window.showNewCoinPopup = (coinType, onContinue) => {
+      if (this.audioManager) this.audioManager.playSound('newCoinUnlock');
       let svgStr = createCoinSvg(coinType, true);
       svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg" style="width:100%; height:100%;"');
       
@@ -388,6 +389,7 @@ class GameController {
 
     if (this.selectedSlotIndex === null) {
       if (!this.board.getSlot(index).isEmpty()) {
+        if (this.audioManager) this.audioManager.playSound('selectCoin');
         this.selectedSlotIndex = index;
         this.renderer.render(this.selectedSlotIndex);
       }
@@ -406,7 +408,14 @@ class GameController {
       const success = this.logic.executeTransfer(srcIndex, destIndex);
 
       if (success) {
-        if (this.audioManager) this.audioManager.playSound('dropCoin');
+        if (this.audioManager) {
+          this.audioManager.playSound('dropCoin');
+          if (movingCoins.length > 3) {
+            setTimeout(() => {
+              this.audioManager.playSound('dropCoin');
+            }, 100); // 100ms delay for fast double play
+          }
+        }
         this._tutorialRunning = false;
         const hand = document.getElementById('tutorial-hand');
         if (hand) hand.style.opacity = '0';

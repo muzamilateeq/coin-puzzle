@@ -3,11 +3,14 @@ export class AudioManager {
     this.settingsManager = settingsManager;
     
     this.soundPaths = {
-      dropCoin: './Assets/sounds/dropcoin-sound.mp3',
+      dropCoin: './Assets/sounds/coin-dropslot.mp3',
       levelUp: './Assets/sounds/level-up98.mp3',
       slotComplete: './Assets/sounds/slot-complete.mp3',
       btnDrop: './Assets/sounds/drop-coinsounds.mp3',
-      wrongSlot: './Assets/sounds/wrong-slotsound.mp3'
+      wrongSlot: './Assets/sounds/wrong-slotsound.mp3',
+      selectCoin: './Assets/sounds/coin-selecting.mp3',
+      settingAdjust: './Assets/sounds/setting-adjust.mp3',
+      newCoinUnlock: './Assets/sounds/new-coin.mp3'
     };
 
     this.buffers = {};
@@ -75,7 +78,7 @@ export class AudioManager {
     }
   }
 
-  playSound(name) {
+  playSound(name, duration = null) {
     if (!this.settingsManager || !this.settingsManager.soundEnabled) return;
     
     // Wake up if OS put tab to sleep
@@ -89,6 +92,9 @@ export class AudioManager {
       source.buffer = this.buffers[name];
       source.connect(this.masterGain);
       source.start(0);
+      if (duration) {
+        source.stop(this.audioContext.currentTime + duration);
+      }
     } else {
       // Fallback: If Web Audio is unsupported or audio is still downloading/decoding
       const src = this.soundPaths[name];
@@ -96,6 +102,11 @@ export class AudioManager {
         const audio = new Audio(src);
         audio.volume = 0.8; 
         audio.play().catch(() => {});
+        if (duration) {
+          setTimeout(() => {
+            audio.pause();
+          }, duration * 1000);
+        }
       }
     }
   }

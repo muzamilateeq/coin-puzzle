@@ -63,15 +63,23 @@ export class SettingsManager {
     }
   }
 
+  playSettingSound() {
+    if (window.audioManager) {
+      window.audioManager.playSound('settingAdjust');
+    }
+  }
+
   toggleMusicState() {
     this.musicEnabled = !this.musicEnabled;
     localStorage.setItem('musicEnabled', this.musicEnabled);
+    this.playSettingSound();
     this.updateUI();
   }
 
   toggleSoundState() {
     this.soundEnabled = !this.soundEnabled;
     localStorage.setItem('soundEnabled', this.soundEnabled);
+    this.playSettingSound();
     this.updateUI();
   }
 
@@ -81,6 +89,7 @@ export class SettingsManager {
     if (this.vibrateEnabled && navigator.vibrate) {
       navigator.vibrate(50);
     }
+    this.playSettingSound();
     this.updateUI();
   }
 
