@@ -5,22 +5,44 @@ export class AudioManager {
     this.soundPaths = {
       dropCoin: './Assets/sounds/dropcoin-sound.mp3',
       levelUp: './Assets/sounds/level-up98.mp3',
-      slotComplete: './Assets/sounds/slot-complete.mp3'
+      slotComplete: './Assets/sounds/slot-complete.mp3',
+      btnDrop: './Assets/sounds/drop-coinsounds.mp3',
+      wrongSlot: './Assets/sounds/wrong-slotsound.mp3'
     };
 
     this.buffers = {};
+    this.audioContext = null;
+    this.masterGain = null;
+    this.unlocked = false;
     
     // Initialize Web Audio API context for zero-latency playback
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (AudioContext) {
       this.audioContext = new AudioContext();
+      // Setup a single master gain (volume) node connected to speakers
+      this.masterGain = this.audioContext.createGain();
+      this.masterGain.gain.value = 0.8;
+      this.masterGain.connect(this.audioContext.destination);
     }
 
-    // Modern browsers require user interaction before audio context can play
+    // Professional H5 Audio Unlock Routine (Pre-warms the audio hardware)
     this.unlockAudio = () => {
-      if (this.audioContext && this.audioContext.state === 'suspended') {
+      if (this.unlocked || !this.audioContext) return;
+      
+      if (this.audioContext.state === 'suspended') {
         this.audioContext.resume();
       }
+
+      // Play a tiny silent buffer to force hardware initialization instantly (crucial for iOS Safari)
+      const buffer = this.audioContext.createBuffer(1, 1, 22050);
+      const source = this.audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.audioContext.destination);
+      source.start(0);
+
+      this.unlocked = true;
+      document.removeEventListener('click', this.unlockAudio);
+      document.removeEventListener('touchstart', this.unlockAudio);
     };
     
     document.addEventListener('click', this.unlockAudio);
@@ -32,32 +54,31 @@ export class AudioManager {
   async preloadSounds() {
     if (!this.audioContext) return;
     
-    for (const [key, path] of Object.entries(this.soundPaths)) {
+    // Fetch and decode all sounds concurrently
+    const loadSound = async (key, path) => {
       try {
         const response = await fetch(path);
         const arrayBuffer = await response.arrayBuffer();
         
-        // decodeAudioData decodes the mp3 into memory for instant playback
-        // We use the callback signature for full iOS Safari compatibility
         this.audioContext.decodeAudioData(
           arrayBuffer, 
-          (buffer) => {
-            this.buffers[key] = buffer;
-          }, 
-          (err) => {
-            console.warn(`Error decoding audio ${key}:`, err);
-          }
+          (buffer) => { this.buffers[key] = buffer; }, 
+          (err) => { console.warn(`Error decoding audio ${key}:`, err); }
         );
       } catch (err) {
         console.warn(`Failed to fetch sound ${key}:`, err);
       }
+    };
+
+    for (const [key, path] of Object.entries(this.soundPaths)) {
+      loadSound(key, path);
     }
   }
 
   playSound(name) {
     if (!this.settingsManager || !this.settingsManager.soundEnabled) return;
     
-    // Ensure we are resumed if they click for the first time on a sound-triggering element
+    // Wake up if OS put tab to sleep
     if (this.audioContext && this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
@@ -66,12 +87,7 @@ export class AudioManager {
       // Use Web Audio API: Zero Latency, exact timing
       const source = this.audioContext.createBufferSource();
       source.buffer = this.buffers[name];
-      
-      const gainNode = this.audioContext.createGain();
-      gainNode.gain.value = 0.8;
-      
-      source.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
+      source.connect(this.masterGain);
       source.start(0);
     } else {
       // Fallback: If Web Audio is unsupported or audio is still downloading/decoding
@@ -79,9 +95,7 @@ export class AudioManager {
       if (src) {
         const audio = new Audio(src);
         audio.volume = 0.8; 
-        audio.play().catch(e => {
-          console.warn('Fallback audio play failed:', e);
-        });
+        audio.play().catch(() => {});
       }
     }
   }

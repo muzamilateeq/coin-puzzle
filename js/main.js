@@ -436,6 +436,7 @@ class GameController {
         }
 
       } else {
+        if (this.audioManager) this.audioManager.playSound('wrongSlot');
         // Invalid move feedback
         const errSlot = this.selectedSlotIndex;
         this.busySlots.add(errSlot);
@@ -598,6 +599,7 @@ class GameController {
     );
 
     if (success) {
+      if (this.audioManager) this.audioManager.playSound('btnDrop');
       this.selectedSlotIndex = null;
 
       // Render so new coins get data-new-drop="true" in the DOM
