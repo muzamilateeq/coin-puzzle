@@ -1,9 +1,9 @@
 import { CONFIG } from './config.js';
 import { resetCoinCounter } from './core/Coin.js';
 import { Board } from './core/Board.js';
-import { GameLogic } from './logic/GameLogic.js?v=639.32';
-import { DropManager } from './logic/DropManager.js?v=639.32';
-import { Renderer } from './ui/renderer.js?v=639.33';
+import { GameLogic } from './logic/GameLogic.js';
+import { DropManager } from './logic/dropManager.js';
+import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
 import { AudioManager } from './core/AudioManager.js';
