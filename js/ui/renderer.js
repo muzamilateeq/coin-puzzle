@@ -130,103 +130,48 @@ export class Renderer {
 
     // Update HUD Coin Bases with SVGs
     if (this.hudBaseCurrent && this.hudBaseNext) {
-      const score = this.gameLogic.score;
-
-      if (score >= 4) {
-        if (score % 2 === 0) {
-          // Phase A: (Scores 4, 6, 8...) -> Target = 6 of coin N
-          const N = (score / 2) + 4;
-          this.hudBaseNext.style.display = 'none';
-          
-          const leftCoin = N;
-          const svgKey1 = `${leftCoin}_true`;
-          if (this.hudBaseCurrent.dataset.svgKey !== svgKey1) {
-            const oldSvg = this.hudBaseCurrent.querySelector('svg');
-            if (oldSvg) oldSvg.remove();
-            
-            let svgStr = createCoinSvg(leftCoin, true);
-            svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
-            this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
-            this.hudBaseCurrent.dataset.svgKey = svgKey1;
-          }
-          
-          if (this.hudCountCurrent) {
-            const maxCount = getTotalCount(leftCoin);
-            this.hudCountCurrent.textContent = Math.max(0, CONFIG.PHASE_A_TARGET - maxCount);
-          }
+      // Show TWO boxes (Target and Current Max)
+      this.hudBaseNext.style.display = 'flex';
+      
+      // 1. Left Box (Next Upcoming Locked Coin, e.g., 5)
+      const leftCoin = currentMaxCoin + 1;
+      const svgKey1 = `${leftCoin}_true`;
+      if (this.hudBaseCurrent.dataset.svgKey !== svgKey1) {
+        const oldSvg = this.hudBaseCurrent.querySelector('svg');
+        if (oldSvg) oldSvg.remove();
+        
+        let svgStr = createCoinSvg(leftCoin, true);
+        svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg next-locked-coin"');
+        this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
+        this.hudBaseCurrent.dataset.svgKey = svgKey1;
+      }
+      
+      // 2. Right Box (Currently Collecting Coin, e.g., 4)
+      const rightCoin = currentMaxCoin;
+      const svgKey2 = `${rightCoin}_true`;
+      if (this.hudBaseNext.dataset.svgKey !== svgKey2) {
+        const oldSvg = this.hudBaseNext.querySelector('svg');
+        if (oldSvg) oldSvg.remove();
+        
+        let svgStr = createCoinSvg(rightCoin, true);
+        svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
+        this.hudBaseNext.insertAdjacentHTML('afterbegin', svgStr);
+        this.hudBaseNext.dataset.svgKey = svgKey2;
+      }
+      
+      // Set the text under the coins
+      if (this.hudCountCurrent) this.hudCountCurrent.textContent = '1';
+      if (this.hudCountNext) {
+        const maxCount = getTotalCount(rightCoin);
+        const remaining = Math.max(0, CONFIG.MAX_PER_SLOT - maxCount);
+        if (remaining === 0) {
+          this.hudCountNext.innerHTML = '✔';
+          this.hudCountNext.style.color = '#00FF00'; // Bright green for visibility
+          this.hudCountNext.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
         } else {
-          // Phase B: (Scores 5, 7, 9...) -> Target = 1 of coin N+1, AND reach MAX_PER_SLOT for coin N
-          const N = ((score - 1) / 2) + 4;
-          this.hudBaseNext.style.display = 'flex';
-          
-          const leftCoin = N + 1;
-          const rightCoin = N;
-          
-          const svgKey1 = `${leftCoin}_true`;
-          if (this.hudBaseCurrent.dataset.svgKey !== svgKey1) {
-            const oldSvg = this.hudBaseCurrent.querySelector('svg');
-            if (oldSvg) oldSvg.remove();
-            
-            let svgStr = createCoinSvg(leftCoin, true);
-            svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"'); // fully colored
-            this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
-            this.hudBaseCurrent.dataset.svgKey = svgKey1;
-          }
-          
-          const svgKey2 = `${rightCoin}_true`;
-          if (this.hudBaseNext.dataset.svgKey !== svgKey2) {
-            const oldSvg = this.hudBaseNext.querySelector('svg');
-            if (oldSvg) oldSvg.remove();
-            
-            let svgStr = createCoinSvg(rightCoin, true);
-            svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
-            this.hudBaseNext.insertAdjacentHTML('afterbegin', svgStr);
-            this.hudBaseNext.dataset.svgKey = svgKey2;
-          }
-          
-          if (this.hudCountCurrent) {
-            this.hudCountCurrent.textContent = Math.max(0, CONFIG.PHASE_B_TARGET - getTotalCount(leftCoin));
-          }
-          if (this.hudCountNext) {
-            this.hudCountNext.textContent = Math.max(0, CONFIG.MAX_PER_SLOT - getTotalCount(rightCoin));
-          }
-        }
-      } else {
-        // Early levels (Score 0, 1, 2, 3)
-        // Show TWO boxes (Target and Current Max)
-        this.hudBaseNext.style.display = 'flex';
-        
-        // 1. Left Box (Next Upcoming Locked Coin, e.g., 5)
-        const leftCoin = currentMaxCoin + 1;
-        const svgKey1 = `${leftCoin}_true`;
-        if (this.hudBaseCurrent.dataset.svgKey !== svgKey1) {
-          const oldSvg = this.hudBaseCurrent.querySelector('svg');
-          if (oldSvg) oldSvg.remove();
-          
-          let svgStr = createCoinSvg(leftCoin, true);
-          svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg next-locked-coin"');
-          this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
-          this.hudBaseCurrent.dataset.svgKey = svgKey1;
-        }
-        
-        // 2. Right Box (Currently Collecting Coin, e.g., 4)
-        const rightCoin = currentMaxCoin;
-        const svgKey2 = `${rightCoin}_true`;
-        if (this.hudBaseNext.dataset.svgKey !== svgKey2) {
-          const oldSvg = this.hudBaseNext.querySelector('svg');
-          if (oldSvg) oldSvg.remove();
-          
-          let svgStr = createCoinSvg(rightCoin, true);
-          svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
-          this.hudBaseNext.insertAdjacentHTML('afterbegin', svgStr);
-          this.hudBaseNext.dataset.svgKey = svgKey2;
-        }
-        
-        // Set the text under the coins
-        if (this.hudCountCurrent) this.hudCountCurrent.textContent = '1';
-        if (this.hudCountNext) {
-          const maxCount = getTotalCount(rightCoin);
-          this.hudCountNext.textContent = Math.max(0, CONFIG.MAX_PER_SLOT - maxCount);
+          this.hudCountNext.textContent = remaining;
+          this.hudCountNext.style.color = '';
+          this.hudCountNext.style.textShadow = '';
         }
       }
     }
@@ -237,6 +182,14 @@ export class Renderer {
       this.gameLogic.gameState !== 'playing' ||
       !hasEmptySpace
     );
+
+    // Suggestion logic when board is full
+    const endLevelBtn = document.getElementById('btn-end-level');
+    if (!hasEmptySpace && this.gameLogic.gameState === 'playing') {
+      if (endLevelBtn) endLevelBtn.classList.add('show');
+    } else {
+      if (endLevelBtn) endLevelBtn.classList.remove('show');
+    }
 
     this.renderBoard(selectedSlotIndex);
     this.renderHeartTimer();
@@ -272,6 +225,7 @@ export class Renderer {
 
     // 2. Clear the actual game board in logic and DOM
     this.board.clearAll();
+    this.board.resetGemSlotPurchase();
     this.board.unlockSlotsUpTo(newTotalSlots, (idx) => this.gameLogic.getScoreToUnlockSlot(idx, this.gameLogic.score));
     
     Array.from(this.boardEl.children).forEach(slotEl => {
@@ -321,6 +275,24 @@ export class Renderer {
     }
 
     const activeCoinIds = new Set();
+    
+    let recommendedIdx = -1;
+    const hasEmptySpace = this.board.hasEmptySpace();
+    if (!hasEmptySpace && this.gameLogic.gameState === 'playing') {
+      let gemSlotIdx = -1;
+      let timeSlotIdx = -1;
+      slots.forEach((s, idx) => {
+        if (s.isLocked) {
+          if (s.lockType === 'gem') gemSlotIdx = idx;
+          if (s.lockType === 'time') timeSlotIdx = idx;
+        }
+      });
+      if (gemSlotIdx !== -1 && this.gameLogic.gems >= 600) {
+        recommendedIdx = gemSlotIdx;
+      } else if (timeSlotIdx !== -1) {
+        recommendedIdx = timeSlotIdx;
+      }
+    }
 
     // Sync state for all slots and coins
     slots.forEach((slot, index) => {
@@ -340,6 +312,7 @@ export class Renderer {
       if (slot.isPendingShift) slotClass += ' pending-shift'; // Visual cue when timer ends
       // BUG FIX: Don't strip animation classes set by processTransferLifecycle
       if (slotEl.classList.contains('slot-celebrate')) slotClass += ' slot-celebrate';
+      if (index === recommendedIdx) slotClass += ' suggest-pulse';
 
       slotEl.className = slotClass;
 
@@ -383,7 +356,9 @@ export class Renderer {
               </div>
             `;
           } else if (slot.lockType === 'padlock') {
+            const levelText = slot.unlockLevel ? `<div class="locked-level">LEVEL ${slot.unlockLevel}</div>` : '<div class="locked-level"></div>';
             patchEl.innerHTML = `
+              ${levelText}
               <img src="./Assets/Gameplay/Lock Base.png" class="locked-icon-padlock" />
             `;
           }

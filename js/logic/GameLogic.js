@@ -148,10 +148,8 @@ export class GameLogic {
             doRender();
           }
         });
-      }, 1500);
+      }, 500);
     }
-
-    this.checkCollectionLevelUp();
 
     if (this.score >= CONFIG.TARGET_SCORE) {
       this.gameState = 'won';
@@ -162,10 +160,10 @@ export class GameLogic {
   getTotalUnlockedSlots(score) {
     let extra = 0;
     if (score === 2) extra = 1;
-    else if (score === 3) extra = 2;
-    else if (score >= 4 && score <= 6) extra = 3;
-    else if (score >= 7 && score <= 11) extra = 4;
-    else if (score >= 12) extra = Math.floor((score - 12) / 2) + 5;
+    else if (score >= 3 && score <= 4) extra = 2;
+    else if (score >= 5 && score <= 6) extra = 3;
+    else if (score === 7) extra = 4;
+    else if (score >= 8) extra = score - 3;
 
     let total = CONFIG.INITIAL_UNLOCKED_SLOTS + extra;
 
@@ -188,118 +186,52 @@ export class GameLogic {
   }
 
   getDropMaxCoin() {
+    let extra = 0;
+    if (this.score === 2) extra = 1;
+    else if (this.score >= 3 && this.score <= 4) extra = 2;
+    else if (this.score >= 5 && this.score <= 6) extra = 3;
+    else if (this.score === 7) extra = 4;
+    else if (this.score >= 8) extra = this.score - 3;
+
+    const rawTotal = CONFIG.INITIAL_UNLOCKED_SLOTS + extra;
+    
+    // Board 2+ (after Level 13 complete): drop coins up to 16
+    if (rawTotal > 15) {
+      return 16;
+    }
+
     const maxCoinType = CONFIG.COIN_TYPES + this.score;
-    let mergingCoin;
-    if (this.score < 4) {
-      mergingCoin = this.score + 2;
-    } else {
-      mergingCoin = Math.floor(this.score / 2) + 4;
-    }
+    let dropMaxCoin;
 
-    let dropMaxCoin = mergingCoin >= 5 ? mergingCoin - 1 : mergingCoin;
-
-    if (dropMaxCoin > maxCoinType) {
+    if (this.score <= 2) {
       dropMaxCoin = maxCoinType;
+    } else {
+      dropMaxCoin = maxCoinType - 1;
     }
+
+    if (dropMaxCoin < 1) dropMaxCoin = 1;
     return dropMaxCoin;
   }
 
   getDropMinCoin() {
-    const dropMaxCoin = this.getDropMaxCoin();
-    // Keep a sliding window of max 6 coin types dropping at a time
-    // E.g. if dropMax is 15, min will be 10.
-    return Math.max(1, dropMaxCoin - CONFIG.MAX_COIN_WINDOW);
-  }
+    let extra = 0;
+    if (this.score === 2) extra = 1;
+    else if (this.score >= 3 && this.score <= 4) extra = 2;
+    else if (this.score >= 5 && this.score <= 6) extra = 3;
+    else if (this.score === 7) extra = 4;
+    else if (this.score >= 8) extra = this.score - 3;
 
-  getTargetCoin(score) {
-    if (score < 4) {
-      return score + 3; // 0->3, 1->4, 2->5, 3->6
-    } else {
-      if (score % 2 === 0) {
-        return (score / 2) + 4; // 4->6, 6->7
-      } else {
-        return ((score - 1) / 2) + 5; // 5->7, 7->8
-      }
-    }
-  }
-
-  checkCollectionLevelUp() {
-    if (this.isLevelingUp) return false;
-
-    let leveledUp = false;
-    let targetCoinType = null;
-    const totalCount = (type) => {
-      let total = 0;
-      for (const slot of this.board.getAllSlots()) {
-        if (slot.isEmpty()) continue;
-        for (const c of slot.coins) {
-          if (c.type === type) total++;
-        }
-      }
-      return total;
-    };
-
-    if (this.score >= 4) {
-      if (this.score % 2 === 0) {
-        // Phase A: (Scores 4, 6, 8...) -> Target = 6 of coin N
-        const N = (this.score / 2) + 4;
-        if (totalCount(N) >= CONFIG.PHASE_A_TARGET) {
-          targetCoinType = N;
-          leveledUp = true;
-        }
-      } else {
-        // Phase B: (Scores 5, 7, 9...) -> Target = 1 of coin N+1
-        const N = ((this.score - 1) / 2) + 4;
-        if (totalCount(N + 1) >= CONFIG.PHASE_B_TARGET) {
-          targetCoinType = N + 1;
-          leveledUp = true;
-        }
-      }
+    const rawTotal = CONFIG.INITIAL_UNLOCKED_SLOTS + extra;
+    
+    // Board 2+ (after Level 13 complete): drop coins from 9 onwards
+    if (rawTotal > 15) {
+      return 9;
     }
 
-    if (leveledUp) {
-      this.isLevelingUp = true;
-
-      // Dispatch event to UI
-      const event = new CustomEvent('hudGoalCompleted', { detail: { coinType: targetCoinType } });
-      window.dispatchEvent(event);
-
-      // Wait 1.5 seconds for animation
-      setTimeout(() => {
-        const oldScore = this.score;
-        const newScore = this.score + 1;
-        const gemsAwarded = 10 + (newScore % 2 === 0 ? 100 : 200) + (newScore * 10);
-        window.showLevelUpPopup(oldScore, newScore, gemsAwarded, () => {
-          const oldMaxCoin = this.getDropMaxCoin();
-          this.score++;
-          this.gems += gemsAwarded;
-          const newMaxCoin = this.getDropMaxCoin();
-          const oldSlots = this.getTotalUnlockedSlots(this.score - 1);
-          const slotsToUnlock = this.getTotalUnlockedSlots(this.score);
-          this.board.unlockSlotsUpTo(slotsToUnlock, (idx) => this.getScoreToUnlockSlot(idx, this.score));
-          if (this.score >= CONFIG.TARGET_SCORE) {
-            this.gameState = 'won';
-          }
-          this.isLevelingUp = false;
-          const mainInstance = window.gameMain;
-          const doRender = () => {
-            if (oldSlots === 15 && slotsToUnlock === 7 && mainInstance) {
-              mainInstance.renderer.playBoardTransitionAnimation(7);
-            } else if (mainInstance && mainInstance.renderer) {
-              mainInstance.renderer.render();
-            }
-          };
-          // Only show popup for the new coin created at the end of Phase B
-          if (oldScore % 2 !== 0 && window.showNewCoinPopup) {
-            window.showNewCoinPopup(targetCoinType, doRender);
-          } else {
-            doRender();
-          }
-        });
-      }, 1500);
-    }
-    return leveledUp;
+    // On Board 1: Always drop from coin 1 onwards so early coins never stop dropping
+    return 1;
   }
+
 
   checkClear(slotIndex) {
     if (this.isSlotMatchFull(slotIndex)) {
@@ -334,7 +266,6 @@ export class GameLogic {
         const destSlot = slots[j];
         const isDestLocked = destSlot.isLocked && !destSlot.isTempUnlocked;
         if (isDestLocked) continue;
-
         if (destSlot.isEmpty()) return true;
         if (!destSlot.isFull() && destSlot.topCoin.type === srcType) {
           return true;

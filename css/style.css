@@ -382,8 +382,8 @@ body {
   position: absolute;
   bottom: -50px;
   /* Overlap the bottom border perfectly */
-  left: 50%;
-  transform: translateX(-50%) rotateX(-25deg);
+  left: 0;
+  transform: rotateX(-25deg);
   /* Counter-rotate to stay flat facing camera */
   transform-origin: bottom center;
   /* Stand up from its bottom */
@@ -1099,4 +1099,126 @@ button.drop-btn-custom:disabled {
     transform: scale(1) rotate(0deg);
     opacity: 1;
   }
+}
+
+.end-level-btn {
+  position: absolute;
+  left: calc(50% + 83px);
+  right: auto;
+  bottom: 20px;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, #ff4e4e, #c70000);
+  border: 2px solid #ff9e9e;
+  border-radius: 8px;
+  color: white;
+  font-family: "Lilita One", sans-serif;
+  font-size: 0.70rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  transform: translateX(30px) scale(0.9);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.restart-cost {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8em;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.restart-cost img {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.end-level-btn.show {
+  left: calc(50% + 83px);
+  right: auto;
+  transform: translateX(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Responsive adjustments for Mobile & Smaller Devices */
+@media (max-width: 450px) {
+  .drop-btn-custom {
+    width: 135px;
+    height: 58px;
+  }
+  .drop-btn-text {
+    font-size: 1.35rem;
+  }
+  .end-level-btn {
+    left: auto;
+    right: -120px;
+    bottom: 18px;
+    font-size: 0.65rem;
+    padding: 3px 6px;
+    transform: none;
+    transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  }
+  .end-level-btn.show {
+    right: 18px;
+    left: auto;
+    transform: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .drop-btn-custom {
+    width: 120px;
+    height: 52px;
+  }
+  .drop-btn-text {
+    font-size: 1.2rem;
+  }
+  .end-level-btn {
+    left: auto;
+    right: -120px;
+    bottom: 16px;
+    font-size: 0.60rem;
+    padding: 2px 5px;
+  }
+  .end-level-btn.show {
+    right: 16px;
+    left: auto;
+  }
+}
+
+
+@keyframes suggestPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0);
+    transform: scale(1.05);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+    transform: scale(1);
+  }
+}
+
+.suggest-pulse {
+  animation: suggestPulse 1.5s infinite;
+  z-index: 10;
+  border-radius: 8px;
 }

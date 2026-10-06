@@ -10,7 +10,8 @@ export class AudioManager {
       wrongSlot: './Assets/sounds/wrong-slotsound.mp3',
       selectCoin: './Assets/sounds/coin-selecting.mp3',
       settingAdjust: './Assets/sounds/setting-adjust.mp3',
-      newCoinUnlock: './Assets/sounds/new-coin.mp3'
+      newCoinUnlock: './Assets/sounds/new-coin.mp3',
+      newSlotOpen: './Assets/sounds/new-slot-open.mp3'
     };
 
     this.buffers = {};

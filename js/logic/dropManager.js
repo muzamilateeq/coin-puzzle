@@ -19,8 +19,9 @@ export class DropManager {
     while (coinsDropped < count) {
       // Find valid slots with available space
       const validSlots = slots.map((s, index) => ({s, index})).filter(item => {
-        const isLocked = item.s.isLocked && !item.s.isTempUnlocked;
-        return !item.s.isFull() && !isLocked;
+        // Exclude locked slots. Even if they are temporarily unlocked (blue ads slot),
+        // we restrict random drops into them as requested by the user.
+        return !item.s.isFull() && !item.s.isLocked;
       });
       
       if (validSlots.length === 0) break;
@@ -49,8 +50,8 @@ export class DropManager {
       
       usedSlotsInBatch.add(randomSlotIndex);
       
-      // Determine cluster size (2 to 3 coins to prevent overloading one slot)
-      let clusterSize = Math.floor(Math.random() * 2) + 2; 
+      // Determine cluster size (always exactly 2 coins as requested)
+      let clusterSize = 2; 
       clusterSize = Math.min(clusterSize, count - coinsDropped, spaceAvailable);
       
       // Generate a random coin between minCoinType and maxCoinType

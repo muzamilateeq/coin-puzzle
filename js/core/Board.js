@@ -6,6 +6,7 @@ export class Board {
     this.slots = Array.from({ length: CONFIG.TOTAL_SLOTS }, () => new Slot());
     this.manuallyUnlockedIndices = new Set();
     this.lastScoreCount = CONFIG.INITIAL_UNLOCKED_SLOTS;
+    this.hasBoughtGemSlot = false;
   }
 
   getSlot(index) {
@@ -17,8 +18,16 @@ export class Board {
   }
 
   unlockSpecificSlot(index) {
+    if (this.slots[index].lockType === 'gem') {
+      this.hasBoughtGemSlot = true;
+    }
     this.manuallyUnlockedIndices.add(index);
     this.updateLocksAndTypes(this.lastScoreCount);
+  }
+
+  resetGemSlotPurchase() {
+    this.hasBoughtGemSlot = false;
+    this.manuallyUnlockedIndices.clear();
   }
 
   unlockSlotsUpTo(count, unlockScoreCalculator = null) {
@@ -28,13 +37,15 @@ export class Board {
   updateLocksAndTypes(baseCount, unlockScoreCalculator = null) {
     this.lastScoreCount = baseCount;
     
-    // First, determine which ones are unlocked by default level progression
-    const defaultUnlockedStartIndex = CONFIG.TOTAL_SLOTS - baseCount;
+    // Total effective unlocked slots = base level progression + manually purchased slots (600 coins)
+    const extraCount = this.manuallyUnlockedIndices.size;
+    const totalUnlockedCount = Math.min(CONFIG.TOTAL_SLOTS, baseCount + extraCount);
+    
+    const unlockedStartIndex = CONFIG.TOTAL_SLOTS - totalUnlockedCount;
     let lockedSlotIndices = [];
     
     this.slots.forEach((slot, index) => {
-      // It is unlocked if it's in the default unlocked zone (level progression) OR if manually unlocked (gems)
-      if (index >= defaultUnlockedStartIndex || this.manuallyUnlockedIndices.has(index)) {
+      if (index >= unlockedStartIndex) {
         slot.isLocked = false;
         slot.lockType = null;
         slot.isTempUnlocked = false;
@@ -60,26 +71,64 @@ export class Board {
     });
 
     // Assign special types to the remaining locked slots from right to left
-    if (lockedSlotIndices.length > 0) {
-      const idx1 = lockedSlotIndices[lockedSlotIndices.length - 3] || lockedSlotIndices[0];
-      this.slots[idx1].lockType = 'time';
-      this.slots[idx1].timeBonus = 60;
-    }
-    
-    if (lockedSlotIndices.length > 1) {
-      const idx2 = lockedSlotIndices[lockedSlotIndices.length - 2];
-      this.slots[idx2].lockType = 'padlock';
-    }
-    
-    if (lockedSlotIndices.length > 2) {
-      const idx3 = lockedSlotIndices[lockedSlotIndices.length - 1];
-      this.slots[idx3].lockType = 'gem';
-      this.slots[idx3].unlockCost = 600;
-      
-      // Calculate exactly when the NEXT slot (this gem slot) will open
-      let targetIndexForLogic = 15 - idx3; 
-      if (unlockScoreCalculator) {
-          this.slots[idx3].unlockLevel = unlockScoreCalculator(targetIndexForLogic);
+    let availableSlots = [...lockedSlotIndices];
+
+    if (availableSlots.length > 0) {
+      if (!this.hasBoughtGemSlot) {
+        // 1. Gem slot on the rightmost locked slot
+        let gemIdx = availableSlots[availableSlots.length - 1];
+        this.slots[gemIdx].lockType = 'gem';
+        this.slots[gemIdx].unlockCost = 600;
+        let targetIndexForLogic = (15 - gemIdx) - extraCount; 
+        if (unlockScoreCalculator) {
+            this.slots[gemIdx].unlockLevel = unlockScoreCalculator(targetIndexForLogic);
+        }
+        availableSlots = availableSlots.filter(idx => idx !== gemIdx);
+
+        // 2. Padlock slot on the next locked slot to the left
+        if (availableSlots.length > 0) {
+          let padIdx = availableSlots[availableSlots.length - 1];
+          this.slots[padIdx].lockType = 'padlock';
+          let targetIndexForLogic = (15 - padIdx) - extraCount;
+          if (unlockScoreCalculator) {
+              this.slots[padIdx].unlockLevel = unlockScoreCalculator(targetIndexForLogic);
+          }
+          availableSlots = availableSlots.filter(idx => idx !== padIdx);
+        }
+
+        // 3. Time slot on the next locked slot to the left
+        if (availableSlots.length > 0) {
+          let timeIdx = availableSlots[availableSlots.length - 1];
+          const activeTempIdx = lockedSlotIndices.find(idx => this.slots[idx].isTempUnlocked);
+          if (activeTempIdx !== undefined) {
+            timeIdx = activeTempIdx;
+          }
+          this.slots[timeIdx].lockType = 'time';
+          this.slots[timeIdx].timeBonus = this.slots[timeIdx].tempUnlockTimeLeft > 0 ? this.slots[timeIdx].tempUnlockTimeLeft : 60;
+        }
+      } else {
+        // Gem slot has been bought on this board: Padlock and Time slots shift right to fill the boundary
+        // 1. Padlock slot on the rightmost locked slot
+        if (availableSlots.length > 0) {
+          let padIdx = availableSlots[availableSlots.length - 1];
+          this.slots[padIdx].lockType = 'padlock';
+          let targetIndexForLogic = (15 - padIdx) - extraCount;
+          if (unlockScoreCalculator) {
+              this.slots[padIdx].unlockLevel = unlockScoreCalculator(targetIndexForLogic);
+          }
+          availableSlots = availableSlots.filter(idx => idx !== padIdx);
+        }
+
+        // 2. Time slot on the next locked slot to the left
+        if (availableSlots.length > 0) {
+          let timeIdx = availableSlots[availableSlots.length - 1];
+          const activeTempIdx = lockedSlotIndices.find(idx => this.slots[idx].isTempUnlocked);
+          if (activeTempIdx !== undefined) {
+            timeIdx = activeTempIdx;
+          }
+          this.slots[timeIdx].lockType = 'time';
+          this.slots[timeIdx].timeBonus = this.slots[timeIdx].tempUnlockTimeLeft > 0 ? this.slots[timeIdx].tempUnlockTimeLeft : 60;
+        }
       }
     }
   }

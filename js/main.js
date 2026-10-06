@@ -1,9 +1,9 @@
 import { CONFIG } from './config.js';
 import { resetCoinCounter } from './core/Coin.js';
 import { Board } from './core/Board.js';
-import { GameLogic } from './logic/GameLogic.js';
-import { DropManager } from './logic/dropManager.js';
-import { Renderer } from './ui/renderer.js';
+import { GameLogic } from './logic/GameLogic.js?v=639.32';
+import { DropManager } from './logic/DropManager.js?v=639.32';
+import { Renderer } from './ui/renderer.js?v=639.33';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
 import { AudioManager } from './core/AudioManager.js';
@@ -129,6 +129,7 @@ class GameController {
       const newBtn = btn.cloneNode(true);
       btn.parentNode.replaceChild(newBtn, btn);
       newBtn.addEventListener('click', () => {
+        if (this.audioManager) this.audioManager.playSound('newSlotOpen');
         overlay.style.display = 'none';
         if (onContinue) onContinue();
       });
@@ -157,6 +158,17 @@ class GameController {
     this.renderer.init((index) => this.handleSlotClick(index));
 
     document.getElementById('btn-drop').addEventListener('click', () => this.handleDrop());
+    
+    const btnEndLevel = document.getElementById('btn-end-level');
+    if (btnEndLevel) {
+      const restartAction = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.handleRestart();
+      };
+      btnEndLevel.addEventListener('click', restartAction);
+      btnEndLevel.addEventListener('touchstart', restartAction, { passive: false });
+    }
 
     const btnHammer = document.getElementById('btn-hammer');
     if (btnHammer) {
@@ -229,6 +241,7 @@ class GameController {
   async init() {
     resetCoinCounter();
     this.board.clearAll();
+    this.board.resetGemSlotPurchase();
     this.logic.reset();
     this.dropManager.reset();
     this.selectedSlotIndex = null;
@@ -334,6 +347,7 @@ class GameController {
     // Handle unlocking via gems
     if (slot.isLocked && slot.lockType === 'gem') {
       if (this.logic.gems >= slot.unlockCost) {
+        if (this.audioManager) this.audioManager.playSound('newSlotOpen');
         this.logic.gems -= slot.unlockCost;
 
         // Add visual unlock animation
@@ -369,19 +383,8 @@ class GameController {
       return;
     }
 
-    // Handle unlocking via padlock (Ads)
+    // Handle padlock slots (Level Locks - unlocked automatically on level up)
     if (slot.isLocked && slot.lockType === 'padlock') {
-      window.showAdsPopup(async () => {
-        // Add visual unlock animation
-        const slotEl = this.renderer.boardEl.children[index];
-        this.busySlots.add(index);
-        await Animations.animateSlotUnlock(slotEl);
-        this.busySlots.delete(index);
-
-        // Unlock specific slot
-        this.board.unlockSpecificSlot(index);
-        this.renderer.render(this.selectedSlotIndex);
-      });
       return;
     }
 
