@@ -1240,9 +1240,9 @@ button.drop-btn-custom:disabled {
 
 .end-level-btn {
   position: absolute;
-  left: calc(50% + 83px);
+  left: calc(50% + 82px);
   right: auto;
-  bottom: 20px;
+  bottom: -40px;
   opacity: 0;
   pointer-events: none;
   background: linear-gradient(180deg, #ff4e4e, #c70000);
@@ -1256,7 +1256,7 @@ button.drop-btn-custom:disabled {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 -3px 0 rgba(0, 0, 0, 0.3);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-  transform: translateX(30px) scale(0.9);
+  transform: translateX(15px) scale(0.9);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -1283,7 +1283,7 @@ button.drop-btn-custom:disabled {
 }
 
 .end-level-btn.show {
-  left: calc(50% + 83px);
+  left: calc(50% + 82px);
   right: auto;
   transform: translateX(0) scale(1);
   opacity: 1;
@@ -1460,17 +1460,17 @@ body.hammer-cursor .slot:not(.locked) {
   }
 
   .end-level-btn {
-    left: calc(50% + 73px);
+    left: calc(50% + 74px);
     right: auto;
-    bottom: 6px;
+    bottom: -28px;
     font-size: 0.65rem;
     padding: 3px 6px;
-    transform: translateX(30px) scale(0.9);
+    transform: translateX(15px) scale(0.9);
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
   }
 
   .end-level-btn.show {
-    left: calc(50% + 73px);
+    left: calc(50% + 74px);
     right: auto;
     transform: translateX(0) scale(0.95);
   }
@@ -1517,17 +1517,17 @@ body.hammer-cursor .slot:not(.locked) {
   }
 
   .end-level-btn {
-    left: calc(50% + 65px);
+    left: calc(50% + 66px);
     right: auto;
-    bottom: 4px;
+    bottom: -24px;
     font-size: 0.60rem;
     padding: 2px 5px;
-    transform: translateX(30px) scale(0.9);
+    transform: translateX(15px) scale(0.9);
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
   }
 
   .end-level-btn.show {
-    left: calc(50% + 65px);
+    left: calc(50% + 66px);
     right: auto;
     transform: translateX(0) scale(0.9);
   }
