@@ -164,13 +164,10 @@ class GameController {
     
     const btnEndLevel = document.getElementById('btn-end-level');
     if (btnEndLevel) {
-      const restartAction = (e) => {
+      btnEndLevel.addEventListener('click', (e) => {
         e.preventDefault();
-        e.stopPropagation();
         this.handleRestart();
-      };
-      btnEndLevel.addEventListener('click', restartAction);
-      btnEndLevel.addEventListener('touchstart', restartAction, { passive: false });
+      });
     }
 
     const btnHammer = document.getElementById('btn-hammer');
