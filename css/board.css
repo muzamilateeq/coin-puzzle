@@ -6,7 +6,7 @@
 .board-3d-wrapper {
   position: relative;
   width: 95%;
-  max-width: calc((100vh - 18vh) * 0.7289);
+  max-width: calc((100vh - 23vh) * 0.7289);
   height: auto;
   aspect-ratio: 390 / 535;
   margin: -4.5vh auto 0 auto;

@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { resetCoinCounter } from './core/Coin.js';
+import { resetCoinCounter, Coin } from './core/Coin.js';
 import { Board } from './core/Board.js';
 import { GameLogic } from './logic/GameLogic.js';
 import { DropManager } from './logic/dropManager.js';
@@ -146,12 +146,15 @@ class GameController {
     this.selectedSlotIndex = null;
     this.busySlots = new Set();
     this.isHammerActive = false;
+    this.hammerCount = 2;
+    this.fanCount = 1;
 
     this.dropsSinceLevelUp = 5; // Start at 5 so the first drop is normal if no level up yet
     this.lastMaxCoinType = CONFIG.COIN_TYPES;
 
     this.bindEvents();
     this.init();
+    this.updateBoosterBadges();
   }
 
   bindEvents() {
@@ -173,6 +176,58 @@ class GameController {
     const btnHammer = document.getElementById('btn-hammer');
     if (btnHammer) {
       btnHammer.addEventListener('click', () => this.toggleHammerMode());
+    }
+
+    const btnFan = document.getElementById('btn-fan');
+    if (btnFan) {
+      btnFan.addEventListener('click', () => this.handleFanSort());
+    }
+
+    // Booster Purchase Popup Handlers
+    const overlayBuy = document.getElementById('booster-buy-overlay');
+    const btnCloseBuy = document.getElementById('booster-buy-close');
+    const btnGemBuy = document.getElementById('booster-buy-gem-btn');
+    const btnAdBuy = document.getElementById('booster-buy-ad-btn');
+
+    if (btnCloseBuy && overlayBuy) {
+      btnCloseBuy.addEventListener('click', () => {
+        overlayBuy.style.display = 'none';
+      });
+    }
+
+    if (btnGemBuy) {
+      btnGemBuy.addEventListener('click', () => {
+        const cost = 200;
+        if (this.logic.gems >= cost) {
+          this.logic.gems -= cost;
+          if (this._activeBuyBoosterType === 'hammer') {
+            this.hammerCount++;
+          } else {
+            this.fanCount++;
+          }
+          if (this.audioManager) this.audioManager.playSound('newSlotOpen');
+          this.renderer.render(this.selectedSlotIndex);
+          this.updateBoosterBadges();
+          if (overlayBuy) overlayBuy.style.display = 'none';
+        } else {
+          btnGemBuy.classList.add('shake-btn');
+          setTimeout(() => btnGemBuy.classList.remove('shake-btn'), 400);
+        }
+      });
+    }
+
+    if (btnAdBuy) {
+      btnAdBuy.addEventListener('click', () => {
+        if (overlayBuy) overlayBuy.style.display = 'none';
+        if (this._activeBuyBoosterType === 'hammer') {
+          this.hammerCount++;
+        } else {
+          this.fanCount++;
+        }
+        if (this.audioManager) this.audioManager.playSound('newSlotOpen');
+        this.renderer.render(this.selectedSlotIndex);
+        this.updateBoosterBadges();
+      });
     }
 
     this.startGameTimers();
@@ -238,6 +293,57 @@ class GameController {
     }
   }
 
+  updateBoosterBadges() {
+    const hammerBadge = document.getElementById('hammer-count-badge');
+    const fanBadge = document.getElementById('fan-count-badge');
+    const btnHammer = document.getElementById('btn-hammer');
+    const btnFan = document.getElementById('btn-fan');
+
+    if (hammerBadge) {
+      if (this.hammerCount > 0) {
+        hammerBadge.textContent = this.hammerCount;
+        hammerBadge.classList.remove('is-plus');
+        if (btnHammer) btnHammer.classList.remove('disabled');
+      } else {
+        hammerBadge.textContent = '+';
+        hammerBadge.classList.add('is-plus');
+        if (btnHammer) btnHammer.classList.add('disabled');
+      }
+    }
+
+    if (fanBadge) {
+      if (this.fanCount > 0) {
+        fanBadge.textContent = this.fanCount;
+        fanBadge.classList.remove('is-plus');
+        if (btnFan) btnFan.classList.remove('disabled');
+      } else {
+        fanBadge.textContent = '+';
+        fanBadge.classList.add('is-plus');
+        if (btnFan) btnFan.classList.add('disabled');
+      }
+    }
+  }
+
+  showBoosterBuyPopup(type) {
+    this._activeBuyBoosterType = type;
+    const overlay = document.getElementById('booster-buy-overlay');
+    const imgEl = document.getElementById('booster-buy-img');
+    const titleEl = document.getElementById('booster-buy-title');
+
+    if (imgEl) {
+      imgEl.src = type === 'hammer' ? './Assets/Gameplay/Hammer.png' : './Assets/Gameplay/Fan.png';
+    }
+
+    if (titleEl) {
+      titleEl.textContent = type === 'hammer' ? 'GET HAMMER' : 'GET FAN SORT';
+    }
+
+    const hand = document.getElementById('tutorial-hand');
+    if (hand) hand.style.opacity = '0';
+
+    if (overlay) overlay.style.display = 'flex';
+  }
+
   async init() {
     resetCoinCounter();
     this.board.clearAll();
@@ -247,6 +353,9 @@ class GameController {
     this.selectedSlotIndex = null;
     this.busySlots.clear();
     this.setHammerMode(false);
+    this.hammerCount = 2;
+    this.fanCount = 1;
+    this.updateBoosterBadges();
     // Reset tutorial so it shows fresh every new game (score 0)
     this._tutorialRunning = false;
     localStorage.removeItem('coinPuzzleTutorialDone');
@@ -296,6 +405,9 @@ class GameController {
     this.selectedSlotIndex = null;
     this.busySlots.clear();
     this.setHammerMode(false);
+    this.hammerCount = 2;
+    this.fanCount = 1;
+    this.updateBoosterBadges();
 
     // Re-apply same slots based on current level progress
     const totalSlots = this.logic.getTotalUnlockedSlots(this.logic.score);
@@ -319,17 +431,162 @@ class GameController {
     setTimeout(() => this.showTutorialHint(), 500);
   }
 
+  toggleHammerMode() {
+    if (this.logic.gameState !== 'playing') return;
+    if (this.hammerCount <= 0) {
+      this.setHammerMode(false);
+      const btnHammer = document.getElementById('btn-hammer');
+      if (btnHammer) {
+        btnHammer.classList.add('shake-btn');
+        setTimeout(() => btnHammer.classList.remove('shake-btn'), 400);
+      }
+      this.showBoosterBuyPopup('hammer');
+      return;
+    }
+    this.setHammerMode(!this.isHammerActive);
+  }
+
+  setHammerMode(active) {
+    this.isHammerActive = active;
+    const btnHammer = document.getElementById('btn-hammer');
+    if (btnHammer) {
+      if (active) {
+        btnHammer.classList.add('active');
+        document.body.classList.add('hammer-cursor');
+      } else {
+        btnHammer.classList.remove('active');
+        document.body.classList.remove('hammer-cursor');
+      }
+    }
+  }
+
+  async handleFanSort() {
+    if (this.logic.gameState !== 'playing') return;
+    if (this.busySlots.size > 0) return;
+
+    if (this.fanCount <= 0) {
+      const btnFan = document.getElementById('btn-fan');
+      if (btnFan) {
+        btnFan.classList.add('shake-btn');
+        setTimeout(() => btnFan.classList.remove('shake-btn'), 400);
+      }
+      this.showBoosterBuyPopup('fan');
+      return;
+    }
+
+    const btnFan = document.getElementById('btn-fan');
+    if (btnFan) btnFan.classList.add('spinning');
+
+    if (this.audioManager) {
+      this.audioManager.playSound('fanWind') || this.audioManager.playSound('drop');
+    }
+
+    // 1. Gather all active (unlocked / tempUnlocked) slots
+    const playableSlots = this.board.getAllSlots().filter(slot => !slot.isLocked || slot.isTempUnlocked);
+
+    let allCoins = [];
+    playableSlots.forEach(slot => {
+      allCoins.push(...slot.coins);
+    });
+
+    if (allCoins.length === 0) {
+      if (btnFan) btnFan.classList.remove('spinning');
+      return;
+    }
+
+    // Deduct fan count upon activation
+    this.fanCount--;
+    this.updateBoosterBadges();
+
+    // Mark all active slots as busy
+    playableSlots.forEach((slot) => {
+      const realIdx = this.board.getAllSlots().indexOf(slot);
+      if (realIdx !== -1) this.busySlots.add(realIdx);
+    });
+
+    // Add visual wind swirl effect to game board
+    const boardEl = this.renderer.boardEl;
+    if (boardEl) boardEl.classList.add('fan-wind-active');
+
+    await new Promise(r => setTimeout(r, 250));
+
+    // Clear coins from active slots
+    playableSlots.forEach(slot => slot.clear());
+
+    // 2. Group all coins by type
+    const coinGroups = new Map();
+    allCoins.forEach(coin => {
+      if (!coinGroups.has(coin.type)) {
+        coinGroups.set(coin.type, []);
+      }
+      coinGroups.get(coin.type).push(coin);
+    });
+
+    // Sort types ascending
+    const sortedTypes = Array.from(coinGroups.keys()).sort((a, b) => a - b);
+
+    // 3. Re-distribute sorted coins into playable slots cleanly (preserving 100% of coins)
+    for (const type of sortedTypes) {
+      const coinsOfType = coinGroups.get(type);
+
+      while (coinsOfType.length > 0) {
+        // Priority 1: Slot already containing this coin type with available space
+        let targetSlot = playableSlots.find(s => !s.isEmpty() && s.topCoin && s.topCoin.type === type && !s.isFull());
+
+        // Priority 2: Completely empty slot
+        if (!targetSlot) {
+          targetSlot = playableSlots.find(s => s.isEmpty());
+        }
+
+        // Priority 3: Any slot with available space (fail-safe)
+        if (!targetSlot) {
+          targetSlot = playableSlots.find(s => !s.isFull());
+        }
+
+        if (!targetSlot) break;
+
+        const space = targetSlot.spaceAvailable;
+        const toInsert = coinsOfType.splice(0, space);
+        targetSlot.push(...toInsert);
+      }
+    }
+
+    // Render updated clean board DOM
+    this.renderer.render(this.selectedSlotIndex);
+
+    await new Promise(r => setTimeout(r, 200));
+
+    if (boardEl) boardEl.classList.remove('fan-wind-active');
+    this.busySlots.clear();
+
+    // 4. Process any 10-coin full slots created by the sort
+    await this.processAllFullSlots();
+
+    if (btnFan) {
+      setTimeout(() => btnFan.classList.remove('spinning'), 300);
+    }
+  }
+
   async handleSlotClick(index) {
     if (this.logic.gameState !== 'playing') return;
     if (this.busySlots.size > 0) return; // Prevent clicks while animations or conversions are active
 
     // Handle Hammer Mode Click
     if (this.isHammerActive) {
+      if (this.hammerCount <= 0) {
+        this.setHammerMode(false);
+        return;
+      }
+
       const slot = this.board.getSlot(index);
       if (!slot.isEmpty() && !slot.isLocked) {
         // Prevent clicks during animation
         this.busySlots.add(index);
         this.setHammerMode(false);
+
+        // Deduct 1 hammer
+        this.hammerCount--;
+        this.updateBoosterBadges();
 
         const slotEl = this.renderer.boardEl.children[index];
         await Animations.animateHammerSmash(slotEl);
@@ -702,14 +959,27 @@ class GameController {
     };
 
     const runLoop = () => {
-      if (!this._tutorialRunning) {
+      // Check if any popup modal is currently active/visible
+      const isPopupVisible = Array.from(document.querySelectorAll('.popup-overlay'))
+        .some(el => el.style.display === 'flex' || window.getComputedStyle(el).display === 'flex');
+      
+      const isSettingsVisible = document.getElementById('settings-modal')?.classList.contains('active');
+
+      if (isPopupVisible || isSettingsVisible || !this._tutorialRunning) {
+        hand.style.display = 'none';
         hand.style.opacity = '0';
+        hand.classList.remove('bouncing-hand');
+        if (isPopupVisible || isSettingsVisible) {
+          setTimeout(runLoop, 1000);
+          return;
+        }
         return;
       }
 
       // Stop if level up already happened
       if (this.logic.score > 0) {
         this._tutorialRunning = false;
+        hand.style.display = 'none';
         hand.style.opacity = '0';
         return;
       }
@@ -726,6 +996,7 @@ class GameController {
         if (!src || !dest) { setTimeout(runLoop, 2200); return; }
 
         // Fade in at source
+        hand.style.display = 'block';
         hand.style.transition = 'opacity 0.3s';
         hand.style.left = src.x + 'px';
         hand.style.top = src.y + 'px';
@@ -748,11 +1019,12 @@ class GameController {
 
         setTimeout(runLoop, 2200);
 
-      } else {
-        // === CASE 2: No valid moves → point to DROP button ===
+      } else if (this.board.hasEmptySpace()) {
+        // === CASE 2: No valid moves BUT board has empty space → point to DROP button ===
         const dropPos = getDropBtnPos();
         if (!dropPos) { setTimeout(runLoop, 2200); return; }
 
+        hand.style.display = 'block';
         hand.style.transition = 'opacity 0.3s';
         hand.style.left = dropPos.x + 'px';
         hand.style.top = dropPos.y + 'px';
@@ -769,6 +1041,11 @@ class GameController {
         }, 1800);
 
         setTimeout(runLoop, 2200);
+      } else {
+        // === CASE 3: Board is completely full → Hide tutorial hand completely ===
+        hand.style.opacity = '0';
+        hand.classList.remove('bouncing-hand');
+        setTimeout(runLoop, 1500);
       }
     };
 

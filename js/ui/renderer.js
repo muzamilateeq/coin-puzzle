@@ -41,7 +41,7 @@ export class Renderer {
   handleHudGoalCompleted(e) {
     const coinType = e.detail.coinType;
     let targetHudBox = null;
-    
+
     if (this.hudBaseCurrent && this.hudBaseCurrent.dataset.svgKey === `${coinType}_true`) {
       targetHudBox = this.hudBaseCurrent;
     } else if (this.hudBaseNext && this.hudBaseNext.dataset.svgKey === `${coinType}_true`) {
@@ -49,27 +49,27 @@ export class Renderer {
     }
 
     if (targetHudBox) {
-        // Create green tick
-        const tick = document.createElement('div');
-        tick.className = 'hud-checkmark';
-        tick.innerHTML = '✔';
-        targetHudBox.appendChild(tick);
-        
-        // Add celebrate animation
-        targetHudBox.classList.add('hud-celebrate');
-        
-        // Floating +10 Gems
-        const floatText = document.createElement('div');
-        floatText.className = 'floating-gem-text';
-        floatText.innerHTML = '+10 <img src="assets/gem.png" style="width:20px; vertical-align:middle; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">';
-        targetHudBox.appendChild(floatText);
-        
-        // Cleanup after animation
-        setTimeout(() => {
-            if (tick.parentNode) tick.remove();
-            if (floatText.parentNode) floatText.remove();
-            targetHudBox.classList.remove('hud-celebrate');
-        }, 1500);
+      // Create green tick
+      const tick = document.createElement('div');
+      tick.className = 'hud-checkmark';
+      tick.innerHTML = '✔';
+      targetHudBox.appendChild(tick);
+
+      // Add celebrate animation
+      targetHudBox.classList.add('hud-celebrate');
+
+      // Floating +10 Gems
+      const floatText = document.createElement('div');
+      floatText.className = 'floating-gem-text';
+      floatText.innerHTML = '+10 <img src="assets/gem.png" style="width:20px; vertical-align:middle; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">';
+      targetHudBox.appendChild(floatText);
+
+      // Cleanup after animation
+      setTimeout(() => {
+        if (tick.parentNode) tick.remove();
+        if (floatText.parentNode) floatText.remove();
+        targetHudBox.classList.remove('hud-celebrate');
+      }, 1500);
     }
   }
 
@@ -109,7 +109,7 @@ export class Renderer {
     };
 
     const totalUnlocked = CONFIG.INITIAL_UNLOCKED_SLOTS + this.gameLogic.score;
-    
+
     if (this.targetEl) {
       if (totalUnlocked < CONFIG.TOTAL_SLOTS) {
         this.targetEl.textContent = currentMaxCoin;
@@ -132,33 +132,33 @@ export class Renderer {
     if (this.hudBaseCurrent && this.hudBaseNext) {
       // Show TWO boxes (Target and Current Max)
       this.hudBaseNext.style.display = 'flex';
-      
+
       // 1. Left Box (Next Upcoming Locked Coin, e.g., 5)
       const leftCoin = currentMaxCoin + 1;
       const svgKey1 = `${leftCoin}_true`;
       if (this.hudBaseCurrent.dataset.svgKey !== svgKey1) {
         const oldSvg = this.hudBaseCurrent.querySelector('svg');
         if (oldSvg) oldSvg.remove();
-        
+
         let svgStr = createCoinSvg(leftCoin, true);
         svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg next-locked-coin"');
         this.hudBaseCurrent.insertAdjacentHTML('afterbegin', svgStr);
         this.hudBaseCurrent.dataset.svgKey = svgKey1;
       }
-      
+
       // 2. Right Box (Currently Collecting Coin, e.g., 4)
       const rightCoin = currentMaxCoin;
       const svgKey2 = `${rightCoin}_true`;
       if (this.hudBaseNext.dataset.svgKey !== svgKey2) {
         const oldSvg = this.hudBaseNext.querySelector('svg');
         if (oldSvg) oldSvg.remove();
-        
+
         let svgStr = createCoinSvg(rightCoin, true);
         svgStr = svgStr.replace('class="coin-svg"', 'class="coin-svg hud-svg"');
         this.hudBaseNext.insertAdjacentHTML('afterbegin', svgStr);
         this.hudBaseNext.dataset.svgKey = svgKey2;
       }
-      
+
       // Set the text under the coins
       if (this.hudCountCurrent) this.hudCountCurrent.textContent = '1';
       if (this.hudCountNext) {
@@ -198,7 +198,7 @@ export class Renderer {
   renderHeartTimer() {
     const timerEl = document.getElementById('ui-heart-timer');
     if (!timerEl) return;
-    
+
     if (this.gameLogic.hearts >= 5) {
       timerEl.textContent = 'Full';
     } else if (this.gameLogic.nextHeartTime) {
@@ -207,7 +207,7 @@ export class Renderer {
       const secs = (remaining % 60).toString().padStart(2, '0');
       timerEl.textContent = `${mins}:${secs}`;
     }
-    
+
     if (this.heartsEl) this.heartsEl.textContent = this.gameLogic.hearts;
   }
 
@@ -227,10 +227,10 @@ export class Renderer {
     this.board.clearAll();
     this.board.resetGemSlotPurchase();
     this.board.unlockSlotsUpTo(newTotalSlots, (idx) => this.gameLogic.getScoreToUnlockSlot(idx, this.gameLogic.score));
-    
+
     Array.from(this.boardEl.children).forEach(slotEl => {
-       const coins = slotEl.querySelectorAll('.coin');
-       coins.forEach(c => c.remove());
+      const coins = slotEl.querySelectorAll('.coin');
+      coins.forEach(c => c.remove());
     });
     this.coinDomMap.clear();
 
@@ -240,7 +240,7 @@ export class Renderer {
     // 4. Position the real board below the screen
     this.boardEl.style.transition = 'none';
     this.boardEl.style.transform = 'translateY(100vh)';
-    
+
     // Force reflow
     this.boardEl.offsetHeight;
 
@@ -275,7 +275,7 @@ export class Renderer {
     }
 
     const activeCoinIds = new Set();
-    
+
     let recommendedIdx = -1;
     const hasEmptySpace = this.board.hasEmptySpace();
     if (!hasEmptySpace && this.gameLogic.gameState === 'playing') {
@@ -301,7 +301,7 @@ export class Renderer {
       // Update slot classes — preserve animation classes already set
       let slotClass = 'slot';
       const isEffectivelyLocked = slot.isLocked && !slot.isTempUnlocked;
-      
+
       if (isEffectivelyLocked) {
         slotClass += ' locked';
         if (slot.lockType) {
@@ -319,24 +319,24 @@ export class Renderer {
       // Handle rendering special locked slot internals
       if (isEffectivelyLocked && slot.lockType) {
         let patchEl = slotEl.querySelector('.locked-patch');
-        
+
         // Rebuild patch if it doesn't exist or if its type/level/temp state has changed
         const currentLevel = slot.unlockLevel ? String(slot.unlockLevel) : '';
         const tempState = slot.isTempUnlocked ? '1' : '0';
-        
+
         if (!patchEl || patchEl.dataset.lockType !== slot.lockType || patchEl.dataset.tempState !== tempState) {
           if (patchEl) patchEl.remove();
-          
+
           patchEl = document.createElement('div');
           patchEl.className = 'locked-patch';
           patchEl.dataset.lockType = slot.lockType;
           patchEl.dataset.unlockLevel = currentLevel;
           patchEl.dataset.tempState = tempState;
-          
+
           if (slot.lockType === 'gem') {
             const levelText = slot.unlockLevel ? `<div class="locked-level">LEVEL ${slot.unlockLevel}</div>` : '<div class="locked-level"></div>';
             const costText = slot.unlockCost !== null ? slot.unlockCost : 600;
-            
+
             patchEl.innerHTML = `
               ${levelText}
               <img src="./Assets/Gameplay/Plus Iocn_.png" class="locked-icon-plus-center" />
@@ -347,7 +347,7 @@ export class Renderer {
             `;
           } else if (slot.lockType === 'time') {
             const timeVal = slot.timeBonus !== null ? slot.timeBonus : 60;
-            
+
             patchEl.innerHTML = `
               <div class="locked-level">EXTRA</div>
               <img src="./Assets/Gameplay/Extra Time Icon_.png" class="locked-icon-time-center" />

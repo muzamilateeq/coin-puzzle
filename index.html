@@ -13,8 +13,8 @@
   <link rel="preload" as="image" href="./Assets/Loading/Loading Bar_.png">
   <link rel="preload" as="image" href="./Assets/Loading/Loading Fill_.png">
 
-  <link rel="stylesheet" href="./css/style.css?v=645.0">
-  <link rel="stylesheet" href="./css/board.css?v=639.0">
+  <link rel="stylesheet" href="./css/style.css?v=666.0">
+  <link rel="stylesheet" href="./css/board.css?v=640.0">
   <link rel="stylesheet" href="./css/coin.css?v=639.0">
   <link rel="stylesheet" href="./css/settings.css?v=639.5">
 </head>
@@ -92,6 +92,18 @@
 
         <!-- Controls (Bottom) -->
         <div class="controls">
+          <!-- Hammer Booster Button (Left) -->
+          <button id="btn-hammer" class="hammer-btn-custom" title="Smash Slot Coins">
+            <img src="./Assets/Gameplay/Hammer.png" class="hammer-btn-icon" alt="Hammer" />
+            <span id="hammer-count-badge" class="booster-count-badge">2</span>
+          </button>
+
+          <!-- Fan Auto-Sort Booster Button (Left Next to Hammer) -->
+          <button id="btn-fan" class="fan-btn-custom" title="Auto Sort Coins">
+            <img src="./Assets/Gameplay/Fan.png" class="fan-btn-icon" alt="Fan Sort" />
+            <span id="fan-count-badge" class="booster-count-badge">1</span>
+          </button>
+
           <button id="btn-drop" class="drop-btn-custom">
             <img src="./Assets/Gameplay/Coins_.png" class="drop-btn-icon" alt="Coins" />
             <span class="drop-btn-text">DROP</span>
@@ -193,6 +205,36 @@
       </div>
     </div>
 
+    <!-- Booster Buy Popup -->
+    <div id="booster-buy-overlay" class="popup-overlay">
+      <div class="popup-container booster-buy-container">
+        <!-- Close Cross Button (Top Right) -->
+        <button id="booster-buy-close" class="booster-close-btn" title="Close">
+          <img src="./Assets/Settings/Cross.png" alt="Close" />
+        </button>
+
+        <!-- Booster Icon Header -->
+        <div class="booster-buy-icon-wrap">
+          <img id="booster-buy-img" src="./Assets/Gameplay/Fan.png" alt="Booster" />
+        </div>
+
+        <div id="booster-buy-title" class="booster-buy-title-text">GET BOOSTER</div>
+
+        <!-- Green Button: Buy with 200 Gems -->
+        <button id="booster-buy-gem-btn" class="booster-btn-green">
+          <img src="./Assets/Gameplay/Gem.png" class="booster-btn-gem-icon" alt="Gem" />
+          <span class="booster-btn-text">200</span>
+          <span class="btn-qty-badge">x1</span>
+        </button>
+
+        <!-- Yellow Button: Get FREE (Watch Ad) -->
+        <button id="booster-buy-ad-btn" class="booster-btn-yellow">
+          <span class="booster-btn-text">FREE</span>
+          <span class="btn-qty-badge">x1</span>
+        </button>
+      </div>
+    </div>
+
   </div>
 
 
@@ -221,7 +263,7 @@
       }
     };
   </script>
-  <script type="module" src="./js/main.js?v=654.0"></script>
+  <script type="module" src="./js/main.js?v=661.0"></script>
 </body>
 
 </html>

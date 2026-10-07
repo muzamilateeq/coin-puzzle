@@ -470,27 +470,7 @@ button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.controls button#btn-hammer {
-  padding: 4px;
-  /* Less padding so image fits nicely */
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.controls button#btn-hammer img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-.controls button#btn-hammer.active {
-  background: #f59e0b;
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-}
 
 button:disabled {
   background: linear-gradient(135deg, #475569, #334155);
@@ -965,7 +945,7 @@ button.drop-btn-custom:disabled {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 99999;
+  z-index: 999999;
 }
 
 .popup-container {
@@ -1054,6 +1034,163 @@ button.drop-btn-custom:disabled {
   letter-spacing: 1px;
   transform: translateY(-10px);
   display: inline-block;
+}
+
+/* Booster Buy Popup Customization */
+.booster-buy-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.booster-close-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.7));
+  transition: transform 0.2s ease;
+  padding: 0;
+}
+
+.booster-close-btn:active {
+  transform: scale(0.9);
+}
+
+.booster-close-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.booster-buy-icon-wrap {
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(0, 0, 0, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  margin-top: 4px;
+}
+
+.booster-buy-icon-wrap img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+}
+
+.booster-buy-title-text {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  letter-spacing: 1px;
+}
+
+/* Green Button (Gem Purchase 200) */
+.booster-btn-green {
+  position: relative;
+  width: 70%;
+  max-width: 150px;
+  height: 44px;
+  background: linear-gradient(180deg, #00e676 0%, #00a152 100%);
+  border: 2px solid #b9f6ca;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(0, 230, 118, 0.4), inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, filter 0.15s ease;
+  outline: none;
+}
+
+.booster-btn-green:active {
+  transform: scale(0.96);
+  filter: brightness(0.9);
+}
+
+.booster-btn-gem-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.booster-btn-green .booster-btn-text {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Yellow Button (FREE) */
+.booster-btn-yellow {
+  position: relative;
+  width: 70%;
+  max-width: 150px;
+  height: 44px;
+  background: linear-gradient(180deg, #ffea00 0%, #ffab00 100%);
+  border: 2px solid #fffde7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(255, 171, 0, 0.4), inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, filter 0.15s ease;
+  outline: none;
+}
+
+.booster-btn-yellow:active {
+  transform: scale(0.96);
+  filter: brightness(0.9);
+}
+
+.booster-btn-yellow .booster-btn-text {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #37474f;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  letter-spacing: 1px;
+}
+
+/* Badge for +1 quantity on top-right of Green & Yellow buttons */
+.btn-qty-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #ff1744, #d50000);
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  padding: 1px 6px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  z-index: 10;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 /* New Coin Specific */
@@ -1153,28 +1290,219 @@ button.drop-btn-custom:disabled {
   pointer-events: auto;
 }
 
+/* =========================================================================
+   HAMMER BOOSTER BUTTON (Full Left Side, Shifted Up)
+   ========================================================================= */
+.hammer-btn-custom {
+  position: absolute;
+  left: 15px;
+  right: auto;
+  bottom: -45px;
+  transform: none;
+  background: linear-gradient(180deg, #ff9d00, #c75a00);
+  border: 2px solid #ffe066;
+  border-radius: 8px;
+  color: white;
+  padding: 4px 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  min-width: 42px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hammer-btn-custom:active {
+  transform: scale(0.92);
+}
+
+.hammer-btn-custom.active {
+  background: linear-gradient(180deg, #00e676, #00897b);
+  border-color: #a7ffeb;
+  box-shadow: 0 0 12px #00e676, inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+  animation: hammerPulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes hammerPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+.hammer-btn-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+body.hammer-cursor .slot:not(.locked) {
+  cursor: crosshair !important;
+}
+
+/* =========================================================================
+   FAN AUTO-SORT BOOSTER BUTTON (Right Side)
+   ========================================================================= */
+.fan-btn-custom {
+  position: absolute;
+  left: 80px;
+  right: auto;
+  bottom: -45px;
+  transform: none;
+  background: linear-gradient(180deg, #00b0ff, #0060b8);
+  border: 2px solid #80d8ff;
+  border-radius: 8px;
+  color: white;
+  padding: 4px 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  min-width: 42px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fan-btn-custom:active {
+  transform: scale(0.92);
+}
+
+.fan-btn-custom.spinning .fan-btn-icon {
+  animation: fanSpin 0.6s linear infinite;
+}
+
+@keyframes fanSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+.fan-btn-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+  transition: transform 0.3s ease;
+}
+
+/* Booster Count & Plus Badge (Bottom Right of Hammer & Fan Buttons) */
+.booster-count-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff1744, #d50000);
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  z-index: 1005;
+  transition: transform 0.2s ease, background 0.2s ease;
+  line-height: 1;
+}
+
+.booster-count-badge.is-plus {
+  background: linear-gradient(135deg, #00e676, #00a152);
+  border-color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.hammer-btn-custom.disabled,
+.fan-btn-custom.disabled {
+  filter: grayscale(0.2);
+  opacity: 0.85;
+}
+
+@keyframes btnShake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-4px) rotate(-3deg); }
+  40% { transform: translateX(4px) rotate(3deg); }
+  60% { transform: translateX(-4px) rotate(-3deg); }
+  80% { transform: translateX(4px) rotate(3deg); }
+  100% { transform: translateX(0); }
+}
+
+.hammer-btn-custom.shake-btn,
+.fan-btn-custom.shake-btn {
+  animation: btnShake 0.4s ease-in-out;
+}
+
 /* Responsive adjustments for Mobile & Smaller Devices */
 @media (max-width: 450px) {
   .drop-btn-custom {
     width: 135px;
     height: 58px;
   }
+
   .drop-btn-text {
     font-size: 1.35rem;
   }
+
   .end-level-btn {
-    left: auto;
-    right: -120px;
-    bottom: 18px;
+    left: calc(50% + 73px);
+    right: auto;
+    bottom: 6px;
     font-size: 0.65rem;
     padding: 3px 6px;
-    transform: none;
-    transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    transform: translateX(30px) scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
   }
+
   .end-level-btn.show {
-    right: 18px;
-    left: auto;
+    left: calc(50% + 73px);
+    right: auto;
+    transform: translateX(0) scale(0.95);
+  }
+
+  .hammer-btn-custom {
+    left: 12px;
+    right: auto;
+    bottom: -32px;
     transform: none;
+    height: 38px;
+    min-width: 38px;
+    padding: 3px 7px;
+  }
+
+  .hammer-btn-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .fan-btn-custom {
+    left: 65px;
+    right: auto;
+    bottom: -32px;
+    transform: none;
+    height: 38px;
+    min-width: 38px;
+    padding: 3px 7px;
+  }
+
+  .fan-btn-icon {
+    width: 24px;
+    height: 24px;
   }
 }
 
@@ -1183,19 +1511,70 @@ button.drop-btn-custom:disabled {
     width: 120px;
     height: 52px;
   }
+
   .drop-btn-text {
     font-size: 1.2rem;
   }
+
   .end-level-btn {
-    left: auto;
-    right: -120px;
-    bottom: 16px;
+    left: calc(50% + 65px);
+    right: auto;
+    bottom: 4px;
     font-size: 0.60rem;
     padding: 2px 5px;
+    transform: translateX(30px) scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
   }
+
   .end-level-btn.show {
-    right: 16px;
-    left: auto;
+    left: calc(50% + 65px);
+    right: auto;
+    transform: translateX(0) scale(0.9);
+  }
+
+  .hammer-btn-custom {
+    left: 8px;
+    right: auto;
+    bottom: -28px;
+    transform: none;
+    height: 34px;
+    min-width: 34px;
+    padding: 2px 5px;
+  }
+
+  .hammer-btn-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .fan-btn-custom {
+    left: 54px;
+    right: auto;
+    bottom: -28px;
+    transform: none;
+    height: 34px;
+    min-width: 34px;
+    padding: 2px 5px;
+  }
+
+  .fan-btn-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Height-based responsive adjustment for short screen viewports */
+@media (max-height: 720px) {
+  .hammer-btn-custom {
+    bottom: -22px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .fan-btn-custom {
+    bottom: -22px;
+    height: 36px;
+    min-width: 36px;
   }
 }
 
