@@ -1240,9 +1240,9 @@ button.drop-btn-custom:disabled {
 
 .end-level-btn {
   position: absolute;
-  left: calc(50% + 82px);
-  right: auto;
-  bottom: -40px;
+  left: auto;
+  right: 15px;
+  bottom: -22px;
   opacity: 0;
   pointer-events: none;
   background: linear-gradient(180deg, #ff4e4e, #c70000);
@@ -1283,8 +1283,8 @@ button.drop-btn-custom:disabled {
 }
 
 .end-level-btn.show {
-  left: calc(50% + 82px);
-  right: auto;
+  left: auto;
+  right: 15px;
   transform: translateX(0) scale(1);
   opacity: 1;
   pointer-events: auto;
@@ -1460,9 +1460,9 @@ body.hammer-cursor .slot:not(.locked) {
   }
 
   .end-level-btn {
-    left: calc(50% + 74px);
-    right: auto;
-    bottom: -28px;
+    left: auto;
+    right: 12px;
+    bottom: -32px;
     font-size: 0.65rem;
     padding: 3px 6px;
     transform: translateX(15px) scale(0.9);
@@ -1470,8 +1470,8 @@ body.hammer-cursor .slot:not(.locked) {
   }
 
   .end-level-btn.show {
-    left: calc(50% + 74px);
-    right: auto;
+    left: auto;
+    right: 12px;
     transform: translateX(0) scale(0.95);
   }
 
@@ -1517,9 +1517,9 @@ body.hammer-cursor .slot:not(.locked) {
   }
 
   .end-level-btn {
-    left: calc(50% + 66px);
-    right: auto;
-    bottom: -24px;
+    left: auto;
+    right: 8px;
+    bottom: -28px;
     font-size: 0.60rem;
     padding: 2px 5px;
     transform: translateX(15px) scale(0.9);
@@ -1527,8 +1527,8 @@ body.hammer-cursor .slot:not(.locked) {
   }
 
   .end-level-btn.show {
-    left: calc(50% + 66px);
-    right: auto;
+    left: auto;
+    right: 8px;
     transform: translateX(0) scale(0.9);
   }
 
@@ -1575,6 +1575,10 @@ body.hammer-cursor .slot:not(.locked) {
     bottom: -22px;
     height: 36px;
     min-width: 36px;
+  }
+
+  .end-level-btn {
+    bottom: -22px;
   }
 }
 

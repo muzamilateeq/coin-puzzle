@@ -423,7 +423,25 @@ class GameController {
       this.dropManager.dealRandomCoins(coinsToDrop, dropMaxCoin, true, true, false, dropMinCoin);
     }
 
+    // Render so new coins get data-new-drop="true" in the DOM
     this.renderer.render(this.selectedSlotIndex);
+
+    // Collect all newly dropped coin elements (marked by renderer)
+    const newCoinEls = Array.from(
+      this.renderer.boardEl.querySelectorAll('[data-new-drop="true"]')
+    );
+    // Clear the markers before animating
+    newCoinEls.forEach(el => delete el.dataset.newDrop);
+
+    // Play staggered drop animation & drop sound — coins fall in one by one
+    if (newCoinEls.length > 0) {
+      if (this.audioManager) this.audioManager.playSound('btnDrop');
+      try {
+        await Animations.animateDropIn(newCoinEls);
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
     await this.processAllFullSlots();
     
