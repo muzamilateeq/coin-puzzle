@@ -185,7 +185,9 @@ export class Renderer {
 
     // Suggestion logic when board is full
     const endLevelBtn = document.getElementById('btn-end-level');
-    if (!hasEmptySpace && this.gameLogic.gameState === 'playing') {
+    const hasValidMove = this.gameLogic.getHintMove() !== null;
+    
+    if (!hasEmptySpace && !hasValidMove && this.gameLogic.gameState === 'playing') {
       if (endLevelBtn) endLevelBtn.classList.add('show');
     } else {
       if (endLevelBtn) endLevelBtn.classList.remove('show');
@@ -465,6 +467,25 @@ export class Renderer {
       const el = this.coinDomMap.get(id);
       if (el && el.parentNode) el.parentNode.removeChild(el);
       this.coinDomMap.delete(id);
+    }
+
+    // Update drop button state based on permanent slot space
+    if (this.dropBtn) {
+      let hasPermanentSpace = false;
+      slots.forEach(s => {
+        if (!s.isLocked && !s.isTempUnlocked && !s.isFull()) {
+          hasPermanentSpace = true;
+        }
+      });
+      if (hasPermanentSpace) {
+        this.dropBtn.classList.remove('disabled');
+        this.dropBtn.style.opacity = '1';
+        this.dropBtn.style.pointerEvents = 'auto';
+      } else {
+        this.dropBtn.classList.add('disabled');
+        this.dropBtn.style.opacity = '0.5';
+        this.dropBtn.style.pointerEvents = 'none';
+      }
     }
   }
 

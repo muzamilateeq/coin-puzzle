@@ -274,8 +274,8 @@ body {
 .hud-top-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  /* Increased gap to prevent the larger plus icon from touching the heart bar */
+  gap: 16px;
+  /* Increased gap to prevent the larger plus icon from touching the heart bar on small mobiles */
   margin-top: 14px;
 }
 
@@ -326,7 +326,7 @@ body {
 }
 
 .hud-heart-icon {
-  width: 32px;
+  width: clamp(24px, 7vw, 32px);
   height: auto;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
@@ -344,7 +344,7 @@ body {
   left: -12px;
   margin-top: 1px;
   z-index: 3;
-  width: 38px;
+  width: clamp(28px, 8vw, 38px);
   height: auto;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   cursor: pointer;
@@ -357,10 +357,17 @@ body {
 
 .hud-gem-icon {
   position: absolute;
-  right: 6px;
+  right: 4px;
   z-index: 3;
-  width: 15px;
+  width: clamp(14px, 3.5vw, 18px);
   height: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+#ui-gems {
+  padding-right: 10px;
+  padding-left: 6px;
+  /* Add margin away from the plus icon */
 }
 
 .hud-settings-icon {
@@ -1385,8 +1392,13 @@ body.hammer-cursor .slot:not(.locked) {
 }
 
 @keyframes fanSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(-360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(-360deg);
+  }
 }
 
 .fan-btn-icon {
@@ -1435,12 +1447,29 @@ body.hammer-cursor .slot:not(.locked) {
 }
 
 @keyframes btnShake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-4px) rotate(-3deg); }
-  40% { transform: translateX(4px) rotate(3deg); }
-  60% { transform: translateX(-4px) rotate(-3deg); }
-  80% { transform: translateX(4px) rotate(3deg); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px) rotate(-3deg);
+  }
+
+  40% {
+    transform: translateX(4px) rotate(3deg);
+  }
+
+  60% {
+    transform: translateX(-4px) rotate(-3deg);
+  }
+
+  80% {
+    transform: translateX(4px) rotate(3deg);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .hammer-btn-custom.shake-btn,

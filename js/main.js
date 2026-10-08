@@ -121,8 +121,12 @@ class GameController {
       });
     };
 
-    window.showAdsPopup = (onContinue) => {
+    window.showAdsPopup = (onContinue, customSubtitle = null) => {
       const overlay = document.getElementById('ads-overlay');
+      const subtitleEl = overlay.querySelector('.popup-subtitle');
+      if (subtitleEl) {
+        subtitleEl.textContent = customSubtitle || 'Watch a short ad to unlock this slot!';
+      }
       overlay.style.display = 'flex';
       
       const btn = document.getElementById('ads-continue');
@@ -377,7 +381,11 @@ class GameController {
 
   async handleRestart() {
     if (this.logic.hearts <= 0) {
-      // Out of hearts, do nothing or show a message (can be expanded later)
+      window.showAdsPopup(() => {
+        this.logic.hearts++; // Give 1 heart for watching the ad
+        this.renderer.renderHeartTimer();
+        this.handleRestart(); // Try restarting again now that we have a heart
+      }, 'Watch a short ad to get +1 Health Heart and restart!');
       return;
     }
 
@@ -391,10 +399,15 @@ class GameController {
     const requiredTypes = this.logic.getRequiredCoinTypes();
     this.board.clearNonRequiredCoins(requiredTypes);
 
-    // Count how many coins were kept
+    // Count how many coins were kept, and reset temporary unlocks
     let coinsKept = 0;
     this.board.getAllSlots().forEach(slot => {
       coinsKept += slot.length;
+      if (slot.isTempUnlocked) {
+        slot.isTempUnlocked = false;
+        slot.isPendingShift = false;
+        slot.tempUnlockTimeLeft = null;
+      }
     });
 
     // Do NOT call this.logic.reset() to keep score and extraUnlockedSlots intact
@@ -742,29 +755,32 @@ class GameController {
     for (let srcIndex = 0; srcIndex < slots.length; srcIndex++) {
       const srcSlot = slots[srcIndex];
       if (srcSlot.isPendingShift && srcSlot.length > 0) {
-        // Find a valid destination slot
-        const emptyIndex = slots.findIndex(s => {
+        // 1. Try to find a slot of the SAME TYPE that has enough space for ALL coins
+        let destIndex = slots.findIndex(s => {
           if (s.isLocked || s.isTempUnlocked || s.isPendingShift) return false;
-          if (s.spaceAvailable < srcSlot.length) return false;
-          return s.isEmpty() || s.topCoin.type === srcSlot.topCoin.type;
+          if (s.isEmpty() || s.isFull()) return false;
+          return s.topCoin.type === srcSlot.topCoin.type && s.spaceAvailable >= srcSlot.length;
         });
-        if (emptyIndex !== -1) {
-          // Transfer all coins
-          const destSlot = slots[emptyIndex];
+
+        // 2. If no matching color slot with enough space, find ANY completely empty slot
+        if (destIndex === -1) {
+          destIndex = slots.findIndex(s => {
+            if (s.isLocked || s.isTempUnlocked || s.isPendingShift) return false;
+            return s.isEmpty();
+          });
+        }
+
+        if (destIndex !== -1) {
+          const destSlot = slots[destIndex];
           const coinsToMove = srcSlot.pop(srcSlot.length);
           destSlot.push(...coinsToMove);
-
-          // Revert time slot to locked
-          srcSlot.isTempUnlocked = false;
-          srcSlot.isPendingShift = false;
-          srcSlot.tempUnlockTimeLeft = null;
 
           const movingCoinEls = coinsToMove
             .map(c => this.renderer.coinDomMap.get(c.id))
             .filter(Boolean);
 
           this.busySlots.add(srcIndex);
-          this.busySlots.add(emptyIndex);
+          this.busySlots.add(destIndex);
 
           try {
             await Animations.animateSlowFlight(() => {
@@ -772,15 +788,23 @@ class GameController {
             }, movingCoinEls);
           } finally {
             this.busySlots.delete(srcIndex);
-            this.busySlots.delete(emptyIndex);
+            this.busySlots.delete(destIndex);
           }
 
           shiftedAny = true;
           // After a shift, it might fill a slot, so process again
           await this.processAllFullSlots();
         }
+
+        // If the source slot is now empty after moving all it could, lock it back
+        if (srcSlot.length === 0) {
+          srcSlot.isTempUnlocked = false;
+          srcSlot.isPendingShift = false;
+          srcSlot.tempUnlockTimeLeft = null;
+          this.renderer.render(this.selectedSlotIndex);
+        }
       } else if (srcSlot.isPendingShift && srcSlot.length === 0) {
-        // No coins to shift, just lock it back
+        // Was already empty, just lock it back
         srcSlot.isTempUnlocked = false;
         srcSlot.isPendingShift = false;
         srcSlot.tempUnlockTimeLeft = null;
@@ -937,14 +961,21 @@ class GameController {
           pointer-events: none;
           filter: drop-shadow(0 4px 14px rgba(0,0,0,0.7));
           opacity: 0;
-          transition: left 0.55s cubic-bezier(.4,0,.2,1), top 0.55s cubic-bezier(.4,0,.2,1), opacity 0.3s;
+          transition: left 0.2s ease, top 0.2s ease, opacity 0.3s;
         }
-        @keyframes handBounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(15px); }
+        @keyframes handTap {
+          0% { transform: translateY(0) scale(1); }
+          
+          /* Single Tap */
+          15% { transform: translateY(12px) scale(0.85); }
+          30% { transform: translateY(0) scale(1); }
+          
+          /* Pause */
+          100% { transform: translateY(0) scale(1); }
         }
         .bouncing-hand {
-          animation: handBounce 0.6s ease-in-out infinite;
+          animation: handTap 1.8s ease-in-out infinite;
+          transform-origin: center;
         }
       `;
       document.head.appendChild(style);
@@ -978,14 +1009,14 @@ class GameController {
       const isPopupVisible = Array.from(document.querySelectorAll('.popup-overlay'))
         .some(el => el.style.display === 'flex' || window.getComputedStyle(el).display === 'flex');
       
-      const isSettingsVisible = document.getElementById('settings-modal')?.classList.contains('active');
+      const isSettingsVisible = !document.getElementById('settings-modal')?.classList.contains('hidden');
 
       if (isPopupVisible || isSettingsVisible || !this._tutorialRunning) {
         hand.style.display = 'none';
         hand.style.opacity = '0';
         hand.classList.remove('bouncing-hand');
         if (isPopupVisible || isSettingsVisible) {
-          setTimeout(runLoop, 1000);
+          setTimeout(runLoop, 500);
           return;
         }
         return;
@@ -1003,64 +1034,48 @@ class GameController {
       const currentHint = this.logic.getHintMove();
 
       if (currentHint) {
-        // === CASE 1: Valid slot move exists → show slot-to-slot animation ===
-        hand.classList.remove('bouncing-hand');
+        // === CASE 1: Valid slot move exists ===
+        hand.classList.add('bouncing-hand');
         
-        const src = getPos(currentHint.src);
-        const dest = getPos(currentHint.dest);
-        if (!src || !dest) { setTimeout(runLoop, 2200); return; }
+        let targetPos;
+        // If they selected the right source, point to destination!
+        if (this.selectedSlotIndex === currentHint.src) {
+          targetPos = getPos(currentHint.dest);
+        } else {
+          // Otherwise (nothing selected, or wrong slot), point to source
+          targetPos = getPos(currentHint.src);
+        }
 
-        // Fade in at source
-        hand.style.display = 'block';
-        hand.style.transition = 'opacity 0.3s';
-        hand.style.left = src.x + 'px';
-        hand.style.top = src.y + 'px';
-        hand.style.opacity = '1';
+        if (targetPos) {
+          hand.style.display = 'block';
+          // Use a fast transition so it glides smoothly if the target changes
+          hand.style.transition = 'left 0.2s ease, top 0.2s ease, opacity 0.3s';
+          hand.style.left = targetPos.x + 'px';
+          hand.style.top = targetPos.y + 'px';
+          hand.style.opacity = '1';
+        }
 
-        // Slide to destination
-        setTimeout(() => {
-          if (!this._tutorialRunning) return;
-          hand.style.transition = 'left 0.6s cubic-bezier(.4,0,.2,1), top 0.6s cubic-bezier(.4,0,.2,1), opacity 0.3s';
-          hand.style.left = dest.x + 'px';
-          hand.style.top = dest.y + 'px';
-        }, 600);
-
-        // Fade out
-        setTimeout(() => {
-          if (!this._tutorialRunning) return;
-          hand.style.transition = 'opacity 0.3s';
-          hand.style.opacity = '0';
-        }, 1500);
-
-        setTimeout(runLoop, 2200);
+        setTimeout(runLoop, 150);
 
       } else if (this.board.hasEmptySpace()) {
         // === CASE 2: No valid moves BUT board has empty space → point to DROP button ===
         const dropPos = getDropBtnPos();
-        if (!dropPos) { setTimeout(runLoop, 2200); return; }
+        if (!dropPos) { setTimeout(runLoop, 500); return; }
 
         hand.style.display = 'block';
-        hand.style.transition = 'opacity 0.3s';
+        hand.style.transition = 'left 0.2s ease, top 0.2s ease, opacity 0.3s';
         hand.style.left = dropPos.x + 'px';
         hand.style.top = dropPos.y + 'px';
         hand.style.opacity = '1';
         
-        // Add CSS bounce animation
         hand.classList.add('bouncing-hand');
 
-        // Fade out then repeat
-        setTimeout(() => {
-          if (!this._tutorialRunning) return;
-          hand.style.transition = 'opacity 0.3s';
-          hand.style.opacity = '0';
-        }, 1800);
-
-        setTimeout(runLoop, 2200);
+        setTimeout(runLoop, 150);
       } else {
         // === CASE 3: Board is completely full → Hide tutorial hand completely ===
         hand.style.opacity = '0';
         hand.classList.remove('bouncing-hand');
-        setTimeout(runLoop, 1500);
+        setTimeout(runLoop, 500);
       }
     };
 

@@ -135,8 +135,10 @@ export class Board {
 
   hasEmptySpace() {
     return this.slots.some(slot => {
-      const isLocked = slot.isLocked && !slot.isTempUnlocked;
-      return !isLocked && !slot.isFull();
+      // Exclude locked slots AND temporarily unlocked (blue) slots
+      // because coins cannot be dropped into them.
+      const isAvailable = !slot.isLocked && !slot.isTempUnlocked;
+      return isAvailable && !slot.isFull();
     });
   }
 
