@@ -21,14 +21,16 @@ export class GameLogic {
 
     const sourceSlot = this.board.getSlot(sourceIndex);
     const destSlot = this.board.getSlot(destIndex);
-
     const isSourceLocked = sourceSlot.isLocked && !sourceSlot.isTempUnlocked;
+    if (isSourceLocked) return false;
+    // If destination is temp unlocked, it is never considered locked for transfers
     const isDestLocked = destSlot.isLocked && !destSlot.isTempUnlocked;
+    if (isDestLocked) return false;
 
-    if (isSourceLocked || isDestLocked) return false;
     if (sourceSlot.isEmpty()) return false;
     if (destSlot.isFull()) return false;
 
+    // Explicitly allow move if destination is empty
     if (destSlot.isEmpty()) return true;
 
     // Match types
