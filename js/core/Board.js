@@ -104,7 +104,7 @@ export class Board {
             timeIdx = activeTempIdx;
           }
           this.slots[timeIdx].lockType = 'time';
-          this.slots[timeIdx].timeBonus = this.slots[timeIdx].tempUnlockTimeLeft > 0 ? this.slots[timeIdx].tempUnlockTimeLeft : 60;
+          this.slots[timeIdx].timeBonus = 60;
         }
       } else {
         // Gem slot has been bought on this board: Padlock and Time slots shift right to fill the boundary
@@ -127,7 +127,7 @@ export class Board {
             timeIdx = activeTempIdx;
           }
           this.slots[timeIdx].lockType = 'time';
-          this.slots[timeIdx].timeBonus = this.slots[timeIdx].tempUnlockTimeLeft > 0 ? this.slots[timeIdx].tempUnlockTimeLeft : 60;
+          this.slots[timeIdx].timeBonus = 60;
         }
       }
     }

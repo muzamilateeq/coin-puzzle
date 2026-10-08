@@ -622,6 +622,7 @@ class GameController {
         // Destroy the coins in the slot completely
         slot.clear();
         this.busySlots.delete(index);
+        await this.tryProcessPendingShifts();
         this.renderer.render(this.selectedSlotIndex);
       }
       return;
@@ -641,8 +642,35 @@ class GameController {
         await Animations.animateSlotUnlock(slotEl);
         this.busySlots.delete(index);
 
+        // BEFORE updating locks, if there are coins in the blue slot, move them to this new permanent slot!
+        const activeTempIdx = this.board.getAllSlots().findIndex(s => s.isTempUnlocked && s.length > 0);
+        if (activeTempIdx !== -1) {
+          const srcSlot = this.board.getSlot(activeTempIdx);
+          const destSlot = this.board.getSlot(index);
+          const coinsToMove = srcSlot.pop(srcSlot.length);
+          destSlot.push(...coinsToMove);
+
+          // Clear the blue slot's temp status so it can be cleanly shifted
+          srcSlot.isTempUnlocked = false;
+          srcSlot.isPendingShift = false;
+          srcSlot.tempUnlockTimeLeft = null;
+
+          const movingCoinEls = coinsToMove.map(c => this.renderer.coinDomMap.get(c.id)).filter(Boolean);
+          this.busySlots.add(activeTempIdx);
+          this.busySlots.add(index);
+          try {
+            await Animations.animateSlowFlight(() => {
+              this.renderer.render(this.selectedSlotIndex);
+            }, movingCoinEls);
+          } finally {
+            this.busySlots.delete(activeTempIdx);
+            this.busySlots.delete(index);
+          }
+        }
+
         // Unlock specific slot
         this.board.unlockSpecificSlot(index);
+        await this.tryProcessPendingShifts();
         this.renderer.render(this.selectedSlotIndex);
         return;
       } else {
@@ -928,6 +956,7 @@ class GameController {
       }
 
       await this.processAllFullSlots();
+      await this.tryProcessPendingShifts();
       this.checkGameEndState();
       this.showTutorialHint();
     }
