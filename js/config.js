@@ -1,5 +1,6 @@
 export const CONFIG = {
   // --- CORE SETTINGS ---
+  TARGET_SCORE: 30,              // Maximum score/level to win the game
   COIN_TYPES: 2,                 // Starting max coin type at score 0
   MAX_PER_SLOT: 8,               // Coins required to merge into the next level coin
   TOTAL_SLOTS: 15,               // Total slots physically available on the board

@@ -2,7 +2,7 @@ import { CONFIG } from './config.js';
 import { resetCoinCounter, Coin } from './core/Coin.js';
 import { Board } from './core/Board.js';
 import { GameLogic } from './logic/GameLogic.js';
-import { DropManager } from './logic/dropManager.js';
+import { DropManager } from './logic/DropManager.js';
 import { Renderer } from './ui/renderer.js';
 import { Animations } from './ui/animations.js';
 import { SettingsManager } from './settings/settingsManager.js';
@@ -875,6 +875,7 @@ class GameController {
 
       // Step 3: Transform into 2 upgraded level-up coins
       this.logic.executeClearUpgrade(slotIndex);
+      this.checkGameEndState();
 
       this.renderer.render(this.selectedSlotIndex);
       await new Promise(r => setTimeout(r, 450));
@@ -887,7 +888,7 @@ class GameController {
 
   checkGameEndState() {
     if (this.logic.gameState === 'won') {
-      this.renderer.showModal('You Win!', `Excellent! You cleared ${CONFIG.TARGET_SCORE} stacks.`, () => this.init());
+      this.renderer.showModal('You Win!', `Excellent! You reached Level ${CONFIG.TARGET_SCORE}.`, () => this.init());
     }
   }
 
