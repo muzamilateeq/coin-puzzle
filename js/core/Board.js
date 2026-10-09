@@ -72,18 +72,26 @@ export class Board {
 
     // Assign special types to the remaining locked slots from right to left
     let availableSlots = [...lockedSlotIndices];
+    
+    const activeTempIdx = lockedSlotIndices.find(idx => this.slots[idx].isTempUnlocked);
+    if (activeTempIdx !== undefined) {
+      // Remove it from availableSlots so pad/gem don't overwrite it
+      availableSlots = availableSlots.filter(idx => idx !== activeTempIdx);
+    }
 
-    if (availableSlots.length > 0) {
+    if (availableSlots.length > 0 || activeTempIdx !== undefined) {
       if (!this.hasBoughtGemSlot) {
         // 1. Gem slot on the rightmost locked slot
-        let gemIdx = availableSlots[availableSlots.length - 1];
-        this.slots[gemIdx].lockType = 'gem';
-        this.slots[gemIdx].unlockCost = 600;
-        let targetIndexForLogic = (15 - gemIdx) - extraCount; 
-        if (unlockScoreCalculator) {
-            this.slots[gemIdx].unlockLevel = unlockScoreCalculator(targetIndexForLogic);
+        if (availableSlots.length > 0) {
+          let gemIdx = availableSlots[availableSlots.length - 1];
+          this.slots[gemIdx].lockType = 'gem';
+          this.slots[gemIdx].unlockCost = 600;
+          let targetIndexForLogic = (15 - gemIdx) - extraCount; 
+          if (unlockScoreCalculator) {
+              this.slots[gemIdx].unlockLevel = unlockScoreCalculator(targetIndexForLogic);
+          }
+          availableSlots = availableSlots.filter(idx => idx !== gemIdx);
         }
-        availableSlots = availableSlots.filter(idx => idx !== gemIdx);
 
         // 2. Padlock slot on the next locked slot to the left
         if (availableSlots.length > 0) {
@@ -97,12 +105,11 @@ export class Board {
         }
 
         // 3. Time slot on the next locked slot to the left
-        if (availableSlots.length > 0) {
-          let timeIdx = availableSlots[availableSlots.length - 1];
-          const activeTempIdx = lockedSlotIndices.find(idx => this.slots[idx].isTempUnlocked);
-          if (activeTempIdx !== undefined) {
-            timeIdx = activeTempIdx;
-          }
+        let timeIdx = activeTempIdx;
+        if (timeIdx === undefined && availableSlots.length > 0) {
+          timeIdx = availableSlots[availableSlots.length - 1];
+        }
+        if (timeIdx !== undefined) {
           this.slots[timeIdx].lockType = 'time';
           this.slots[timeIdx].timeBonus = 60;
         }
@@ -120,12 +127,11 @@ export class Board {
         }
 
         // 2. Time slot on the next locked slot to the left
-        if (availableSlots.length > 0) {
-          let timeIdx = availableSlots[availableSlots.length - 1];
-          const activeTempIdx = lockedSlotIndices.find(idx => this.slots[idx].isTempUnlocked);
-          if (activeTempIdx !== undefined) {
-            timeIdx = activeTempIdx;
-          }
+        let timeIdx = activeTempIdx;
+        if (timeIdx === undefined && availableSlots.length > 0) {
+          timeIdx = availableSlots[availableSlots.length - 1];
+        }
+        if (timeIdx !== undefined) {
           this.slots[timeIdx].lockType = 'time';
           this.slots[timeIdx].timeBonus = 60;
         }

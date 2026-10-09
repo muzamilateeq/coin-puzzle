@@ -196,11 +196,7 @@ export class GameLogic {
     else if (this.score >= 8) extra = this.score - 3;
 
     const rawTotal = CONFIG.INITIAL_UNLOCKED_SLOTS + extra;
-    
-    // Board 2+ (after Level 13 complete): drop coins up to 16
-    if (rawTotal > 15) {
-      return 16;
-    }
+
 
     const maxCoinType = CONFIG.COIN_TYPES + this.score;
     let dropMaxCoin;
@@ -224,8 +220,13 @@ export class GameLogic {
     else if (this.score >= 8) extra = this.score - 3;
 
     const rawTotal = CONFIG.INITIAL_UNLOCKED_SLOTS + extra;
-    
-    // Board 2+ (after Level 13 complete): drop coins from 9 onwards
+
+    // Board 3+ (starts at Level 21): drop coins from 17 onwards
+    if (this.score >= 21) {
+      return 17;
+    }
+
+    // Board 2 (after Level 13 complete, score 14-20): drop coins from 9 onwards
     if (rawTotal > 15) {
       return 9;
     }
