@@ -16,7 +16,7 @@
   <link rel="preload" as="image" href="./Assets/Loading/Loading Bar_.png">
   <link rel="preload" as="image" href="./Assets/Loading/Loading Fill_.png">
 
-  <link rel="stylesheet" href="./css/style.css?v=671.0">
+  <link rel="stylesheet" href="./css/style.css?v=672.0">
   <link rel="stylesheet" href="./css/board.css?v=640.0">
   <link rel="stylesheet" href="./css/coin.css?v=639.0">
   <link rel="stylesheet" href="./css/settings.css?v=639.5">
@@ -238,6 +238,27 @@
       </div>
     </div>
 
+    <!-- Max Level Popup -->
+    <div id="max-level-overlay" class="popup-overlay">
+      <div class="popup-container max-level-container">
+        <div class="max-level-crown-icon">👑</div>
+        <div class="popup-title max-level-title">MAX LEVEL</div>
+        <div class="popup-subtitle max-level-subtitle">CONGRATULATIONS!</div>
+        <div class="max-level-art-wrapper">
+          <div class="max-level-glow-circle"></div>
+          <img src="./Assets/Gameplay/Coins_.png" class="max-level-coins-art" alt="Max Coins" />
+          <div class="max-level-badge-text">LEVEL 30 REACHED</div>
+        </div>
+        <div class="max-level-reward-box">
+          <span class="max-level-reward-text">+60</span>
+          <img src="./Assets/Gameplay/Gem.png" class="popup-gem-icon" alt="Gems" />
+        </div>
+        <button id="max-level-restart-btn" class="popup-btn max-level-restart-btn">
+          <span class="popup-btn-text">RESTART</span>
+        </button>
+      </div>
+    </div>
+
   </div>
 
 
@@ -266,7 +287,7 @@
       }
     };
   </script>
-  <script type="module" src="./js/main.js?v=719.0"></script>
+  <script type="module" src="./js/main.js?v=720.0"></script>
 </body>
 
 </html>

@@ -126,10 +126,41 @@ export class GameLogic {
         const oldScore = this.score;
         const newScore = this.score + 1;
         const gemsAwarded = 60;
+
+        // When Level 30 (TARGET_SCORE) is reached, trigger MAX LEVEL popup with restart
+        if (newScore >= CONFIG.TARGET_SCORE) {
+          this.score = newScore;
+          this.gems += gemsAwarded;
+          this.gameState = 'won';
+          this.isLevelingUp = false;
+          if (window.gameMain && window.gameMain.renderer) {
+            window.gameMain.renderer.render();
+          }
+          if (window.showMaxLevelPopup) {
+            window.showMaxLevelPopup(() => {
+              if (window.gameMain) window.gameMain.init();
+            });
+          }
+          return;
+        }
+
         window.showLevelUpPopup(oldScore, newScore, gemsAwarded, () => {
           const oldMaxCoin = this.getDropMaxCoin();
           this.score++;
           this.gems += gemsAwarded;
+          if (this.score >= CONFIG.TARGET_SCORE) {
+            this.gameState = 'won';
+            this.isLevelingUp = false;
+            if (window.gameMain && window.gameMain.renderer) {
+              window.gameMain.renderer.render();
+            }
+            if (window.showMaxLevelPopup) {
+              window.showMaxLevelPopup(() => {
+                if (window.gameMain) window.gameMain.init();
+              });
+            }
+            return;
+          }
           const newMaxCoin = this.getDropMaxCoin();
           const oldSlots = this.getTotalUnlockedSlots(this.score - 1);
           const slotsToUnlock = this.getTotalUnlockedSlots(this.score);
@@ -155,6 +186,11 @@ export class GameLogic {
 
     if (this.score >= CONFIG.TARGET_SCORE) {
       this.gameState = 'won';
+      if (window.showMaxLevelPopup) {
+        window.showMaxLevelPopup(() => {
+          if (window.gameMain) window.gameMain.init();
+        });
+      }
     }
     return true;
   }

@@ -1245,6 +1245,66 @@ button.drop-btn-custom:disabled {
   }
 }
 
+/* Max Level Popup Styles */
+.max-level-container {
+  gap: 12px;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.max-level-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #FFD700;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 215, 0, 0.7);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin-bottom: 2px;
+  text-align: center;
+}
+
+.max-level-subtitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  text-align: center;
+}
+
+.max-level-art-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.max-level-coins-art {
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.6)) drop-shadow(0 6px 16px rgba(0, 0, 0, 0.7));
+  animation: floatArt 2s ease-in-out infinite alternate;
+}
+
+@keyframes floatArt {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-6px) scale(1.05); }
+}
+
+.max-level-badge-text {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ffe066;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 6px 14px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  letter-spacing: 1px;
+}
+
 .end-level-btn {
   position: absolute;
   left: auto;
@@ -1633,4 +1693,170 @@ body.hammer-cursor .slot:not(.locked) {
   animation: suggestPulse 1.5s infinite;
   z-index: 10;
   border-radius: 8px;
+}
+
+/* ==========================================================================
+   MAX LEVEL POPUP (Level 30 Win Milestone)
+   ========================================================================== */
+.max-level-container {
+  max-width: 280px;
+  padding: 24px 18px 20px;
+  gap: 10px;
+  border: 2px solid rgba(255, 215, 0, 0.7);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(255, 215, 0, 0.4);
+  animation: maxLevelPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes maxLevelPopIn {
+  0% {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.max-level-crown-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(255, 215, 0, 0.8));
+  animation: crownFloat 2.2s ease-in-out infinite;
+  margin-bottom: -4px;
+}
+
+@keyframes crownFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.08);
+  }
+}
+
+.max-level-title {
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  background: linear-gradient(180deg, #ffffff 0%, #ffe082 40%, #ffb300 70%, #ff8f00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px rgba(255, 215, 0, 0.6));
+  font-family: 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+}
+
+.max-level-subtitle {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffe082;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  text-align: center;
+  margin-top: -4px;
+}
+
+.max-level-art-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0 2px;
+  width: 100%;
+}
+
+.max-level-glow-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, rgba(255, 160, 0, 0.2) 50%, transparent 70%);
+  animation: maxLevelGlowPulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes maxLevelGlowPulse {
+  0%, 100% {
+    transform: translate(-50%, -60%) scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -60%) scale(1.15);
+    opacity: 1;
+  }
+}
+
+.max-level-coins-art {
+  width: 82px;
+  height: auto;
+  object-fit: contain;
+  z-index: 1;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.7));
+  animation: maxLevelCoinBounce 2.5s ease-in-out infinite;
+}
+
+@keyframes maxLevelCoinBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.max-level-badge-text {
+  margin-top: 8px;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 111, 0, 0.35));
+  border: 1.5px solid rgba(255, 215, 0, 0.85);
+  border-radius: 20px;
+  padding: 4px 16px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.max-level-reward-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 6px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  margin-top: 2px;
+}
+
+.max-level-reward-text {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.max-level-restart-btn {
+  margin-top: 6px;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.max-level-restart-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.max-level-restart-btn:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
 }

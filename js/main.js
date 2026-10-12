@@ -139,8 +139,44 @@ class GameController {
       });
     };
 
+    // Global function: show MAX LEVEL popup when Level 30 is reached
+    window.showMaxLevelPopup = (onRestart) => {
+      const overlay = document.getElementById('max-level-overlay');
+      if (!overlay) return;
+      if (overlay.style.display === 'flex') return;
+
+      if (this.audioManager) this.audioManager.playSound('levelUp');
+      if (this._tutorialRunning) {
+        this._tutorialRunning = false;
+        const hand = document.getElementById('tutorial-hand');
+        if (hand) hand.style.opacity = '0';
+      }
+
+      // Hide settings or other modals if open
+      const settingsModal = document.getElementById('settings-modal');
+      if (settingsModal) settingsModal.classList.add('hidden');
+
+      overlay.style.display = 'flex';
+
+      const oldBtn = document.getElementById('max-level-restart-btn');
+      if (oldBtn) {
+        const newBtn = oldBtn.cloneNode(true);
+        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+        newBtn.addEventListener('click', () => {
+          if (this.audioManager) this.audioManager.playSound('btnDrop');
+          overlay.style.display = 'none';
+          if (onRestart) {
+            onRestart();
+          } else {
+            this.init();
+          }
+        });
+      }
+    };
+
     this.board = new Board();
     this.logic = new GameLogic(this.board);
+    window.gameLogic = this.logic;
     this.dropManager = new DropManager(this.board);
     this.renderer = new Renderer(this.board, this.logic, this.dropManager);
     this.settingsManager = new SettingsManager(() => this.handleRestart());
@@ -365,6 +401,8 @@ class GameController {
     this.board.unlockSlotsUpTo(totalSlots, (idx) => this.logic.getScoreToUnlockSlot(idx, this.logic.score));
 
     this.renderer.hideModal();
+    const maxOverlay = document.getElementById('max-level-overlay');
+    if (maxOverlay) maxOverlay.style.display = 'none';
     const currentMaxCoin = CONFIG.COIN_TYPES + this.logic.score;
     const dropMaxCoin = this.logic.getDropMaxCoin();
     const dropMinCoin = this.logic.getDropMinCoin();
@@ -887,8 +925,11 @@ class GameController {
   }
 
   checkGameEndState() {
-    if (this.logic.gameState === 'won') {
-      this.renderer.showModal('You Win!', `Excellent! You reached Level ${CONFIG.TARGET_SCORE}.`, () => this.init());
+    if (this.logic.gameState === 'won' || this.logic.score >= CONFIG.TARGET_SCORE) {
+      this.logic.gameState = 'won';
+      if (window.showMaxLevelPopup) {
+        window.showMaxLevelPopup(() => this.init());
+      }
     }
   }
 
